@@ -1,7 +1,6 @@
 package de.persosim.driver.connector;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,10 +19,15 @@ import de.persosim.driver.connector.pcsc.PcscListener;
 public class NativeDriverConnector {
 
 	Collection<PcscListener> listeners = new HashSet<PcscListener>();
-	private Socket nativeSocket;
 	private NativeDriverComm comm;
+	private String hostName;
+	private int dataPort;
+	private int eventPort;
 
-	public NativeDriverConnector() {
+	public NativeDriverConnector(String hostName, int dataPort, int eventPort) throws UnknownHostException, IOException {
+		this.hostName = hostName;
+		this.dataPort = dataPort;
+		this.eventPort = eventPort;
 	}
 	
 	/**
@@ -32,23 +36,23 @@ public class NativeDriverConnector {
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	public void connect(String hostName, int port) throws UnknownHostException,
-			IOException {
-		nativeSocket = new Socket(hostName, port);
-		nativeSocket.getOutputStream().write("Card Inserted".getBytes());
-		comm = new NativeDriverComm(nativeSocket, listeners);
+	public void connect() throws IOException {
+		comm = new NativeDriverComm(hostName, dataPort, eventPort, listeners);
+		comm.setDaemon(true);
 		comm.start();
-	}
+		comm.sendEventToDriver("Card Inserted");
+	} 
 
 	/**
 	 * This method disconnects from the native driver part.
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
-	public void disconnect() throws IOException {
+	public void disconnect() throws IOException, InterruptedException {
+		comm.sendEventToDriver("Card Removed");
 		comm.interrupt();
-		nativeSocket.getOutputStream().write("Card Removed".getBytes());
-		nativeSocket.close();
+		comm.join();
 	}
 
 	public void addListener(PcscListener listener) {
@@ -57,5 +61,9 @@ public class NativeDriverConnector {
 
 	public void removeListener(PcscListener listener) {
 		listeners.remove(listener);
+	}
+
+	public boolean isConnected() {
+		return comm.isAlive() && !comm.isInterrupted();
 	}
 }
