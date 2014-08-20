@@ -22,12 +22,10 @@ public class NativeDriverConnector {
 	private NativeDriverComm comm;
 	private String hostName;
 	private int dataPort;
-	private int eventPort;
 
-	public NativeDriverConnector(String hostName, int dataPort, int eventPort) throws UnknownHostException, IOException {
+	public NativeDriverConnector(String hostName, int dataPort) throws UnknownHostException, IOException {
 		this.hostName = hostName;
 		this.dataPort = dataPort;
-		this.eventPort = eventPort;
 	}
 	
 	/**
@@ -37,10 +35,8 @@ public class NativeDriverConnector {
 	 * @throws UnknownHostException
 	 */
 	public void connect() throws IOException {
-		comm = new NativeDriverComm(hostName, dataPort, eventPort, listeners);
-		comm.setDaemon(true);
+		comm = new NativeDriverComm(hostName, dataPort, listeners);
 		comm.start();
-		comm.sendEventToDriver("Card Inserted");
 	} 
 
 	/**
@@ -50,7 +46,6 @@ public class NativeDriverConnector {
 	 * @throws InterruptedException 
 	 */
 	public void disconnect() throws IOException, InterruptedException {
-		comm.sendEventToDriver("Card Removed");
 		comm.interrupt();
 		comm.join();
 	}

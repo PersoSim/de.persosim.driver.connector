@@ -23,27 +23,24 @@ public class NativeDriverComm extends Thread {
 	private Collection<PcscListener> listeners;
 	private BufferedReader bufferedDataIn;
 	private BufferedWriter bufferedDataOut;
-	private BufferedWriter bufferedEventOut;
 	private Socket dataSocket;
-	private Socket eventSocket;
+	
+	public static final String MESSAGE_ICC_HELLO = "HELLO_ICC";	//Example: HELLO_ICC|LUN:-1
+	public static final String MESSAGE_ICC_STOP = "STOP_ICC";
+	public static final String MESSAGE_ICC_ERROR = "ERROR_ICC";
+	public static final String MESSAGE_ICC_DONE = "DONE_ICC";
+	public static final String MESSAGE_IFD_HELLO = "HELLO_IFD"; //Example: HELLO_IFD|LUN:3
+	public static final String MESSAGE_IFD_DONE = "DONE_IFD";
+	public static final String MESSAGE_IFD_ERROR = "ERROR_IFD";
 
-	public NativeDriverComm(String hostName, int dataPort, int eventPort, Collection<PcscListener> listeners)
+	public NativeDriverComm(String hostName, int dataPort, Collection<PcscListener> listeners)
 			throws IOException {
 		this.listeners = listeners;
 		this.dataSocket = new Socket(hostName, dataPort);
-		this.eventSocket = new Socket(hostName, eventPort);
 		bufferedDataIn = new BufferedReader(new InputStreamReader(
 				dataSocket.getInputStream()));
 		bufferedDataOut = new BufferedWriter(new OutputStreamWriter(
 				dataSocket.getOutputStream()));
-		bufferedEventOut = new BufferedWriter(new OutputStreamWriter(
-				eventSocket.getOutputStream()));
-	}
-
-	public void sendEventToDriver(String data) throws IOException {
-		bufferedEventOut.write(data);
-		bufferedEventOut.newLine();
-		bufferedEventOut.flush();
 	}
 
 	/*
@@ -54,11 +51,9 @@ public class NativeDriverComm extends Thread {
 	@Override
 	public void run() {
 		try {
+			CommUtils.doHandshake(dataSocket);
 			while (!this.isInterrupted()) {
 				try {
-					while (!bufferedDataIn.ready()){
-						Thread.yield();
-					}
 					String data = bufferedDataIn.readLine();
 					PcscCallResult result = null;
 					for (PcscListener listener : listeners) {
@@ -77,15 +72,15 @@ public class NativeDriverComm extends Thread {
 					e.printStackTrace();
 				}
 			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		} finally {
 			try {
 				dataSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				eventSocket.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -98,24 +93,14 @@ public class NativeDriverComm extends Thread {
 	 */
 	@Override
 	public void interrupt() {
-		// TODO Auto-generated method stub
 		super.interrupt();
-		if (dataSocket != null){
-			try {
-				dataSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if (eventSocket != null){
-			try {
-				eventSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			dataSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-
+	
+	
 }
