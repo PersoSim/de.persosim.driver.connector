@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: de.persosim.driver.connector.test
+Bundle-Version: 0.0.1.qualifier
+Bundle-Activator: de.persosim.driver.test.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ de.persosim.driver.connector;bundle-version="0.0.1",
+ org.junit;bundle-version="4.11.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
