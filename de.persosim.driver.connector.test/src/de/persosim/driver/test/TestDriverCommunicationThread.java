@@ -66,6 +66,7 @@ public class TestDriverCommunicationThread extends Thread {
 					bufferedOut.write(dataToSend);
 					bufferedOut.newLine();
 					bufferedOut.flush();
+					System.out.println("Data sent to ICC:\t" + dataToSend);
 					if (dataToSend.equals(MESSAGE_IFD_DONE)) {
 						if (data.equals(MESSAGE_ICC_STOP)){
 							clientSocket.close();
@@ -73,7 +74,6 @@ public class TestDriverCommunicationThread extends Thread {
 						}
 						handshakeDone = true;
 					}
-					System.out.println("Data sent to ICC:\t" + dataToSend);
 				}
 			} catch (SocketException e) {
 				// ignore, expected behaviour on interrupt

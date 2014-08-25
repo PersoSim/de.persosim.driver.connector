@@ -128,17 +128,17 @@ public class TestDriver {
 					break;
 				case "data":
 					String data = "";
-					if (lun == -1){
-						System.out.println("The lun is " + lun + ", please set a valid lun before sending data.");
-					}
 					for (int i = 1; i < commandArgs.length; i++) {
 						data += commandArgs[i];
 						if (i < commandArgs.length - 1) {
 							data += " ";
 						}
 					}
-					System.out.println("Response: "
-							+ driver.sendData(lun, data));
+					String response = driver.sendData(lun, data);
+					if (response != null){
+						System.out.println("Response: " + response);	
+					}
+					
 					break;
 				case "exit":
 				case "quit":
