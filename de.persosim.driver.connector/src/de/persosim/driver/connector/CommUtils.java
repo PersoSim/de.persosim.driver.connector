@@ -7,21 +7,44 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import de.persosim.driver.connector.exceptions.PscsNativeCommunicationException;
+
 public class CommUtils {
-	public static int doHandshake(Socket iccSocket) throws IOException,
+	public enum HandshakeMode {
+		OPEN, CLOSE;
+	}
+	public static int doHandshake(Socket iccSocket, int lun, HandshakeMode mode) throws IOException,
 			InterruptedException {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				iccSocket.getOutputStream()));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_HELLO + "|LUN:-1");
-		String helloData = reader.readLine();
+		CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_HELLO + "|LUN:" + lun);
+		String [] helloData = reader.readLine().split("\\|");
 		
-		CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_DONE);
-		reader.readLine();
+		if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_HELLO)){
+			throw new PscsNativeCommunicationException("Unexpected message type");
+		}
 		
-		return Integer.parseInt(helloData.split("\\|")[1].split(":")[1]);
+		try{
+			int responseLun = Integer.parseInt(helloData[1].split(":")[1]);
+			
+			if (mode == HandshakeMode.OPEN){
+				CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_DONE);
+			} else {
+				CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_STOP);
+			}
+			reader.readLine();
+			
+			if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_DONE)){
+				throw new PscsNativeCommunicationException("Unexpected message type");
+			}
+			
+			return responseLun;
+		} catch (NumberFormatException e){
+			throw new PscsNativeCommunicationException("Unexpected message content");
+		}
 	}
 
 	public static void writeLine(BufferedWriter writer, String message)

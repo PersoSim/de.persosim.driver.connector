@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Collection;
 
+import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscListener;
@@ -51,7 +52,7 @@ public class NativeDriverComm extends Thread {
 	@Override
 	public void run() {
 		try {
-			CommUtils.doHandshake(dataSocket);
+			CommUtils.doHandshake(dataSocket, -1, HandshakeMode.OPEN);
 			while (!this.isInterrupted()) {
 				try {
 					String data = bufferedDataIn.readLine();
