@@ -1,7 +1,11 @@
 package de.persosim.driver.connector;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Collection;
@@ -14,9 +18,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.test.TestDriver;
+import de.persosim.simulator.utils.HexString;
 
 public class NativeDriverCommTest {
 	
@@ -32,7 +38,7 @@ public class NativeDriverCommTest {
 		driver.start();
 		listeners = new HashSet<>();
 		nativeComm = new NativeDriverComm("localhost", TestDriver.PORT_NUMBER_DEFAULT, listeners);
-	}
+		nativeComm.setName("NativeDriverCommunicationThread");	}
 	
 	@After
 	public void tearDown() throws Exception {
@@ -40,8 +46,8 @@ public class NativeDriverCommTest {
 		driver.stop();
 	}
 
-	@Test(timeout=2000)
-	public void testThread() throws IOException, InterruptedException{
+	@Test
+	public void testThreadValidPcsc() throws IOException, InterruptedException{
 //		prepare the mock
 
 		listeners.add(mockedListener);
@@ -52,15 +58,10 @@ public class NativeDriverCommTest {
 		
 		nativeComm.start();
 		
+		// FIXME find better solution for timing issues during tests
 		Thread.sleep(100);
 		
-		Socket dataSocket = new Socket("localhost", TestDriver.PORT_NUMBER_DEFAULT);
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(dataSocket.getOutputStream()));
-		writer.write("Test");
-		writer.newLine();
-		writer.flush();
-		Thread.sleep(10);
-		dataSocket.close();
-		
+		String data = driver.sendData(0, 0, new byte [0]);
+		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, Integer.parseInt(data.split("#")[0]));
 	}
 }

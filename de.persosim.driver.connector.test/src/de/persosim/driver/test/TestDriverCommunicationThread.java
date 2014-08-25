@@ -104,6 +104,7 @@ public class TestDriverCommunicationThread extends Thread {
 					if (lunMapping.containsKey(lun)) {
 						try {
 							lunMapping.get(lun).close();
+							System.out.println("Closed socket on port: " + lunMapping.get(lun).getPort());
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

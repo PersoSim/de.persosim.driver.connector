@@ -26,15 +26,16 @@ public class NativeDriverComm extends Thread {
 	private BufferedReader bufferedDataIn;
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
-	
-	public static final String MESSAGE_ICC_HELLO = "HELLO_ICC";	//Example: HELLO_ICC|LUN:-1
+
+	public static final String MESSAGE_ICC_HELLO = "HELLO_ICC"; // Example:
+																// HELLO_ICC|LUN:-1
 	public static final String MESSAGE_ICC_STOP = "STOP_ICC";
 	public static final String MESSAGE_ICC_ERROR = "ERROR_ICC";
 	public static final String MESSAGE_ICC_DONE = "DONE_ICC";
-	public static final String MESSAGE_IFD_HELLO = "HELLO_IFD"; //Example: HELLO_IFD|LUN:3
+	public static final String MESSAGE_IFD_HELLO = "HELLO_IFD"; // Example:
+																// HELLO_IFD|LUN:3
 	public static final String MESSAGE_IFD_DONE = "DONE_IFD";
 	public static final String MESSAGE_IFD_ERROR = "ERROR_IFD";
-
 
 	public static final String TYPE_STR = "STR";
 	public static final String TYPE_DWORD = "DWORD";
@@ -43,9 +44,9 @@ public class NativeDriverComm extends Thread {
 	public static final int PCSC_FUNCTION_DEVICE_CONTROL = 0;
 	public static final int PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
 	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
-	
-	public NativeDriverComm(String hostName, int dataPort, Collection<PcscListener> listeners)
-			throws IOException {
+
+	public NativeDriverComm(String hostName, int dataPort,
+			Collection<PcscListener> listeners) throws IOException {
 		this.listeners = listeners;
 		this.dataSocket = new Socket(hostName, dataPort);
 		bufferedDataIn = new BufferedReader(new InputStreamReader(
@@ -67,26 +68,34 @@ public class NativeDriverComm extends Thread {
 				try {
 					String data = bufferedDataIn.readLine();
 					PcscCallResult result = null;
-					for (PcscListener listener : listeners) {
-						PcscCallResult currentResult = listener
-								.processPcscCall(new PcscCallData(data));
-						if (result == null && currentResult != null) {
-							// ignore all but the first result
-							result = currentResult;
-						}
-					}
-					if (result == null){
-						result = new PcscCallResult() {
-							@Override
-							public String getEncoded() {
-								return "" + PcscConstants.IFD_NOT_SUPPORTED;
+					if (data != null){
+
+						for (PcscListener listener : listeners) {
+							try {
+								PcscCallResult currentResult = listener
+										.processPcscCall(new PcscCallData(data));
+								if (result == null && currentResult != null) {
+									// ignore all but the first result
+									result = currentResult;
+								}
+							} catch (RuntimeException e) {
+								System.out
+										.println("Something went wrong while parsing the PCSC data!");
 							}
-						};
+						}
+						if (result == null) {
+							result = new PcscCallResult() {
+								@Override
+								public String getEncoded() {
+									return "" + PcscConstants.IFD_NOT_SUPPORTED;
+								}
+							};
+						}
+
+						bufferedDataOut.write(result.getEncoded());
+						bufferedDataOut.newLine();
+						bufferedDataOut.flush();
 					}
-					
-					bufferedDataOut.write(result.getEncoded());
-					bufferedDataOut.newLine();
-					bufferedDataOut.flush();
 				} catch (SocketException e) {
 					// expected behavior after interrupting
 				}
@@ -100,7 +109,9 @@ public class NativeDriverComm extends Thread {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Thread#interrupt()
 	 */
 	@Override
@@ -113,6 +124,5 @@ public class NativeDriverComm extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 }
