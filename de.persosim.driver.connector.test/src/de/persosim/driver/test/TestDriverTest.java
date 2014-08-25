@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.persosim.driver.connector.CommUtils;
+import de.persosim.driver.connector.CommUtils.HandshakeMode;
 
 public class TestDriverTest implements DriverEventListener {
 	private String message;
@@ -68,7 +69,7 @@ public class TestDriverTest implements DriverEventListener {
 				try {
 					System.out.println("Sim waiting for data");
 					data = reader.readLine();
-					assertEquals("Test", data);
+					assertEquals("0#0#54657374", data);
 					System.out.println("Sim writing data");
 
 					writer.write("Answer");
@@ -82,11 +83,11 @@ public class TestDriverTest implements DriverEventListener {
 			}
 		});
 
-		CommUtils.doHandshake(dataSocket);
+		CommUtils.doHandshake(dataSocket, 0, HandshakeMode.OPEN);
 
 		sim.start();
 		
-		String response = nativeDriver.sendData(0, "Test");
+		String response = nativeDriver.sendData(0, 0, "Test".getBytes());
 		assertEquals("Answer", response);
 		while (message == null) {
 			Thread.yield();

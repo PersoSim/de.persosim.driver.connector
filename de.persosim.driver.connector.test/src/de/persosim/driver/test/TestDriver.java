@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import de.persosim.simulator.utils.HexString;
+
 /**
  * This class can be used for testcases that need an open native driver server
  * socket for testing.
@@ -27,7 +29,13 @@ import java.util.HashSet;
  * 
  * To stop a channel the handshake is slightly different:
  * 
- * HELLO_ICC|LUN:x HELLO_IFD|LUN:x STOP_ICC DONE_IFD
+ * HELLO_ICC|LUN:x
+ * <br/>
+ * HELLO_IFD|LUN:x
+ * <br/>
+ * STOP_ICC
+ * <br/>
+ * DONE_IFD
  * 
  * @author mboonk
  * 
@@ -71,31 +79,34 @@ public class TestDriver {
 		}
 	}
 
-	public String sendData(int lun, String data) throws IOException,
+	public String sendData(int lun, int function, byte [] ... data) throws IOException,
 			InterruptedException {
 		Socket iccSocket = lunMapping.get(lun);
 		if (iccSocket != null && iccSocket.isConnected()) {
-			System.out.println("Driver sending data to sim");
+			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
-			bufferedOut.write(data);
+			String dataToSend = function + "#" + lun;
+			
+			for(byte [] current : data){
+				dataToSend += "#" + HexString.encode(current);
+			}
+			
+			bufferedOut.write(dataToSend);
 			bufferedOut.newLine();
 			bufferedOut.flush();
 
 			BufferedReader bufferedIn = new BufferedReader(
 					new InputStreamReader(iccSocket.getInputStream()));
-			System.out.println("Driver waiting for response");
-			while (!bufferedIn.ready()) {
-				Thread.yield();
-			}
+			System.out.println("Driver waiting for response from connector");
 
-			data = bufferedIn.readLine();
+			String responseData = bufferedIn.readLine();
 			for (DriverEventListener listener : listeners) {
 				System.out.println("Notifing listener of type "
 						+ listener.getClass().getSimpleName());
-				listener.messageReceivedCallback(data);
+				listener.messageReceivedCallback(responseData);
 			}
-			return data;
+			return responseData;
 		}
 		System.out.println("No connected socket found for lun: " + lun);
 		return null;
@@ -127,14 +138,16 @@ public class TestDriver {
 					lun = Integer.parseInt(commandArgs[1]);
 					break;
 				case "data":
-					String data = "";
-					for (int i = 1; i < commandArgs.length; i++) {
-						data += commandArgs[i];
-						if (i < commandArgs.length - 1) {
-							data += " ";
-						}
+
+					int function = Integer.parseInt(commandArgs[1]);
+					
+					byte [][] parameterData = new byte [commandArgs.length - 2][];
+					
+					for (int i = 2; i < commandArgs.length; i++) {
+						parameterData[i-2] = HexString.toByteArray(commandArgs[i]);
 					}
-					String response = driver.sendData(lun, data);
+					String response = driver.sendData(lun, function, parameterData);
+					
 					if (response != null){
 						System.out.println("Response: " + response);	
 					}
@@ -147,7 +160,7 @@ public class TestDriver {
 				default:
 					System.out.println("Possible commands:");
 					System.out.println("lun <number>");
-					System.out.println("pcsc <dataToSend>");
+					System.out.println("data <functionNumber> <param1> <param2> ...");
 					System.out.println("exit");
 					System.out.println("quit");
 				}

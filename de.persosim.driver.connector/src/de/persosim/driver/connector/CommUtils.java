@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-import de.persosim.driver.connector.exceptions.PscsNativeCommunicationException;
+import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 
 public class CommUtils {
 	public enum HandshakeMode {
@@ -24,7 +24,7 @@ public class CommUtils {
 		String [] helloData = reader.readLine().split("\\|");
 		
 		if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_HELLO)){
-			throw new PscsNativeCommunicationException("Unexpected message type");
+			throw new PcscNativeCommunicationException("Unexpected message type");
 		}
 		
 		try{
@@ -35,15 +35,15 @@ public class CommUtils {
 			} else {
 				CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_STOP);
 			}
-			reader.readLine();
+			helloData = reader.readLine().split("\\|");
 			
 			if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_DONE)){
-				throw new PscsNativeCommunicationException("Unexpected message type");
+				throw new PcscNativeCommunicationException("Unexpected message type");
 			}
 			
 			return responseLun;
 		} catch (NumberFormatException e){
-			throw new PscsNativeCommunicationException("Unexpected message content");
+			throw new PcscNativeCommunicationException("Unexpected message content");
 		}
 	}
 

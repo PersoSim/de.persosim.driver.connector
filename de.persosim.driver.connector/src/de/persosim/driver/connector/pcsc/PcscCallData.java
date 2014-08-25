@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.persosim.simulator.utils.HexString;
+
 /**
  * This class contains all data that is transmitted when a PCSC function call
  * occurs.
@@ -48,17 +50,21 @@ public class PcscCallData {
 	}
 
 	private List<byte[]> getParameters(String data) {
-		// FIXME MBK implement
-		return null;
+		List<byte []> result = new ArrayList<byte []>();
+		String [] dataArray = data.split("#");
+		for (int i = 2; i < dataArray.length; i++){
+			result.add(HexString.toByteArray(dataArray[i]));
+		}
+		return result;
 	}
 
 	private int getLogicalUnitNumber(String data) {
-		// FIXME MBK implement
-		return 0;
+		String [] dataArray = data.split("#");
+		return Integer.parseInt(dataArray[1]);
 	}
 
 	private int getCallType(String data) {
-		// FIXME MBK implement
-		return 0;
+		String [] dataArray = data.split("#");
+		return Integer.parseInt(dataArray[0]);
 	}
 }

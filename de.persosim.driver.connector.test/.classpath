@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="lib/jmockit.jar"/>
 	<classpathentry kind="lib" path="lib/jmockit-coverage.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/de.persosim.driver.connector"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/de.persosim.simulator"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

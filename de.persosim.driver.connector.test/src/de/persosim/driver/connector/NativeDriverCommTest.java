@@ -59,7 +59,7 @@ public class NativeDriverCommTest {
 		writer.write("Test");
 		writer.newLine();
 		writer.flush();
-		Thread.sleep(100);
+		Thread.sleep(10);
 		dataSocket.close();
 		
 	}
