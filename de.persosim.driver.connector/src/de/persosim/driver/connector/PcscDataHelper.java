@@ -69,4 +69,25 @@ public class PcscDataHelper {
 		}
 		return null;
 	}
+
+	/**
+	 * @param tag
+	 * @param data
+	 * @return the complete tag field (tag|length|content) as byte [] or null if the tag could not be found
+	 */
+	public static byte[] getField(byte[] tag, byte[] data) {
+		byte[] paddedTag = getPaddedTag(tag);
+		int offset = 0;
+		int length = 0;
+		while (offset < data.length - DWORD_LENGTH) {
+			length = Utils.getIntFromUnsignedByteArray(Arrays.copyOfRange(data,
+					offset + DWORD_LENGTH, offset + DWORD_LENGTH * 2));
+			if (compare(paddedTag, 0, data, offset, DWORD_LENGTH)) {
+				return Arrays.copyOfRange(data, offset, offset + length);
+			} else {
+				offset += length;
+			}
+		}
+		return null;
+	}
 }

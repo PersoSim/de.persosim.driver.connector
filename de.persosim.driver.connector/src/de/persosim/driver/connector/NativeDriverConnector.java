@@ -132,31 +132,31 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 	public PcscCallResult getCapabilities(PcscCallData data) {
 		//try to find tag in own capabilities
 		
-		byte [] result = null;
+		PcscCallResult result = null;
 		byte [] currentTag = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "HJP Consulting".getBytes(StandardCharsets.US_ASCII));
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "HJP Consulting".getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_TYPE), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Virtual Card Reader IFD".getBytes(StandardCharsets.US_ASCII));
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Virtual Card Reader IFD".getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_VERSION), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte []{0,0,0,0}); //0xMMmmbbbb MM=major mm=minor bbbb=build
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte []{0,0,0,0}); //0xMMmmbbbb MM=major mm=minor bbbb=build
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_SERIAL), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Serial000000001".getBytes(StandardCharsets.US_ASCII));
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Serial000000001".getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_ATR), currentTag)){
 			if (cachedAtr != null){
-				result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+				result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			}
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS), new byte [] {1});
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS), new byte [] {1});
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), new byte [] {1});
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), new byte [] {1});
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE), currentTag)){
-			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE), new byte [] {0});
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE), new byte [] {0});
 		} else {
 			for (PcscListener listener : listeners){
 				if (listener instanceof PcscFeature){
 					PcscFeature feature = (PcscFeature) listener;
-					result = PcscDataHelper.getFieldContent(currentTag, feature.getCapabilities());
+					result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, PcscDataHelper.getField(currentTag, feature.getCapabilities()));
 					if (result != null){
 						break;
 					}
@@ -165,22 +165,9 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 		}
 		
 		if (result != null){
-			final String resultData = HexString.encode(result);
-			return new PcscCallResult() {
-				
-				@Override
-				public String getEncoded() {
-					return PcscConstants.IFD_SUCCESS + "#" + resultData;
-				}
-			};
+			return result;
 		} else {
-			return new PcscCallResult() {
-				
-				@Override
-				public String getEncoded() {
-					return "" + PcscConstants.IFD_ERROR_TAG;
-				}
-			};
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_TAG);
 		}
 	}
 
