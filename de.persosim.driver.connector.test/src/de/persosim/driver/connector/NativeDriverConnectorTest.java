@@ -2,6 +2,7 @@ package de.persosim.driver.connector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.security.Security;
 
@@ -47,25 +48,19 @@ public class NativeDriverConnectorTest {
 	public void setUp() throws Exception {
 		new NonStrictExpectations(PersoSimKernel.class){
 			{
-				kernel.init();
+				kernel.init(); // TODO this method seems to be incorrectly mocked and executed
 			}
 		};
 		
 		sim = new SocketSimulator(new DefaultPersonalization() {
-			
 			@Override
-			protected void addTaTrustPoints() throws CertificateNotParseableException {
-				// TODO Auto-generated method stub
-				
-			}
+			protected void addTaTrustPoints() throws CertificateNotParseableException {}
 		}, 9876);
 		sim.start();
 		
 		driver = new TestDriver();
 		driver.start();
-		
-
-		
+				
 		nativeConnector = new NativeDriverConnector("localhost",
 				TestDriver.PORT_NUMBER_DEFAULT, "localhost", 9876);
 		nativeConnector.connect();
@@ -78,34 +73,61 @@ public class NativeDriverConnectorTest {
 		sim.stop();
 	}
 
+	private String checkPcscTag(byte [] tag, int expectedResponseCode) throws Exception{
+		String result = driver.sendData(0,
+				NativeDriverComm.PCSC_FUNCTION_GET_CAPABILITIES,
+				tag);
+
+		String expected = expectedResponseCode + "#" + HexString.encode(tag);
+		
+		switch (expectedResponseCode){
+		case PcscConstants.IFD_ERROR_TAG:
+			expected = PcscConstants.IFD_ERROR_TAG + "";
+			break;
+		case PcscConstants.IFD_SUCCESS:
+			expected = expectedResponseCode + "#" + HexString.encode(tag);
+			break;
+			default:
+				fail("invalid expected response code");
+		}
+
+		assertTrue(result.startsWith(expected));
+		return expected;
+	}
+	
 	@Test
 	public void testPcscGetCapabilitiesVendorName() throws Exception {
 		// FIXME find better solution for timing issues while testing
 		Thread.sleep(100);
-		String tag = "00000100";
+		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_VENDOR_NAME), PcscConstants.IFD_SUCCESS);
+	}
 
-		String result = driver.sendData(0,
-				NativeDriverComm.PCSC_FUNCTION_GET_CAPABILITIES,
-				HexString.toByteArray(tag));
+	@Test
+	public void testPcscGetCapabilitiesSimultaneousAccess() throws Exception {
+		// FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS), PcscConstants.IFD_SUCCESS);
+	}
 
-		String expected = PcscConstants.IFD_SUCCESS + "#" + tag;
+	@Test
+	public void testPcscGetCapabilitiesSlotsNumber() throws Exception {
+		// FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SLOTS_NUMBER), PcscConstants.IFD_SUCCESS);
+	}
 
-		assertTrue(result.indexOf(expected) == 0);
+	@Test
+	public void testPcscGetCapabilitiesSlotThreadSafe() throws Exception {
+		// FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SLOT_THREAD_SAFE), PcscConstants.IFD_SUCCESS);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesNotExisting() throws Exception {
 		// FIXME find better solution for timing issues while testing
 		Thread.sleep(100);
-		String tag = "FFFFFFFF";
-
-		String result = driver.sendData(0,
-				NativeDriverComm.PCSC_FUNCTION_GET_CAPABILITIES,
-				HexString.toByteArray(tag));
-
-		String expected = PcscConstants.IFD_SUCCESS + "#" + tag;
-
-		assertTrue(!(result.indexOf(expected) == 0));
+		checkPcscTag(HexString.toByteArray("FFFFFFFF"), PcscConstants.IFD_ERROR_TAG);
 	}
 
 	@Test
