@@ -134,8 +134,15 @@ public class NativeDriverConnector implements PcscListener, PcscCommonMethods, P
 					return PcscConstants.IFD_SUCCESS + "#" + resultData;
 				}
 			};
+		} else {
+			return new PcscCallResult() {
+				
+				@Override
+				public String getEncoded() {
+					return "" + PcscConstants.IFD_ERROR_TAG;
+				}
+			};
 		}
-		return null;
 	}
 
 	@Override
