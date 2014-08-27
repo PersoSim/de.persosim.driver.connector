@@ -25,5 +25,21 @@ public interface PcscConstants {
 	public static final int IFD_ICC_NOT_PRESENT = 616;
 	public static final int IFD_NO_SUCH_DEVICE = 617;
 	public static final int IFD_ERROR_INSUFFICIENT_BUFFER = 618;
+	
+
+	public static final int TAG_VENDOR_NAME = 0x0100;
+	public static final int TAG_VENDOR_TYPE = 0x0101;
+	public static final int TAG_VENDOR_VERSION = 0x0102;
+	public static final int TAG_VENDOR_SERIAL = 0x0103;
+	
+
+	public static final int TAG_IFD_ATR = 0x0303;
+	public static final int TAG_IFD_SLOTNUM = 0x0180;
+	public static final int TAG_IFD_SLOT_THREAD_SAFE = 0x0FAC;
+	public static final int TAG_IFD_THREAD_SAFE = 0x0FAD;
+	public static final int TAG_IFD_SLOTS_NUMBER = 0x0FAE;
+	public static final int TAG_IFD_SIMULTANEOUS_ACCESS = 0x0FAF;
+	public static final int TAG_IFD_POLLING_THREAD = 0x0FB0;
+	public static final int TAG_IFD_POLLING_THREAD_KILLABLE = 0x0FB1;
 
 }

@@ -44,6 +44,7 @@ public class NativeDriverComm extends Thread {
 	public static final int PCSC_FUNCTION_DEVICE_CONTROL = 0;
 	public static final int PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
 	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
+	public static final int PCSC_FUNCTION_SET_CAPABILITIES = 3;
 
 	public NativeDriverComm(String hostName, int dataPort,
 			Collection<PcscListener> listeners) throws IOException {

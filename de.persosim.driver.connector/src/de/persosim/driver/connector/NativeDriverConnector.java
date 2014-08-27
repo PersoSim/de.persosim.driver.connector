@@ -12,6 +12,7 @@ import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.simulator.utils.HexString;
+import de.persosim.simulator.utils.Utils;
 
 /**
  * This class handles the connection to the native part of the PersoSim driver
@@ -22,12 +23,13 @@ import de.persosim.simulator.utils.HexString;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements PcscListener, PcscCommonMethods, PcscSlotLogicalDeviceMethods{
+public class NativeDriverConnector implements PcscConstants, PcscListener, PcscCommonMethods, PcscSlotLogicalDeviceMethods{
 
 	Collection<PcscListener> listeners = new HashSet<PcscListener>();
 	private NativeDriverComm comm;
 	private String hostName;
 	private int dataPort;
+	private byte [] cachedAtr = null;
 
 	public NativeDriverConnector(String hostName, int dataPort) throws UnknownHostException, IOException {
 		this.hostName = hostName;
@@ -79,6 +81,8 @@ public class NativeDriverConnector implements PcscListener, PcscCommonMethods, P
 			return deviceControl(data);
 		case NativeDriverComm.PCSC_FUNCTION_GET_CAPABILITIES:
 			return getCapabilities(data);
+		case NativeDriverComm.PCSC_FUNCTION_SET_CAPABILITIES:
+			return setCapabilities(data);
 		}
 		return null;
 	}
@@ -98,21 +102,21 @@ public class NativeDriverConnector implements PcscListener, PcscCommonMethods, P
 	@Override
 	public PcscCallResult getCapabilities(PcscCallData data) {
 		//try to find tag in own capabilities
-		byte [] TAG_VENDOR_NAME = new byte [] {0,0,0x01, 0x00};
-		byte [] TAG_VENDOR_TYPE = new byte [] {0,0,0x01, 0x01};
-		byte [] TAG_VENDOR_VERSION = new byte [] {0,0,0x01, 0x02};
-		byte [] TAG_VENDOR_SERIAL = new byte [] {0,0,0x01, 0x03};
 		
 		byte [] result = null;
 		byte [] currentTag = data.getParameters().get(0);
-		if (Arrays.equals(TAG_VENDOR_NAME, currentTag)){
-			result = PcscDataHelper.buildTlv(TAG_VENDOR_NAME, "HJP Consulting".getBytes(StandardCharsets.US_ASCII));
-		} else if (Arrays.equals(TAG_VENDOR_TYPE, currentTag)){
-			result = PcscDataHelper.buildTlv(TAG_VENDOR_NAME, "Virtual Card Reader IFD".getBytes(StandardCharsets.US_ASCII));
-		} else if (Arrays.equals(TAG_VENDOR_VERSION, currentTag)){
-			result = PcscDataHelper.buildTlv(TAG_VENDOR_NAME, new byte []{0,0,0,0}); //0xMMmmbbbb MM=major mm=minor bbbb=build
-		} else if (Arrays.equals(TAG_VENDOR_SERIAL, currentTag)){
-			result = PcscDataHelper.buildTlv(TAG_VENDOR_NAME, "Serial000000001".getBytes(StandardCharsets.US_ASCII));
+		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), currentTag)){
+			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "HJP Consulting".getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_TYPE), currentTag)){
+			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Virtual Card Reader IFD".getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_VERSION), currentTag)){
+			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte []{0,0,0,0}); //0xMMmmbbbb MM=major mm=minor bbbb=build
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_SERIAL), currentTag)){
+			result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Serial000000001".getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_ATR), currentTag)){
+			if (cachedAtr != null){
+				result = PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+			}
 		} else {
 			for (PcscListener listener : listeners){
 				if (listener instanceof PcscFeature){
