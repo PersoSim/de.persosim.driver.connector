@@ -2,12 +2,7 @@ package de.persosim.driver.connector;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -18,11 +13,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.test.TestDriver;
-import de.persosim.simulator.utils.HexString;
 
 public class NativeDriverCommTest {
 	

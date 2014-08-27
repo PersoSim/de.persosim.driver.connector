@@ -1,6 +1,10 @@
 package de.persosim.driver.connector;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -27,13 +31,19 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	Collection<PcscListener> listeners = new HashSet<PcscListener>();
 	private NativeDriverComm comm;
-	private String hostName;
-	private int dataPort;
-	private byte [] cachedAtr = null;
+	private String nativeDriverHostName;
+	private int nativeDriverPort;
+	private byte [] cachedAtr = new byte [0];
+	private Socket simSocket;
+	private boolean connectedToSim = false;
+	private String simHostName;
+	private int simPort;
 
-	public NativeDriverConnector(String hostName, int dataPort) throws UnknownHostException, IOException {
-		this.hostName = hostName;
-		this.dataPort = dataPort;
+	public NativeDriverConnector(String nativeDriverHostName, int nativeDriverPort, String simHostName, int simPort) throws UnknownHostException, IOException {
+		this.nativeDriverHostName = nativeDriverHostName;
+		this.nativeDriverPort = nativeDriverPort;
+		this.simHostName = simHostName;
+		this.simPort = simPort;
 	}
 	
 	/**
@@ -45,7 +55,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 	public void connect() throws IOException {
 		addListener(new PcscPrinter());
 		addListener(this);
-		comm = new NativeDriverComm(hostName, dataPort, listeners);
+		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort, listeners);
 		comm.start();
 	} 
 
@@ -72,6 +82,22 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 		return comm.isAlive() && !comm.isInterrupted();
 	}
 	
+	private byte [] exchangeApdu(byte [] commandApdu){
+		try {
+			BufferedReader bufferedIn = new BufferedReader(new InputStreamReader(simSocket.getInputStream()));
+			PrintWriter printOut;
+			printOut = new PrintWriter(simSocket.getOutputStream());
+			
+			printOut.println(HexString.encode(commandApdu));
+			printOut.flush();
+			return HexString.toByteArray(bufferedIn.readLine());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch(data.getFunction()){
@@ -83,6 +109,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 			return getCapabilities(data);
 		case NativeDriverComm.PCSC_FUNCTION_SET_CAPABILITIES:
 			return setCapabilities(data);
+		case NativeDriverComm.PCSC_FUNCTION_POWER_ICC:
+			return powerIcc(data);
 		}
 		return null;
 	}
@@ -163,8 +191,37 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	@Override
 	public PcscCallResult powerIcc(PcscCallData data) {
-		// TODO Auto-generated method stub
-		return null;
+		byte [] action = data.getParameters().get(0);
+		if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_DOWN), action)){
+			if(connectedToSim){
+				exchangeApdu(HexString.toByteArray("FF000000"));
+				try {
+					simSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_UP), action)){
+			try {
+				if (!connectedToSim){
+					simSocket = new Socket(simHostName, simPort);
+				}
+				cachedAtr = exchangeApdu(HexString.toByteArray("FF010000"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_RESET), action)){
+			cachedAtr = exchangeApdu(HexString.toByteArray("FFFF0000"));
+		}
+		return new PcscCallResult() {
+			
+			@Override
+			public String getEncoded() {
+				return PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr));
+			}
+		};
 	}
 
 	@Override

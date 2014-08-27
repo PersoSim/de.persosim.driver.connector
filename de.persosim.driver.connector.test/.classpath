@@ -8,5 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/de.persosim.simulator"/>
 	<classpathentry kind="lib" path="lib/jmockit-coverage.jar"/>
 	<classpathentry kind="lib" path="lib/jmockit.jar"/>
+	<classpathentry kind="lib" path="/de.persosim.simulator/lib/bcprov-jdk15on-150.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
