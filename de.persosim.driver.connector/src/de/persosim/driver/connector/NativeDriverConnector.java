@@ -15,6 +15,9 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
+import de.persosim.driver.connector.pcsc.TlvPcscCallResult;
+import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
@@ -33,9 +36,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 	private NativeDriverComm comm;
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
-	private byte [] cachedAtr = new byte [0];
+	private byte [] cachedAtr = null;
 	private Socket simSocket;
-	private boolean connectedToSim = false;
 	private String simHostName;
 	private int simPort;
 
@@ -87,7 +89,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 			BufferedReader bufferedIn = new BufferedReader(new InputStreamReader(simSocket.getInputStream()));
 			PrintWriter printOut;
 			printOut = new PrintWriter(simSocket.getOutputStream());
-			
 			printOut.println(HexString.encode(commandApdu));
 			printOut.flush();
 			return HexString.toByteArray(bufferedIn.readLine());
@@ -193,35 +194,38 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 	public PcscCallResult powerIcc(PcscCallData data) {
 		byte [] action = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_DOWN), action)){
-			if(connectedToSim){
-				exchangeApdu(HexString.toByteArray("FF000000"));
+			if(simSocket != null && !simSocket.isClosed()){
+				byte [] result = exchangeApdu(HexString.toByteArray("FF000000"));
 				try {
 					simSocket.close();
+					cachedAtr = null;
+					if (Arrays.equals(result, Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))){
+						return new SimplePcscCallResult(IFD_SUCCESS);
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_UP), action)){
 			try {
-				if (!connectedToSim){
+				if (simSocket == null || simSocket.isClosed()){
 					simSocket = new Socket(simHostName, simPort);
 				}
 				cachedAtr = exchangeApdu(HexString.toByteArray("FF010000"));
+				return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_RESET), action)){
 			cachedAtr = exchangeApdu(HexString.toByteArray("FFFF0000"));
+			return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 		}
-		return new PcscCallResult() {
-			
-			@Override
-			public String getEncoded() {
-				return PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr));
-			}
-		};
+		
+		return null;
 	}
 
 	@Override

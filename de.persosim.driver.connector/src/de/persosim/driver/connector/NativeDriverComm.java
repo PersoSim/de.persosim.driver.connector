@@ -13,6 +13,7 @@ import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
  * This thread reads PCSC data from the native interface and delegates it to the @link
@@ -71,19 +72,26 @@ public class NativeDriverComm extends Thread {
 					String data = bufferedDataIn.readLine();
 					PcscCallResult result = null;
 					if (data != null){
-
+						try{
+						PcscCallData callData = new PcscCallData(data);
 						for (PcscListener listener : listeners) {
 							try {
 								PcscCallResult currentResult = listener
-										.processPcscCall(new PcscCallData(data));
+										.processPcscCall(callData);
 								if (result == null && currentResult != null) {
 									// ignore all but the first result
 									result = currentResult;
 								}
 							} catch (RuntimeException e) {
 								System.out
-										.println("Something went wrong while parsing the PCSC data!");
+										.println("Something went wrong while processing of the PCSC data by listener " + listener.getClass().getName() + "!");
+								e.printStackTrace();
 							}
+						}
+						} catch (RuntimeException e) {
+							System.out
+									.println("Something went wrong while parsing the PCSC data!");
+							e.printStackTrace();
 						}
 						if (result == null) {
 							result = new PcscCallResult() {

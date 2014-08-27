@@ -12,7 +12,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import de.persosim.driver.test.TestDriver;
@@ -131,7 +130,7 @@ public class NativeDriverConnectorTest {
 	}
 	
 	@Test
-	public void testPcscPowerIccPowerDown() throws Exception{
+	public void testPcscPowerIccPowerDownWithoutPowerUp() throws Exception{
 		//prepare the mock
 		
 		new NonStrictExpectations(PersoSimKernel.class){
@@ -146,7 +145,58 @@ public class NativeDriverConnectorTest {
 		
 		String result = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_DOWN));
 		
-		String expected = "" + PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), new byte [0]));
+		String expected = "" + PcscConstants.IFD_ERROR_POWER_ACTION;
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testPcscPowerIccPowerDown() throws Exception{
+		//prepare the mock
+		final byte [] testAtr = "TESTATR".getBytes();
+		
+		new NonStrictExpectations(PersoSimKernel.class){
+			{
+				kernel.powerOn();
+				result = testAtr;
+				kernel.powerOff();
+				result = new byte [] {(byte) 0x90, 0};
+			}
+		};
+		
+		//FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+		
+		String result = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		
+		result = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_DOWN));
+
+		String expected = "" + PcscConstants.IFD_SUCCESS;
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testPcscPowerIccReset() throws Exception{
+		
+		//prepare the mock
+		final byte [] testAtr = "TESTATR".getBytes();
+		
+		new NonStrictExpectations(PersoSimKernel.class){
+			{
+				kernel.powerOn();
+				result = testAtr;
+				kernel.reset();
+				result = testAtr;
+			}
+		};
+		
+		//FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+
+		String result = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		
+		result = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_RESET));
+		
+		String expected = "" + PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
 		assertEquals(expected, result);
 	}
 }
