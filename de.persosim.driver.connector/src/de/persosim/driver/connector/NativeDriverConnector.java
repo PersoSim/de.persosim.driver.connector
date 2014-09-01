@@ -13,8 +13,13 @@ import java.util.HashSet;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
+import de.persosim.driver.connector.pcsc.PcscCommonMethods;
+import de.persosim.driver.connector.pcsc.PcscCommunicationServices;
+import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.driver.connector.pcsc.PcscDataHelper;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.driver.connector.pcsc.PcscSlotLogicalDeviceMethods;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.TlvPcscCallResult;
 import de.persosim.simulator.platform.Iso7816;
@@ -30,7 +35,7 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements PcscConstants, PcscListener, PcscCommonMethods, PcscSlotLogicalDeviceMethods{
+public class NativeDriverConnector implements PcscConstants, PcscListener, PcscCommonMethods, PcscSlotLogicalDeviceMethods, PcscCommunicationServices{
 
 	Collection<PcscListener> listeners = new HashSet<PcscListener>();
 	private NativeDriverComm comm;
@@ -112,6 +117,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 			return setCapabilities(data);
 		case NativeDriverComm.PCSC_FUNCTION_POWER_ICC:
 			return powerIcc(data);
+		case NativeDriverComm.PCSC_FUNCTION_TRANSMIT_TO_ICC:
+			return transmitToIcc(data);
 		}
 		return null;
 	}
@@ -235,8 +242,11 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	@Override
 	public PcscCallResult transmitToIcc(PcscCallData data) {
-		// TODO Auto-generated method stub
-		return null;
+		byte [] inputData = data.getParameters().get(0);
+		//ignore the header for now
+		//byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
+		byte [] commandApdu = Arrays.copyOfRange(inputData, 8, inputData.length);
+		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, exchangeApdu(commandApdu));
 	}
 
 	@Override

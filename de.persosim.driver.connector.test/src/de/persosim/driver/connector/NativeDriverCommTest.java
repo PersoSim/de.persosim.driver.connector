@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
+import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.test.TestDriver;
 

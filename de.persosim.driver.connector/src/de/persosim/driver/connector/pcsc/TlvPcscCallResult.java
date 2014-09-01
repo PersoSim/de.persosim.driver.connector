@@ -1,6 +1,5 @@
 package de.persosim.driver.connector.pcsc;
 
-import de.persosim.driver.connector.PcscDataHelper;
 import de.persosim.simulator.utils.HexString;
 
 public class TlvPcscCallResult implements PcscCallResult {

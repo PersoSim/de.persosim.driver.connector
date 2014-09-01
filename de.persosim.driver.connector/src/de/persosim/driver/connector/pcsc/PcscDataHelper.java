@@ -1,4 +1,4 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.pcsc;
 
 import java.util.Arrays;
 

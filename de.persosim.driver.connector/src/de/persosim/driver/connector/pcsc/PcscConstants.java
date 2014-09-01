@@ -1,4 +1,5 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.pcsc;
+
 
 public interface PcscConstants {
 	public static final int IFD_POWER_UP = 500;
@@ -41,5 +42,10 @@ public interface PcscConstants {
 	public static final int TAG_IFD_SIMULTANEOUS_ACCESS = 0x0FAF;
 	public static final int TAG_IFD_POLLING_THREAD = 0x0FB0;
 	public static final int TAG_IFD_POLLING_THREAD_KILLABLE = 0x0FB1;
+	public static final int SCARD_PROTOCOL_T0 = 1;
+	public static final int SCARD_PROTOCOL_T1 = 2;
+	public static final int SCARD_PROTOCOL_ANY = SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1;
+	public static final int SCARD_PROTOCOL_RAW = 4;
+	public static final int SCARD_PROTOCOL_T15 = 8;
 
 }

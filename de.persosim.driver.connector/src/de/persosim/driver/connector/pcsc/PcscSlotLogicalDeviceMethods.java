@@ -1,7 +1,5 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.pcsc;
 
-import de.persosim.driver.connector.pcsc.PcscCallData;
-import de.persosim.driver.connector.pcsc.PcscCallResult;
 
 public interface PcscSlotLogicalDeviceMethods {
 	//Administrative
@@ -11,7 +9,6 @@ public interface PcscSlotLogicalDeviceMethods {
 	public abstract PcscCallResult powerIcc(PcscCallData data);
 	public abstract PcscCallResult swallowIcc(PcscCallData data);
 	public abstract PcscCallResult ejectIcc(PcscCallData data);
-	public abstract PcscCallResult transmitToIcc(PcscCallData data);
 	public abstract PcscCallResult isIccPresent(PcscCallData data);
 	public abstract PcscCallResult isIccAbsent(PcscCallData data);
 	

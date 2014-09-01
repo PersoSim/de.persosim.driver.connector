@@ -1,7 +1,5 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.pcsc;
 
-import de.persosim.driver.connector.pcsc.PcscCallData;
-import de.persosim.driver.connector.pcsc.PcscCallResult;
 
 public interface PcscCommonMethods {
 	

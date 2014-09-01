@@ -12,8 +12,8 @@ import java.util.Collection;
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
+import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
-import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
  * This thread reads PCSC data from the native interface and delegates it to the @link
@@ -47,6 +47,7 @@ public class NativeDriverComm extends Thread {
 	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
 	public static final int PCSC_FUNCTION_SET_CAPABILITIES = 3;
 	public static final int PCSC_FUNCTION_POWER_ICC = 4;
+	public static final int PCSC_FUNCTION_TRANSMIT_TO_ICC = 5;
 
 	public NativeDriverComm(String hostName, int dataPort,
 			Collection<PcscListener> listeners) throws IOException {

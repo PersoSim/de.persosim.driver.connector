@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.security.Security;
 
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
@@ -15,6 +17,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.driver.connector.pcsc.PcscDataHelper;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.SocketSimulator;
 import de.persosim.simulator.exception.CertificateNotParseableException;
@@ -128,6 +132,29 @@ public class NativeDriverConnectorTest {
 		// FIXME find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(HexString.toByteArray("FFFFFFFF"), PcscConstants.IFD_ERROR_TAG);
+	}
+	
+	@Test
+	public void testPcscTransmitToIcc() throws IOException, InterruptedException{
+		// FIXME find better solution for timing issues while testing
+		Thread.sleep(100);
+		final byte [] apdu = new byte []{0,0,0,0};
+		byte [] testData = Utils.concatByteArrays(Utils.toUnsignedByteArray(PcscConstants.SCARD_PROTOCOL_T0), Utils.toUnsignedByteArray(8), apdu);
+
+		new Expectations(PersoSimKernel.class){
+			{
+				kernel.powerOn();
+				result = new byte [0];
+				kernel.process(apdu);
+				result = "RESPONSE".getBytes();
+			}
+		};
+		
+		String response = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		
+		response = driver.sendData(0, NativeDriverComm.PCSC_FUNCTION_TRANSMIT_TO_ICC, testData);
+		String expected = PcscConstants.IFD_SUCCESS + "#" + HexString.encode("RESPONSE".getBytes());
+		assertEquals(expected, response);
 	}
 
 	@Test
