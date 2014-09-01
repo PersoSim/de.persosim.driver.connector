@@ -153,6 +153,15 @@ public class TestDriver {
 					}
 					
 					break;
+				case "powerup":
+					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf4}));
+					break;
+				case "powerdown":
+					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf5}));
+					break;
+				case "reset":
+					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf6}));
+					break;
 				case "exit":
 				case "quit":
 					driver.stop();
@@ -161,11 +170,14 @@ public class TestDriver {
 					System.out.println("Possible commands:");
 					System.out.println("lun <number>");
 					System.out.println("data <functionNumber> <param1> <param2> ...");
+					System.out.println("powerup");
+					System.out.println("powerdown");
+					System.out.println("reset");
 					System.out.println("exit");
 					System.out.println("quit");
 				}
 			} catch (Exception e) {
-				System.err.println("Error caused by faulty input;");
+				System.err.println("Error caused by faulty input or severed connection");
 			}
 		}
 	}
