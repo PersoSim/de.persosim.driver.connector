@@ -1,9 +1,6 @@
 package de.persosim.driver.connector;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -87,21 +84,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	public boolean isConnected() {
 		return comm.isAlive() && !comm.isInterrupted();
-	}
-	
-	private byte [] exchangeApdu(byte [] commandApdu){
-		try {
-			BufferedReader bufferedIn = new BufferedReader(new InputStreamReader(simSocket.getInputStream()));
-			PrintWriter printOut;
-			printOut = new PrintWriter(simSocket.getOutputStream());
-			printOut.println(HexString.encode(commandApdu));
-			printOut.flush();
-			return HexString.toByteArray(bufferedIn.readLine());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
 	}
 	
 	@Override
@@ -195,7 +177,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 		byte [] action = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_DOWN), action)){
 			if(simSocket != null && !simSocket.isClosed()){
-				byte [] result = exchangeApdu(HexString.toByteArray("FF000000"));
+				byte [] result = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FF000000"));
 				try {
 					simSocket.close();
 					cachedAtr = null;
@@ -213,7 +195,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 				if (simSocket == null || simSocket.isClosed()){
 					simSocket = new Socket(simHostName, simPort);
 				}
-				cachedAtr = exchangeApdu(HexString.toByteArray("FF010000"));
+				cachedAtr = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FF010000"));
 				return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -221,7 +203,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 			}
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_RESET), action)){
-			cachedAtr = exchangeApdu(HexString.toByteArray("FFFF0000"));
+			cachedAtr = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FFFF0000"));
 			return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 		}
 		
@@ -246,7 +228,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 		//ignore the header for now
 		//byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
 		byte [] commandApdu = Arrays.copyOfRange(inputData, 8, inputData.length);
-		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, exchangeApdu(commandApdu));
+		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, CommUtils.exchangeApdu(simSocket, commandApdu));
 	}
 
 	@Override
