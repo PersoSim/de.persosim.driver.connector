@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.pcsc;
 
 
+
 public interface PcscConstants {
 	public static final int IFD_POWER_UP = 500;
 	public static final int IFD_POWER_DOWN = 501;
@@ -47,5 +48,8 @@ public interface PcscConstants {
 	public static final int SCARD_PROTOCOL_ANY = SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1;
 	public static final int SCARD_PROTOCOL_RAW = 4;
 	public static final int SCARD_PROTOCOL_T15 = 8;
+
+	public static final int DEVICE_TYPE_SLOT = 1;
+	public static final int DEVICE_TYPE_FUNCTIONAL = 1;
 
 }

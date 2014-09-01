@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
@@ -18,6 +20,7 @@ import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.PcscSlotLogicalDeviceMethods;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
+import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.TlvPcscCallResult;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
@@ -32,24 +35,29 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements PcscConstants, PcscListener, PcscCommonMethods, PcscSlotLogicalDeviceMethods, PcscCommunicationServices{
+public class NativeDriverConnector implements PcscConstants, PcscListener,
+		PcscCommonMethods, PcscSlotLogicalDeviceMethods,
+		PcscCommunicationServices {
 
+	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	Collection<PcscListener> listeners = new HashSet<PcscListener>();
 	private NativeDriverComm comm;
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
-	private byte [] cachedAtr = null;
+	private byte[] cachedAtr = null;
 	private Socket simSocket;
 	private String simHostName;
 	private int simPort;
 
-	public NativeDriverConnector(String nativeDriverHostName, int nativeDriverPort, String simHostName, int simPort) throws UnknownHostException, IOException {
+	public NativeDriverConnector(String nativeDriverHostName,
+			int nativeDriverPort, String simHostName, int simPort)
+			throws UnknownHostException, IOException {
 		this.nativeDriverHostName = nativeDriverHostName;
 		this.nativeDriverPort = nativeDriverPort;
 		this.simHostName = simHostName;
 		this.simPort = simPort;
 	}
-	
+
 	/**
 	 * This method connects to the native driver part.
 	 * 
@@ -59,15 +67,16 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 	public void connect() throws IOException {
 		addListener(new PcscPrinter());
 		addListener(this);
-		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort, listeners);
+		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
+				listeners);
 		comm.start();
-	} 
+	}
 
 	/**
 	 * This method disconnects from the native driver part.
 	 * 
 	 * @throws IOException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public void disconnect() throws IOException, InterruptedException {
 		comm.interrupt();
@@ -82,13 +91,33 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 		listeners.remove(listener);
 	}
 
+	private void openSimSocket() throws UnknownHostException, IOException {
+		if (simSocket == null || simSocket.isClosed()) {
+			simSocket = new Socket(simHostName, simPort);
+		}
+		cachedAtr = CommUtils.exchangeApdu(simSocket,
+				HexString.toByteArray("FF010000"));
+
+		for (PcscListener listener : listeners) {
+			if (listener instanceof SocketCommunicator) {
+				((SocketCommunicator) listener)
+						.setCommunicationSocket(simSocket);
+			}
+		}
+	}
+
+	private void closeSimSocket() throws IOException {
+		simSocket.close();
+		cachedAtr = null;
+	}
+
 	public boolean isConnected() {
 		return comm.isAlive() && !comm.isInterrupted();
 	}
-	
+
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		switch(data.getFunction()){
+		switch (data.getFunction()) {
 		case NativeDriverComm.PCSC_FUNCTION_DEVICE_LIST_DEVICES:
 			return deviceListDevices();
 		case NativeDriverComm.PCSC_FUNCTION_DEVICE_CONTROL:
@@ -107,53 +136,87 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	@Override
 	public PcscCallResult deviceListDevices() {
-		//TODO implement
-		return null;
+		//logical card slot
+		byte [] slot = Utils.concatByteArrays("PersoSim Virtual Reader Slot 1".getBytes(), Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_SLOT));
+		
+		//pinpad
+		byte [] pinpad = Utils.concatByteArrays("PersoSim Virtual Pin Pad".getBytes(), Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
+		
+		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, Utils.concatByteArrays(slot, pinpad));
 	}
 
 	@Override
 	public PcscCallResult deviceControl(PcscCallData data) {
-		//TODO implement
+		// TODO implement
 		return null;
 	}
 
 	@Override
 	public PcscCallResult getCapabilities(PcscCallData data) {
-		//try to find tag in own capabilities
-		
+		// try to find tag in own capabilities
+
 		PcscCallResult result = null;
-		byte [] currentTag = data.getParameters().get(0);
-		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "HJP Consulting".getBytes(StandardCharsets.US_ASCII));
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_TYPE), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Virtual Card Reader IFD".getBytes(StandardCharsets.US_ASCII));
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_VERSION), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte []{0,0,0,0}); //0xMMmmbbbb MM=major mm=minor bbbb=build
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_SERIAL), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_VENDOR_NAME), "Serial000000001".getBytes(StandardCharsets.US_ASCII));
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_ATR), currentTag)){
-			if (cachedAtr != null){
-				result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+		byte[] currentTag = data.getParameters().get(0);
+		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+				currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+					"HJP Consulting".getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_TYPE),
+				currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+					"Virtual Card Reader IFD"
+							.getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_VERSION),
+				currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte[] { 0,
+							0, 0, 0 }); // 0xMMmmbbbb MM=major mm=minor
+										// bbbb=build
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_SERIAL),
+				currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+					"Serial000000001".getBytes(StandardCharsets.US_ASCII));
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_ATR),
+				currentTag)) {
+			if (cachedAtr != null) {
+				result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+						Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			}
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS), new byte [] {1});
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), new byte [] {1});
-		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE), currentTag)){
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE), new byte [] {0});
+		} else if (Arrays.equals(
+				Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS),
+				currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS),
+					new byte[] { 1 });
+		} else if (Arrays.equals(
+				Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER),
+					new byte[] { 1 });
+		} else if (Arrays
+				.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE),
+						currentTag)) {
+			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE),
+					new byte[] { 0 });
 		} else {
-			for (PcscListener listener : listeners){
-				if (listener instanceof PcscFeature){
+			for (PcscListener listener : listeners) {
+				if (listener instanceof PcscFeature) {
 					PcscFeature feature = (PcscFeature) listener;
-					result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, PcscDataHelper.getField(currentTag, feature.getCapabilities()));
-					if (result != null){
+					result = new SimplePcscCallResult(
+							PcscConstants.IFD_SUCCESS, PcscDataHelper.getField(
+									currentTag, feature.getCapabilities()));
+					if (result != null) {
 						break;
 					}
 				}
 			}
 		}
-		
-		if (result != null){
+
+		if (result != null) {
 			return result;
 		} else {
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_TAG);
@@ -174,14 +237,17 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	@Override
 	public PcscCallResult powerIcc(PcscCallData data) {
-		byte [] action = data.getParameters().get(0);
-		if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_DOWN), action)){
-			if(simSocket != null && !simSocket.isClosed()){
-				byte [] result = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FF000000"));
+		byte[] action = data.getParameters().get(0);
+		if (Arrays.equals(Utils.toUnsignedByteArray((short) IFD_POWER_DOWN),
+				action)) {
+			if (simSocket != null && !simSocket.isClosed()) {
+				byte[] result = CommUtils.exchangeApdu(simSocket,
+						HexString.toByteArray("FF000000"));
 				try {
-					simSocket.close();
-					cachedAtr = null;
-					if (Arrays.equals(result, Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))){
+					closeSimSocket();
+					if (Arrays
+							.equals(result,
+									Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
 						return new SimplePcscCallResult(IFD_SUCCESS);
 					}
 				} catch (IOException e) {
@@ -189,24 +255,28 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 					e.printStackTrace();
 				}
 			}
-			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
-		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_POWER_UP), action)){
+			return new SimplePcscCallResult(
+					PcscConstants.IFD_ERROR_POWER_ACTION);
+		} else if (Arrays.equals(
+				Utils.toUnsignedByteArray((short) IFD_POWER_UP), action)) {
 			try {
-				if (simSocket == null || simSocket.isClosed()){
-					simSocket = new Socket(simHostName, simPort);
-				}
-				cachedAtr = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FF010000"));
-				return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+				openSimSocket();
+				return new TlvPcscCallResult(IFD_SUCCESS,
+						Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
-		} else if (Arrays.equals(Utils.toUnsignedByteArray((short)IFD_RESET), action)){
-			cachedAtr = CommUtils.exchangeApdu(simSocket, HexString.toByteArray("FFFF0000"));
-			return new TlvPcscCallResult(IFD_SUCCESS, Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+			return new SimplePcscCallResult(
+					PcscConstants.IFD_ERROR_POWER_ACTION);
+		} else if (Arrays.equals(Utils.toUnsignedByteArray((short) IFD_RESET),
+				action)) {
+			cachedAtr = CommUtils.exchangeApdu(simSocket,
+					HexString.toByteArray("FFFF0000"));
+			return new TlvPcscCallResult(IFD_SUCCESS,
+					Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 		}
-		
+
 		return null;
 	}
 
@@ -224,11 +294,34 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, PcscC
 
 	@Override
 	public PcscCallResult transmitToIcc(PcscCallData data) {
-		byte [] inputData = data.getParameters().get(0);
-		//ignore the header for now
-		//byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
-		byte [] commandApdu = Arrays.copyOfRange(inputData, 8, inputData.length);
-		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, CommUtils.exchangeApdu(simSocket, commandApdu));
+		byte[] inputData = data.getParameters().get(0);
+		// ignore the header for now
+		// byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
+		byte[] commandApdu = Arrays.copyOfRange(inputData, 8, inputData.length);
+		
+		byte[] expectedHeaderAndLc = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01, FEATURE_GET_FEATURE_REQUEST, 0};
+
+		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
+			return getFeatures();
+		}
+		
+		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
+				CommUtils.exchangeApdu(simSocket, commandApdu));
+	}
+
+	private PcscCallResult getFeatures() {
+		List<Byte> featureDefinitions = new ArrayList<Byte>();
+		for (PcscListener listener : listeners){
+			if (listener instanceof PcscFeature){
+				featureDefinitions.add(((PcscFeature)listener).getFeatureDefinition()[0]);
+			}
+		}
+		byte [] result = new byte [featureDefinitions.size()];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = featureDefinitions.get(i);
+		}
+		
+		return new SimplePcscCallResult(IFD_SUCCESS, result);
 	}
 
 	@Override
