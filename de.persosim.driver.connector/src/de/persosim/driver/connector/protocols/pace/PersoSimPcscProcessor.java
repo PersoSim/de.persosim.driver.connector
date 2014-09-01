@@ -6,7 +6,6 @@ import java.util.Arrays;
 import de.persosim.driver.connector.NativeDriverComm;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
-import de.persosim.driver.connector.pcsc.PcscCommunicationServices;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
@@ -19,8 +18,7 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  *
  */
-public class PersoSimPcscProcessor implements PcscFeature,
-		PcscCommunicationServices, SocketCommunicator, PcscConstants {
+public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, PcscConstants {
 
 
 	Socket communicationSocket;
@@ -82,8 +80,7 @@ public class PersoSimPcscProcessor implements PcscFeature,
 		}
 	}
 
-	@Override
-	public PcscCallResult transmitToIcc(PcscCallData data) {
+	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] inputData = data.getParameters().get(0);
 		// ignore the header for now
 		// byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);

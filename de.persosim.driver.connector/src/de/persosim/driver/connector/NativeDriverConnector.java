@@ -12,13 +12,10 @@ import java.util.List;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
-import de.persosim.driver.connector.pcsc.PcscCommonMethods;
-import de.persosim.driver.connector.pcsc.PcscCommunicationServices;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscDataHelper;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
-import de.persosim.driver.connector.pcsc.PcscSlotLogicalDeviceMethods;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.TlvPcscCallResult;
@@ -35,12 +32,11 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements PcscConstants, PcscListener,
-		PcscCommonMethods, PcscSlotLogicalDeviceMethods,
-		PcscCommunicationServices {
+public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
-	Collection<PcscListener> listeners = new HashSet<PcscListener>();
+	private Collection<PcscListener> listeners = new HashSet<PcscListener>();
+	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
 	private NativeDriverComm comm;
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
@@ -65,7 +61,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 	 * @throws UnknownHostException
 	 */
 	public void connect() throws IOException {
-		addListener(new PcscPrinter());
 		addListener(this);
 		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners);
@@ -134,8 +129,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 		return null;
 	}
 
-	@Override
-	public PcscCallResult deviceListDevices() {
+	
+	private PcscCallResult deviceListDevices() {
 		//logical card slot
 		byte [] slot = Utils.concatByteArrays("PersoSim Virtual Reader Slot 1".getBytes(), Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_SLOT));
 		
@@ -145,14 +140,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, Utils.concatByteArrays(slot, pinpad));
 	}
 
-	@Override
-	public PcscCallResult deviceControl(PcscCallData data) {
+	private PcscCallResult deviceControl(PcscCallData data) {
 		// TODO implement
 		return null;
 	}
 
-	@Override
-	public PcscCallResult getCapabilities(PcscCallData data) {
+	private PcscCallResult getCapabilities(PcscCallData data) {
 		// try to find tag in own capabilities
 
 		PcscCallResult result = null;
@@ -223,20 +216,17 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 		}
 	}
 
-	@Override
-	public PcscCallResult setCapabilities(PcscCallData data) {
+	private PcscCallResult setCapabilities(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult setProtocolParameters(PcscCallData data) {
+	private PcscCallResult setProtocolParameters(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult powerIcc(PcscCallData data) {
+	private PcscCallResult powerIcc(PcscCallData data) {
 		byte[] action = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray((short) IFD_POWER_DOWN),
 				action)) {
@@ -280,20 +270,17 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 		return null;
 	}
 
-	@Override
-	public PcscCallResult swallowIcc(PcscCallData data) {
+	private PcscCallResult swallowIcc(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult ejectIcc(PcscCallData data) {
+	private PcscCallResult ejectIcc(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult transmitToIcc(PcscCallData data) {
+	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] inputData = data.getParameters().get(0);
 		// ignore the header for now
 		// byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
@@ -324,39 +311,41 @@ public class NativeDriverConnector implements PcscConstants, PcscListener,
 		return new SimplePcscCallResult(IFD_SUCCESS, result);
 	}
 
-	@Override
-	public PcscCallResult isIccPresent(PcscCallData data) {
+	private PcscCallResult isIccPresent(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult isIccAbsent(PcscCallData data) {
+	private PcscCallResult isIccAbsent(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult listContexts(PcscCallData data) {
+	private PcscCallResult listContexts(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult isContextSupported(PcscCallData data) {
+	private PcscCallResult isContextSupported(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult getIfdsp(PcscCallData data) {
+	private PcscCallResult getIfdsp(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public PcscCallResult listInterfaces(PcscCallData data) {
+	private PcscCallResult listInterfaces(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void addUi(VirtualReaderUi ui) {
+		this.userInterfaces.add(ui);
+	}
+	
+	public void removeUi(VirtualReaderUi ui){
+		this.userInterfaces.remove(ui);
 	}
 }
