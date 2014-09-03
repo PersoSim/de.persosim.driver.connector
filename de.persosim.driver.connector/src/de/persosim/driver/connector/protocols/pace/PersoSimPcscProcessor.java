@@ -1,15 +1,19 @@
 package de.persosim.driver.connector.protocols.pace;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collection;
 
 import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
+import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -18,10 +22,12 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  *
  */
-public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, PcscConstants {
+public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, PcscConstants, UiEnabled {
 
 
 	Socket communicationSocket;
+
+	private Collection<VirtualReaderUi> interfaces;
 
 	public static final byte FUNCTION_GET_READER_PACE_CAPABILITIES = 1;
 	public static final byte FUNCTION_ESTABLISH_PACE_CHANNEL = 2;
@@ -125,6 +131,16 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 		
 		// TODO filter pin data if the type is secret (PIN/PUK)
 
+		if (pin.length == 0){
+			for (VirtualReaderUi current : interfaces){
+				try {
+					pin = current.getPin();
+				} catch (IOException e) {
+					// TODO logging
+					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_ABORT, new byte [0]);
+				}
+			}
+		}
 		
 		// TODO implement PACE steps
 		short mseSetAtStatusWord = 0;
@@ -176,5 +192,10 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 	@Override
 	public byte[] getFeatureDefinition() {
 		return new byte [] {FEATURE_CONTROL_CODE, 4, 0,0,0,0};
+	}
+
+	@Override
+	public void setUserInterfaces(Collection<VirtualReaderUi> interfaces) {
+		this.interfaces = interfaces;
 	}
 }

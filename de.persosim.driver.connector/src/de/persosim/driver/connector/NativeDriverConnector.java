@@ -86,6 +86,14 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		listeners.remove(listener);
 	}
 
+	public void addUi(VirtualReaderUi ui) {
+		this.userInterfaces.add(ui);
+	}
+	
+	public void removeUi(VirtualReaderUi ui){
+		this.userInterfaces.remove(ui);
+	}
+
 	private void openSimSocket() throws UnknownHostException, IOException {
 		if (simSocket == null || simSocket.isClosed()) {
 			simSocket = new Socket(simHostName, simPort);
@@ -339,13 +347,5 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private PcscCallResult listInterfaces(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public void addUi(VirtualReaderUi ui) {
-		this.userInterfaces.add(ui);
-	}
-	
-	public void removeUi(VirtualReaderUi ui){
-		this.userInterfaces.remove(ui);
 	}
 }
