@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ui
+Bundle-SymbolicName: de.persosim.driver.connector.ui
+Bundle-Version: 0.0.1.qualifier
+Bundle-Activator: de.persosim.driver.connector.ui.Activator
+Require-Bundle: org.eclipse.core.runtime,
+ de.persosim.driver.connector;bundle-version="0.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
