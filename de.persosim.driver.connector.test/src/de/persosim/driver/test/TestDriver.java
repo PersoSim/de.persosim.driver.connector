@@ -16,27 +16,6 @@ import de.persosim.simulator.utils.HexString;
  * This class can be used for testcases that need an open native driver server
  * socket for testing.
  * 
- * Protocol:
- * 
- * Messages are of the form:
- * 
- * function|param:value|param2:value2
- * 
- * An initial Handshake consists of 4 messages:
- * 
- * HELLO_ICC|LUN:-1 if this is a new connection, if not LUN is the last used lun
- * HELLO_IFD|LUN:x the IFD answers with the new lun as integer DONE_ICC DONE_ICC
- * 
- * To stop a channel the handshake is slightly different:
- * 
- * HELLO_ICC|LUN:x
- * <br/>
- * HELLO_IFD|LUN:x
- * <br/>
- * STOP_ICC
- * <br/>
- * DONE_IFD
- * 
  * @author mboonk
  * 
  */

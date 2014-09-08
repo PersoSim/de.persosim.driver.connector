@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.simulator.utils.HexString;
@@ -49,7 +50,7 @@ public class CommUtils {
 
 		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO
 				+ "|LUN:" + lun);
-		String[] helloData = reader.readLine().split("\\|");
+		String[] helloData = reader.readLine().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
 		if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
@@ -64,7 +65,7 @@ public class CommUtils {
 			} else {
 				CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_STOP);
 			}
-			helloData = reader.readLine().split("\\|");
+			helloData = reader.readLine().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
 			if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_DONE)) {
 				throw new PcscNativeCommunicationException(

@@ -16,8 +16,8 @@ public class PcscPrinter implements PcscListener {
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		System.out.print("PCSC Printer:\t" + data.getFunction() + "|" + data.getLogicalUnitNumber()
-				+ "|");
+		System.out.print("PCSC Printer:\t" + data.getFunction() + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber()
+				+ NativeDriverInterface.MESSAGE_DIVIDER);
 		for (byte[] current : data.getParameters()) {
 			System.out.println("Param:" + HexString.encode(current));
 		}

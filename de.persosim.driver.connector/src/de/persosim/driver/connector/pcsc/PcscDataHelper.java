@@ -32,7 +32,6 @@ public class PcscDataHelper {
 	}
 
 	public static byte[] buildTlv(byte[] tag, byte[] value) {
-
 		// FIXME check in which cases setting the valid boolean to false makes
 		// sense
 		return Utils.concatByteArrays(getPaddedTag(tag),

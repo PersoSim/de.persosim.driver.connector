@@ -82,14 +82,14 @@ public class NativeDriverConnectorTest {
 				NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES,
 				tag);
 
-		String expected = expectedResponseCode + "#" + HexString.encode(tag);
+		String expected = expectedResponseCode + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(tag);
 		
 		switch (expectedResponseCode){
 		case PcscConstants.IFD_ERROR_TAG:
 			expected = PcscConstants.IFD_ERROR_TAG + "";
 			break;
 		case PcscConstants.IFD_SUCCESS:
-			expected = expectedResponseCode + "#" + HexString.encode(tag);
+			expected = expectedResponseCode + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(tag);
 			break;
 			default:
 				fail("invalid expected response code");
@@ -153,7 +153,7 @@ public class NativeDriverConnectorTest {
 		String response = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
 		
 		response = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, testData);
-		String expected = PcscConstants.IFD_SUCCESS + "#" + HexString.encode("RESPONSE".getBytes());
+		String expected = PcscConstants.IFD_SUCCESS + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
 		assertEquals(expected, response);
 	}
 
@@ -174,7 +174,7 @@ public class NativeDriverConnectorTest {
 		
 		String result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
 		
-		String expected = "" + PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
+		String expected = "" + PcscConstants.IFD_SUCCESS + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
 		assertEquals(expected, result);
 	}
 	
@@ -245,7 +245,7 @@ public class NativeDriverConnectorTest {
 		
 		result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_RESET));
 		
-		String expected = "" + PcscConstants.IFD_SUCCESS + "#" + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
+		String expected = "" + PcscConstants.IFD_SUCCESS + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
 		assertEquals(expected, result);
 	}
 }

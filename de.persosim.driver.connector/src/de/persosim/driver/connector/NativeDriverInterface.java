@@ -15,6 +15,8 @@ public interface NativeDriverInterface {
 	public static final String MESSAGE_IFD_DONE = "DONE_IFD";
 	public static final String MESSAGE_IFD_ERROR = "ERROR_IFD";
 
+	public static final String MESSAGE_DIVIDER = "|";
+	
 	public static final String TYPE_STR = "STR";
 	public static final String TYPE_DWORD = "DWORD";
 	public static final String TYPE_TLV = "TLV";

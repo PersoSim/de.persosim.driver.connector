@@ -1,5 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
+import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.simulator.utils.HexString;
 
 public class SimplePcscCallResult implements PcscCallResult {
@@ -12,7 +13,7 @@ public class SimplePcscCallResult implements PcscCallResult {
 	public SimplePcscCallResult(int responseCode, byte [] ... data) {
 		this(responseCode);
 		for (byte[] current : data) {
-			resultData += "#" + HexString.encode(current);
+			resultData += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 	}
 	
