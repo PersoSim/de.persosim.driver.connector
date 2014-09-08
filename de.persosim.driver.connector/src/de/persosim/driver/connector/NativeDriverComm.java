@@ -42,12 +42,14 @@ public class NativeDriverComm extends Thread {
 	public static final String TYPE_DWORD = "DWORD";
 	public static final String TYPE_TLV = "TLV";
 	public static final String TYPE_BYTE_ARRAY = "BYTE_ARRAY";
+	
 	public static final int PCSC_FUNCTION_DEVICE_CONTROL = 0;
 	public static final int PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
 	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
 	public static final int PCSC_FUNCTION_SET_CAPABILITIES = 3;
 	public static final int PCSC_FUNCTION_POWER_ICC = 4;
 	public static final int PCSC_FUNCTION_TRANSMIT_TO_ICC = 5;
+	public static final int PCSC_FUNCTION_IS_ICC_PRESENT = 6;
 
 	public NativeDriverComm(String hostName, int dataPort,
 			Collection<PcscListener> listeners) throws IOException {

@@ -133,6 +133,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return powerIcc(data);
 		case NativeDriverComm.PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
+		case NativeDriverComm.PCSC_FUNCTION_IS_ICC_PRESENT:
+			return isIccPresent(data);
 		}
 		return null;
 	}
@@ -320,8 +322,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {
-		// TODO Auto-generated method stub
-		return null;
+		byte [] response = CommUtils.exchangeApdu(simSocket, new byte [] {(byte) 0xff, (byte) 0x90, 0,0 });
+		
+		if (Arrays.equals(response, Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))){
+			return new SimplePcscCallResult(IFD_ICC_PRESENT);
+		}
+		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);
 	}
 
 	private PcscCallResult isIccAbsent(PcscCallData data) {
