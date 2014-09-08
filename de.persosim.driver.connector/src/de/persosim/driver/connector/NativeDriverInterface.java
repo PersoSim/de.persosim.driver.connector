@@ -84,4 +84,12 @@ public interface NativeDriverInterface {
 	public static final int PCSC_FUNCTION_POWER_ICC = 4;
 	public static final int PCSC_FUNCTION_TRANSMIT_TO_ICC = 5;
 	public static final int PCSC_FUNCTION_IS_ICC_PRESENT = 6;
+	public static final int PCSC_FUNCTION_IS_ICC_ABSENT = 7;
+	public static final int PCSC_FUNCTION_SWALLOW_ICC = 8;
+	public static final int PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = 9;
+	public static final int PCSC_FUNCTION_LIST_INTERFACES = 10;
+	public static final int PCSC_FUNCTION_LIST_CONTEXTS = 11;
+	public static final int PCSC_FUNCTION_IS_CONTEXT_SUPPORTED = 12;
+	public static final int PCSC_FUNCTION_GET_IFDSP = 13;
+	public static final int PCSC_FUNCTION_EJECT_ICC = 14;
 }

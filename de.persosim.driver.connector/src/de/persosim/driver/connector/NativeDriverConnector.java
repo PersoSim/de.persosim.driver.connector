@@ -135,6 +135,22 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return transmitToIcc(data);
 		case NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT:
 			return isIccPresent(data);
+		case NativeDriverInterface.PCSC_FUNCTION_EJECT_ICC:
+			return ejectIcc(data);
+		case NativeDriverInterface.PCSC_FUNCTION_GET_IFDSP:
+			return getIfdsp(data);
+		case NativeDriverInterface.PCSC_FUNCTION_IS_CONTEXT_SUPPORTED:
+			return isContextSupported(data);
+		case NativeDriverInterface.PCSC_FUNCTION_IS_ICC_ABSENT:
+			return isIccAbsent(data);
+		case NativeDriverInterface.PCSC_FUNCTION_LIST_CONTEXTS:
+			return listContexts(data);
+		case NativeDriverInterface.PCSC_FUNCTION_LIST_INTERFACES:
+			return listInterfaces(data);
+		case NativeDriverInterface.PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS:
+			return setProtocolParameters(data);
+		case NativeDriverInterface.PCSC_FUNCTION_SWALLOW_ICC:
+			return swallowIcc(data);
 		}
 		return null;
 	}
@@ -227,12 +243,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult setCapabilities(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult setProtocolParameters(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
@@ -281,12 +297,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult swallowIcc(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult ejectIcc(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
@@ -331,27 +347,27 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult isIccAbsent(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult listContexts(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult isContextSupported(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult getIfdsp(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 
 	private PcscCallResult listInterfaces(PcscCallData data) {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		return null;
 	}
 }
