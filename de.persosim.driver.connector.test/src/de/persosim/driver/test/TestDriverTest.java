@@ -1,6 +1,5 @@
 package de.persosim.driver.test;
 
-import static de.persosim.driver.connector.NativeDriverComm.*;
 import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
@@ -17,6 +16,7 @@ import org.junit.Test;
 
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
+import de.persosim.driver.connector.NativeDriverInterface;
 
 public class TestDriverTest implements DriverEventListener {
 	private String message;
@@ -45,10 +45,10 @@ public class TestDriverTest implements DriverEventListener {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, MESSAGE_ICC_HELLO + "|LUN:-1");
-		assertEquals(MESSAGE_IFD_HELLO + "|LUN:0", reader.readLine());
-		CommUtils.writeLine(writer, MESSAGE_ICC_DONE);
-		assertEquals(MESSAGE_IFD_DONE, reader.readLine());
+		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO + "|LUN:-1");
+		assertEquals(NativeDriverInterface.MESSAGE_IFD_HELLO + "|LUN:0", reader.readLine());
+		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_DONE);
+		assertEquals(NativeDriverInterface.MESSAGE_IFD_DONE, reader.readLine());
 		iccSocket.close();
 	}
 

@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 
-import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
@@ -79,7 +79,7 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction()) {
-		case NativeDriverComm.PCSC_FUNCTION_TRANSMIT_TO_ICC:
+		case NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
 		default:
 			return null;

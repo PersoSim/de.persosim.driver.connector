@@ -47,11 +47,11 @@ public class CommUtils {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_HELLO
+		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO
 				+ "|LUN:" + lun);
 		String[] helloData = reader.readLine().split("\\|");
 
-		if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_HELLO)) {
+		if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
 					"Unexpected message type");
 		}
@@ -60,13 +60,13 @@ public class CommUtils {
 			int responseLun = Integer.parseInt(helloData[1].split(":")[1]);
 
 			if (mode == HandshakeMode.OPEN) {
-				CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_DONE);
+				CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_DONE);
 			} else {
-				CommUtils.writeLine(writer, NativeDriverComm.MESSAGE_ICC_STOP);
+				CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_STOP);
 			}
 			helloData = reader.readLine().split("\\|");
 
-			if (!helloData[0].equals(NativeDriverComm.MESSAGE_IFD_DONE)) {
+			if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_DONE)) {
 				throw new PcscNativeCommunicationException(
 						"Unexpected message type");
 			}

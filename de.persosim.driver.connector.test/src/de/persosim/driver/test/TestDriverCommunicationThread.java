@@ -1,7 +1,5 @@
 package de.persosim.driver.test;
 
-import static de.persosim.driver.connector.NativeDriverComm.*;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,7 +11,9 @@ import java.net.SocketException;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class TestDriverCommunicationThread extends Thread {
+import de.persosim.driver.connector.NativeDriverInterface;
+
+public class TestDriverCommunicationThread extends Thread implements NativeDriverInterface{
 
 	private ServerSocket serverSocket;
 	private HashMap<Integer, Socket> lunMapping;

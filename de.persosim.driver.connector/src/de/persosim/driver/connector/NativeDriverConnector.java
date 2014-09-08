@@ -121,19 +121,19 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction()) {
-		case NativeDriverComm.PCSC_FUNCTION_DEVICE_LIST_DEVICES:
+		case NativeDriverInterface.PCSC_FUNCTION_DEVICE_LIST_DEVICES:
 			return deviceListDevices();
-		case NativeDriverComm.PCSC_FUNCTION_DEVICE_CONTROL:
+		case NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
-		case NativeDriverComm.PCSC_FUNCTION_GET_CAPABILITIES:
+		case NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES:
 			return getCapabilities(data);
-		case NativeDriverComm.PCSC_FUNCTION_SET_CAPABILITIES:
+		case NativeDriverInterface.PCSC_FUNCTION_SET_CAPABILITIES:
 			return setCapabilities(data);
-		case NativeDriverComm.PCSC_FUNCTION_POWER_ICC:
+		case NativeDriverInterface.PCSC_FUNCTION_POWER_ICC:
 			return powerIcc(data);
-		case NativeDriverComm.PCSC_FUNCTION_TRANSMIT_TO_ICC:
+		case NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
-		case NativeDriverComm.PCSC_FUNCTION_IS_ICC_PRESENT:
+		case NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT:
 			return isIccPresent(data);
 		}
 		return null;
