@@ -15,10 +15,10 @@ public interface PcscFeature extends PcscListener {
 	/**
 	 * This is a concatenation of the one byte feature description, a length
 	 * byte (static value of 4) and a control code to be used by the pcsc system
-	 * in deviceControl executions.
+	 * in deviceControl executions.<br/>
 	 * 
-	 * @see PCSC specification part 10 2.2
-	 * @return
+	 * These features are defined in the PCSC specification part 10 2.2
+	 * @return the feature definition
 	 */
 	public abstract byte[] getFeatureDefinition();
 }

@@ -123,7 +123,8 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 	
 	private PcscCallResult establishPaceChannel(byte[] inputDataFromPpdu) {
 		int offset = OFFSET_ESTABLISH_PACE_PIN_ID;
-		byte pinId = inputDataFromPpdu[OFFSET_ESTABLISH_PACE_PIN_ID];
+		//commented out while not used to prevent the unused warning
+		//byte pinId = inputDataFromPpdu[OFFSET_ESTABLISH_PACE_PIN_ID];
 		byte [] chat = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
 		offset += chat.length + LENGTH_ESTABLISH_PACE_CHAT_LENGTH;
 		byte [] pin = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);

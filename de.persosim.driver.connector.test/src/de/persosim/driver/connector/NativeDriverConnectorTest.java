@@ -101,42 +101,42 @@ public class NativeDriverConnectorTest {
 	
 	@Test
 	public void testPcscGetCapabilitiesVendorName() throws Exception {
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_VENDOR_NAME), PcscConstants.IFD_SUCCESS);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSimultaneousAccess() throws Exception {
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS), PcscConstants.IFD_SUCCESS);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotsNumber() throws Exception {
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SLOTS_NUMBER), PcscConstants.IFD_SUCCESS);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotThreadSafe() throws Exception {
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_SLOT_THREAD_SAFE), PcscConstants.IFD_SUCCESS);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesNotExisting() throws Exception {
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		checkPcscTag(HexString.toByteArray("FFFFFFFF"), PcscConstants.IFD_ERROR_TAG);
 	}
 	
 	@Test
 	public void testPcscTransmitToIcc() throws IOException, InterruptedException{
-		// FIXME find better solution for timing issues while testing
+		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		final byte [] apdu = new byte []{0,0,0,0};
 		byte [] testData = Utils.concatByteArrays(Utils.toUnsignedByteArray(PcscConstants.SCARD_PROTOCOL_T0), Utils.toUnsignedByteArray(8), apdu);
@@ -169,7 +169,7 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		//FIXME find better solution for timing issues while testing
+		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
 		String result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
@@ -189,7 +189,7 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		//FIXME find better solution for timing issues while testing
+		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
 		String result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_DOWN));
@@ -212,7 +212,7 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		//FIXME find better solution for timing issues while testing
+		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
 		String result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
@@ -238,7 +238,7 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		//FIXME find better solution for timing issues while testing
+		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 
 		String result = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));

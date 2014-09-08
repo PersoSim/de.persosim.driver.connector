@@ -52,7 +52,7 @@ public class NativeDriverCommTest {
 		
 		nativeComm.start();
 		
-		// FIXME find better solution for timing issues during tests
+		// XXX find better solution for timing issues during tests
 		Thread.sleep(100);
 		
 		String data = driver.sendData(0, 0, new byte [0]);

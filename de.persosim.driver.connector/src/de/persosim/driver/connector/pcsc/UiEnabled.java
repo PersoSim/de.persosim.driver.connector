@@ -4,6 +4,18 @@ import java.util.Collection;
 
 import de.persosim.driver.connector.VirtualReaderUi;
 
+/**
+ * This interface describes the ability to use a {@link VirtualReaderUi} to get
+ * or present data.
+ * 
+ * @author mboonk
+ *
+ */
 public interface UiEnabled {
-	public abstract void setUserInterfaces(Collection<VirtualReaderUi> interfaces);
+	/**
+	 * @param interfaces
+	 *            set a new {@link Collection} of user interfaces to use
+	 */
+	public abstract void setUserInterfaces(
+			Collection<VirtualReaderUi> interfaces);
 }

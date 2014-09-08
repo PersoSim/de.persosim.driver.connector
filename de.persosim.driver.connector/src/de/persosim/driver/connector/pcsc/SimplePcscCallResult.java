@@ -3,6 +3,11 @@ package de.persosim.driver.connector.pcsc;
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.simulator.utils.HexString;
 
+/**
+ * This {@link PcscCallResult} contains a status code and optional data parameters.
+ * @author mboonk
+ *
+ */
 public class SimplePcscCallResult implements PcscCallResult {
 	private String resultData;
 	

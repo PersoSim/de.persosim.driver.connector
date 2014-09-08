@@ -3,7 +3,9 @@ package de.persosim.driver.connector.pcsc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -18,6 +20,10 @@ public class PcscCallData {
 	int logicalUnitNumber;
 	List<byte[]> parameters;
 
+	/**
+	 * Create a new instance by parsing the given data.
+	 * @param data
+	 */
 	public PcscCallData(String data) {
 		function = getCallType(data);
 		logicalUnitNumber = getLogicalUnitNumber(data);
@@ -51,7 +57,7 @@ public class PcscCallData {
 
 	private List<byte[]> getParameters(String data) {
 		List<byte []> result = new ArrayList<byte []>();
-		String [] dataArray = data.split("#");
+		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 		for (int i = 2; i < dataArray.length; i++){
 			result.add(HexString.toByteArray(dataArray[i]));
 		}
@@ -59,12 +65,12 @@ public class PcscCallData {
 	}
 
 	private int getLogicalUnitNumber(String data) {
-		String [] dataArray = data.split("#");
+		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 		return Integer.parseInt(dataArray[1]);
 	}
 
 	private int getCallType(String data) {
-		String [] dataArray = data.split("#");
+		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 		return Integer.parseInt(dataArray[0]);
 	}
 }

@@ -13,7 +13,7 @@ public interface PcscListener {
 	 * 
 	 * @param data
 	 *            the data received from the PCSC system
-	 * @return the {@link PcscCallResult} data or {@link null}
+	 * @return the {@link PcscCallResult} data or null
 	 */
 	public abstract PcscCallResult processPcscCall(PcscCallData data);
 }

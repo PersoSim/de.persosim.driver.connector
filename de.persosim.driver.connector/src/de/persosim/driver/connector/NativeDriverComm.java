@@ -28,6 +28,17 @@ public class NativeDriverComm extends Thread {
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
 
+	/**
+	 * Constructor using the connection information and a {@link Collection} of
+	 * listeners.
+	 * 
+	 * @param hostName
+	 * @param dataPort
+	 * @param listeners
+	 *            the {@link PcscListener}s that need to be informed when a new
+	 *            PCSC message is transmitted
+	 * @throws IOException
+	 */
 	public NativeDriverComm(String hostName, int dataPort,
 			Collection<PcscListener> listeners) throws IOException {
 		this.listeners = listeners;
@@ -51,23 +62,25 @@ public class NativeDriverComm extends Thread {
 				try {
 					String data = bufferedDataIn.readLine();
 					PcscCallResult result = null;
-					if (data != null){
-						try{
-						PcscCallData callData = new PcscCallData(data);
-						for (PcscListener listener : listeners) {
-							try {
-								PcscCallResult currentResult = listener
-										.processPcscCall(callData);
-								if (result == null && currentResult != null) {
-									// ignore all but the first result
-									result = currentResult;
+					if (data != null) {
+						try {
+							PcscCallData callData = new PcscCallData(data);
+							for (PcscListener listener : listeners) {
+								try {
+									PcscCallResult currentResult = listener
+											.processPcscCall(callData);
+									if (result == null && currentResult != null) {
+										// ignore all but the first result
+										result = currentResult;
+									}
+								} catch (RuntimeException e) {
+									System.out
+											.println("Something went wrong while processing of the PCSC data by listener "
+													+ listener.getClass()
+															.getName() + "!");
+									e.printStackTrace();
 								}
-							} catch (RuntimeException e) {
-								System.out
-										.println("Something went wrong while processing of the PCSC data by listener " + listener.getClass().getName() + "!");
-								e.printStackTrace();
 							}
-						}
 						} catch (RuntimeException e) {
 							System.out
 									.println("Something went wrong while parsing the PCSC data!");

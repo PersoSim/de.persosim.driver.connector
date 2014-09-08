@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -29,10 +30,21 @@ public class TestDriver {
 
 	private boolean running = false;
 
+	/**
+	 * Start the test driver on the default port.
+	 * 
+	 * @throws IOException
+	 */
 	public void start() throws IOException {
 		start(PORT_NUMBER_DEFAULT);
 	}
 
+	/**
+	 * Start the test driver on the given port
+	 * 
+	 * @param port
+	 * @throws IOException
+	 */
 	public void start(int port) throws IOException {
 		if (!running) {
 			System.out.println("Starting test driver on port " + port);
@@ -47,6 +59,12 @@ public class TestDriver {
 		}
 	}
 
+	/**
+	 * Stop the test driver execution. It can not be started again by running
+	 * {@link #start()}
+	 * 
+	 * @throws InterruptedException
+	 */
 	public void stop() throws InterruptedException {
 		if (running) {
 			System.out.println("Stopping test driver on port "
@@ -58,19 +76,29 @@ public class TestDriver {
 		}
 	}
 
-	public String sendData(int lun, int function, byte [] ... data) throws IOException,
-			InterruptedException {
+	/**
+	 * Send data from the test driver to simulate PCSC calls.
+	 * 
+	 * @param lun
+	 * @param function
+	 * @param data
+	 * @return the resulting answer to the PCSC call
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public String sendData(int lun, int function, byte[]... data)
+			throws IOException, InterruptedException {
 		Socket iccSocket = lunMapping.get(lun);
 		if (iccSocket != null && iccSocket.isConnected()) {
 			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
 			String dataToSend = function + "#" + lun;
-			
-			for(byte [] current : data){
+
+			for (byte[] current : data) {
 				dataToSend += "#" + HexString.encode(current);
 			}
-			
+
 			bufferedOut.write(dataToSend);
 			bufferedOut.newLine();
 			bufferedOut.flush();
@@ -91,16 +119,34 @@ public class TestDriver {
 		return null;
 	}
 
+	/**
+	 * Add an event listener.
+	 * 
+	 * @param listener
+	 */
 	public void addListener(DriverEventListener listener) {
 		listeners.add(listener);
 	}
 
+	/**
+	 * Remove an event listener.
+	 * 
+	 * @param listener
+	 */
 	public void removeListener(DriverEventListener listener) {
 		listeners.remove(listener);
 	}
 
 	private static int lun = -1;
 
+	/**
+	 * Main method for starting a stand alone test driver using a console
+	 * interface.
+	 * 
+	 * @param args
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static void main(String[] args) throws IOException,
 			InterruptedException {
 		TestDriver driver = new TestDriver();
@@ -119,27 +165,44 @@ public class TestDriver {
 				case "data":
 
 					int function = Integer.parseInt(commandArgs[1]);
-					
-					byte [][] parameterData = new byte [commandArgs.length - 2][];
-					
+
+					byte[][] parameterData = new byte[commandArgs.length - 2][];
+
 					for (int i = 2; i < commandArgs.length; i++) {
-						parameterData[i-2] = HexString.toByteArray(commandArgs[i]);
+						parameterData[i - 2] = HexString
+								.toByteArray(commandArgs[i]);
 					}
-					String response = driver.sendData(lun, function, parameterData);
-					
-					if (response != null){
-						System.out.println("Response: " + response);	
+					String response = driver.sendData(lun, function,
+							parameterData);
+
+					if (response != null) {
+						System.out.println("Response: " + response);
 					}
-					
+
 					break;
 				case "powerup":
-					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf4}));
+					System.out
+							.println("Response: "
+									+ driver.sendData(
+											lun,
+											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											new byte[] { 0x01, (byte) 0xf4 }));
 					break;
 				case "powerdown":
-					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf5}));
+					System.out
+							.println("Response: "
+									+ driver.sendData(
+											lun,
+											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											new byte[] { 0x01, (byte) 0xf5 }));
 					break;
 				case "reset":
-					System.out.println("Response: " + driver.sendData(lun, 4, new byte []{0x01, (byte) 0xf6}));
+					System.out
+							.println("Response: "
+									+ driver.sendData(
+											lun,
+											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											new byte[] { 0x01, (byte) 0xf6 }));
 					break;
 				case "exit":
 				case "quit":
@@ -148,7 +211,8 @@ public class TestDriver {
 				default:
 					System.out.println("Possible commands:");
 					System.out.println("lun <number>");
-					System.out.println("data <functionNumber> <param1> <param2> ...");
+					System.out
+							.println("data <functionNumber> <param1> <param2> ...");
 					System.out.println("powerup");
 					System.out.println("powerdown");
 					System.out.println("reset");
@@ -156,7 +220,8 @@ public class TestDriver {
 					System.out.println("quit");
 				}
 			} catch (Exception e) {
-				System.err.println("Error caused by faulty input or severed connection");
+				System.err
+						.println("Error caused by faulty input or severed connection");
 			}
 		}
 	}

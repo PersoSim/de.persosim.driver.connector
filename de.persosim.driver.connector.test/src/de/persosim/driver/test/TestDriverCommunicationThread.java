@@ -13,7 +13,15 @@ import java.util.HashMap;
 
 import de.persosim.driver.connector.NativeDriverInterface;
 
-public class TestDriverCommunicationThread extends Thread implements NativeDriverInterface{
+/**
+ * This {@link Thread} communicates for the test driver and manages the
+ * connections.
+ * 
+ * @author mboonk
+ *
+ */
+public class TestDriverCommunicationThread extends Thread implements
+		NativeDriverInterface {
 
 	private ServerSocket serverSocket;
 	private HashMap<Integer, Socket> lunMapping;
@@ -51,7 +59,8 @@ public class TestDriverCommunicationThread extends Thread implements NativeDrive
 		while (!isInterrupted()) {
 			try {
 				clientSocket = serverSocket.accept();
-				System.out.println("New local socket on port: " + clientSocket.getPort());
+				System.out.println("New local socket on port: "
+						+ clientSocket.getPort());
 				BufferedReader bufferedIn = new BufferedReader(
 						new InputStreamReader(clientSocket.getInputStream()));
 
@@ -68,9 +77,10 @@ public class TestDriverCommunicationThread extends Thread implements NativeDrive
 					bufferedOut.flush();
 					System.out.println("Data sent to ICC:\t" + dataToSend);
 					if (dataToSend.equals(MESSAGE_IFD_DONE)) {
-						if (data.equals(MESSAGE_ICC_STOP)){
+						if (data.equals(MESSAGE_ICC_STOP)) {
 							clientSocket.close();
-							System.out.println("Local socket on port " + clientSocket.getPort() + " closed.");
+							System.out.println("Local socket on port "
+									+ clientSocket.getPort() + " closed.");
 						}
 						handshakeDone = true;
 					}
@@ -104,14 +114,15 @@ public class TestDriverCommunicationThread extends Thread implements NativeDrive
 					if (lunMapping.containsKey(lun)) {
 						try {
 							lunMapping.get(lun).close();
-							System.out.println("Closed socket on port: " + lunMapping.get(lun).getPort());
+							System.out.println("Closed socket on port: "
+									+ lunMapping.get(lun).getPort());
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
 					lunMapping.put(lun, clientSocket);
-					if (lunHandshakeData.containsKey(lun)){
+					if (lunHandshakeData.containsKey(lun)) {
 						currentHandshake = lunHandshakeData.get(lun);
 					} else {
 						currentHandshake = new HandshakeData();
@@ -122,13 +133,14 @@ public class TestDriverCommunicationThread extends Thread implements NativeDrive
 				}
 				break;
 			case MESSAGE_ICC_STOP:
-					int lun = currentHandshake.getLun();
-					if (lunHandshakeData.containsKey(lun) && !lunHandshakeData.get(lun).isHandshakeDone()){
-						return MESSAGE_IFD_ERROR;
-					}
-					lunHandshakeData.remove(lun);
-					currentHandshake = null;
-					return MESSAGE_IFD_DONE;
+				int lun = currentHandshake.getLun();
+				if (lunHandshakeData.containsKey(lun)
+						&& !lunHandshakeData.get(lun).isHandshakeDone()) {
+					return MESSAGE_IFD_ERROR;
+				}
+				lunHandshakeData.remove(lun);
+				currentHandshake = null;
+				return MESSAGE_IFD_DONE;
 
 			case MESSAGE_ICC_DONE:
 				currentHandshake.setHandshakeDone(true);

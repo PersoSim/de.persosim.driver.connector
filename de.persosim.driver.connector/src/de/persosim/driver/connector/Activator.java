@@ -3,6 +3,11 @@ package de.persosim.driver.connector;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+/**
+ * The activator for this bundle.
+ * @author mboonk
+ *
+ */
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;

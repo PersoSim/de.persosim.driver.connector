@@ -12,9 +12,29 @@ import java.util.regex.Pattern;
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.simulator.utils.HexString;
 
+/**
+ * This class contains helper methods to facilitate the communication with the
+ * simulation and driver components.
+ * 
+ * @author mboonk
+ *
+ */
 public class CommUtils {
+	/**
+	 * The handshake can be done in several modes, this enum is used to
+	 * differentiate.
+	 * 
+	 * @author mboonk
+	 *
+	 */
 	public enum HandshakeMode {
-		OPEN, CLOSE;
+		/**
+		 * Used to open a new connection
+		 */
+		OPEN, /**
+		 * Used to close an existing connection
+		 */
+		CLOSE;
 	}
 
 	/**
@@ -41,6 +61,20 @@ public class CommUtils {
 		return null;
 	}
 
+	/**
+	 * This method performs a handshake against the
+	 * {@link NativeDriverConnector}.
+	 * 
+	 * @param iccSocket
+	 *            the socket to communicate over
+	 * @param lun
+	 *            the logical unit number
+	 * @param mode
+	 *            {@link HandshakeMode}
+	 * @return the assigned lun for this connection
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static int doHandshake(Socket iccSocket, int lun, HandshakeMode mode)
 			throws IOException, InterruptedException {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
@@ -50,7 +84,8 @@ public class CommUtils {
 
 		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO
 				+ "|LUN:" + lun);
-		String[] helloData = reader.readLine().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		String[] helloData = reader.readLine().split(
+				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
 		if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
@@ -61,11 +96,14 @@ public class CommUtils {
 			int responseLun = Integer.parseInt(helloData[1].split(":")[1]);
 
 			if (mode == HandshakeMode.OPEN) {
-				CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_DONE);
+				CommUtils.writeLine(writer,
+						NativeDriverInterface.MESSAGE_ICC_DONE);
 			} else {
-				CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_STOP);
+				CommUtils.writeLine(writer,
+						NativeDriverInterface.MESSAGE_ICC_STOP);
 			}
-			helloData = reader.readLine().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+			helloData = reader.readLine().split(
+					Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
 			if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_DONE)) {
 				throw new PcscNativeCommunicationException(
@@ -79,6 +117,16 @@ public class CommUtils {
 		}
 	}
 
+	/**
+	 * This method writes a line using the given {@link BufferedWriter} and
+	 * flushes it.
+	 * 
+	 * @param writer
+	 * @param message
+	 *            the message to send (it will be concatenated with a new line
+	 *            seperator)
+	 * @throws IOException
+	 */
 	public static void writeLine(BufferedWriter writer, String message)
 			throws IOException {
 		writer.write(message);
