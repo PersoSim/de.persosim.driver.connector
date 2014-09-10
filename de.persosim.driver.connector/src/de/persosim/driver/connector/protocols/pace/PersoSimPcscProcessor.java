@@ -11,7 +11,6 @@ import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
-import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
@@ -67,8 +66,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 
 	private static final byte FEATURE_CONTROL_CODE = 0x20;
 	
-
-	
 	public static final int OFFSET_FUNCTION = 0;
 	public static final int OFFSET_DATA_LENGTH = 1;
 	public static final int OFFSET_INPUT_DATA = 3;
@@ -85,9 +82,27 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		switch (data.getFunction()) {
 		case NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
+		case NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL:
+			return deviceControl(data);
 		default:
 			return null;
 		}
+	}
+
+	private PcscCallResult deviceControl(PcscCallData data) {
+		byte[] controlCode = data.getParameters().get(0);
+		if (Arrays.equals(controlCode,
+				Utils.toUnsignedByteArray(getControlCode()))) {
+			switch (data.getParameters().get(1)[OFFSET_FUNCTION]) {
+			case FUNCTION_GET_READER_PACE_CAPABILITIES:
+				return getReaderPaceCapabilities(getInputDataFromPpdu(data.getParameters().get(1)));
+			case FUNCTION_ESTABLISH_PACE_CHANNEL:
+				return establishPaceChannel(getInputDataFromPpdu(data.getParameters().get(1)));
+			case FUNCTION_DESTROY_PACE_CHANNEL:
+				return destroyPaceChannel(getInputDataFromPpdu(data.getParameters().get(1)));
+			}
+		}
+		return null;
 	}
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
