@@ -203,8 +203,13 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceControl(PcscCallData data) {
 		byte [] controlCode = data.getParameters().get(0);
-		if (controlCode.equals(Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST))){
-			return getFeatures();
+		if (Arrays.equals(controlCode,Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST))){
+			List<byte []> features = getFeatures();
+			byte [] resultData = new byte [0];
+			for (int i = 0; i < features.size(); i++){
+				resultData = Utils.concatByteArrays(resultData, features.get(i));
+			}
+			return new SimplePcscCallResult(IFD_SUCCESS, resultData);
 		}
 		return null;
 	}
@@ -354,27 +359,31 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				0x01, FEATURE_GET_FEATURE_REQUEST, 0 };
 
 		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
-			return getFeatures();
+			return new SimplePcscCallResult(IFD_SUCCESS, getOnlyTagsFromFeatureList(getFeatures()));
 		}
 
 		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 				CommUtils.exchangeApdu(simSocket, commandApdu));
 	}
-
-	private PcscCallResult getFeatures() {
-		List<Byte> featureDefinitions = new ArrayList<Byte>();
+	
+	private byte [] getOnlyTagsFromFeatureList(List<byte []> features){
+		byte[] result = new byte[features.size()];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = features.get(i)[0];
+		}
+		return result;
+	}
+	
+	private List<byte []> getFeatures() {
+		List<byte []> featureDefinitions = new ArrayList<byte []>();
 		for (PcscListener listener : listeners) {
 			if (listener instanceof PcscFeature) {
 				featureDefinitions.add(((PcscFeature) listener)
-						.getFeatureDefinition()[0]);
+						.getFeatureDefinition());
 			}
 		}
-		byte[] result = new byte[featureDefinitions.size()];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = featureDefinitions.get(i);
-		}
 
-		return new SimplePcscCallResult(IFD_SUCCESS, result);
+		return featureDefinitions;
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {

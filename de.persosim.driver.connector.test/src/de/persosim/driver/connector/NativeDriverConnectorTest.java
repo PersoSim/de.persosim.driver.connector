@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.security.Security;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import mockit.Expectations;
 import mockit.Mocked;
@@ -17,8 +19,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
+import de.persosim.driver.connector.pcsc.PcscCallData;
+import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscDataHelper;
+import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.SocketSimulator;
 import de.persosim.simulator.exception.CertificateNotParseableException;
@@ -155,6 +161,51 @@ public class NativeDriverConnectorTest {
 		response = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, testData);
 		String expected = PcscConstants.IFD_SUCCESS + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
 		assertEquals(expected, response);
+	}
+	
+	@Test
+	public void testPcscControl() throws IOException, InterruptedException{
+		// XXX find better solution for timing issues while testing
+		Thread.sleep(100);
+
+		new Expectations(PersoSimKernel.class){
+			{
+				kernel.powerOn();
+				result = new byte [0];
+			}
+		};
+		
+		byte fakeTag = (byte) 255;
+		int fakeControlCode = 1357;
+		
+		nativeConnector.addListener(new AbstractPcscFeature(fakeControlCode, fakeTag) {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				return null;
+			}
+			
+			@Override
+			public byte[] getCapabilities() {
+				return null;
+			}
+		});
+		String response = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		
+		response = driver.sendData(0, NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST));
+		
+		//a string of tag|04|xxxxxxxx bytes is expected
+		byte [] responseData = HexString.toByteArray(response.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[1]);
+		boolean foundFeature = false;
+		for (int i = 0; i < responseData.length / 4; i++){
+			assertEquals(4, responseData[i*4+1]);
+			if (responseData[i*4] == fakeTag){
+				Arrays.equals(Utils.toUnsignedByteArray(fakeControlCode), Arrays.copyOfRange(responseData, i*4+2, i*4+6));
+				foundFeature = true;
+			}
+		}
+		assertTrue("Feature inserted for testing not found", foundFeature);
+		assertEquals(PcscConstants.IFD_SUCCESS + "", response.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0]);
 	}
 
 	@Test
