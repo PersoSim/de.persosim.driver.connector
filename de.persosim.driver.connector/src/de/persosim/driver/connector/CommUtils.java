@@ -7,10 +7,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.simulator.utils.HexString;
+import de.persosim.simulator.utils.Utils;
 
 /**
  * This class contains helper methods to facilitate the communication with the
@@ -124,7 +126,7 @@ public class CommUtils {
 	 * @param writer
 	 * @param message
 	 *            the message to send (it will be concatenated with a new line
-	 *            seperator)
+	 *            separator)
 	 * @throws IOException
 	 */
 	public static void writeLine(BufferedWriter writer, String message)
@@ -132,5 +134,10 @@ public class CommUtils {
 		writer.write(message);
 		writer.newLine();
 		writer.flush();
+	}
+	
+	public static byte [] getNullTerminatedAsciiString(String string){
+		byte [] bytes = string.getBytes(StandardCharsets.US_ASCII);
+		return Utils.concatByteArrays(bytes, new byte [1]);
 	}
 }

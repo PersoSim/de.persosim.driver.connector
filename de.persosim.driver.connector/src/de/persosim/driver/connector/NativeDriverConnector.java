@@ -187,18 +187,15 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceListDevices() {
 		// logical card slot
-		byte[] slot = Utils.concatByteArrays(
-				"PersoSim Virtual Reader Slot 1".getBytes(),
+		byte[] result = Utils.concatByteArrays(
+				CommUtils.getNullTerminatedAsciiString("PersoSim Virtual Reader Slot"),
 				Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_SLOT));
 
-		// pinpad
-		byte[] pinpad = Utils
-				.concatByteArrays(
-						"PersoSim Virtual Pin Pad".getBytes(),
-						Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
+		for (VirtualReaderUi ui : userInterfaces){
+			result = Utils.concatByteArrays(result, ui.getDeviceDescriptors());
+		}
 
-		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
-				Utils.concatByteArrays(slot, pinpad));
+		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, result);
 	}
 
 	private PcscCallResult deviceControl(PcscCallData data) {

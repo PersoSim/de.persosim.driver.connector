@@ -22,4 +22,9 @@ public interface VirtualReaderUi {
 	 * @param lines the lines to display a multiple {@link String} objects
 	 */
 	public abstract void display(String... lines);
+	
+	/**
+	 * @return the PCSC device descriptors for this user interface
+	 */
+	public abstract byte [] getDeviceDescriptors();
 }

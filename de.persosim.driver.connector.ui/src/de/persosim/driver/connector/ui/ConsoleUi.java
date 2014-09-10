@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.simulator.utils.Utils;
 
 public class ConsoleUi implements VirtualReaderUi {
 
@@ -44,6 +47,14 @@ public class ConsoleUi implements VirtualReaderUi {
 			System.out.print("-");
 		}
 		System.out.print("+");
+	}
+
+	@Override
+	public byte[] getDeviceDescriptors() {
+		byte [] result = CommUtils.getNullTerminatedAsciiString("PersoSim Console PinPad");
+		result = Utils.concatByteArrays(result, Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
+		result = Utils.concatByteArrays(result, CommUtils.getNullTerminatedAsciiString("PersoSim Console Display"));
+		return Utils.concatByteArrays(result, Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
 	}
 
 }
