@@ -93,10 +93,10 @@ public class TestDriver {
 			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
-			String dataToSend = function + "#" + lun;
+			String dataToSend = function + NativeDriverInterface.MESSAGE_DIVIDER + lun;
 
 			for (byte[] current : data) {
-				dataToSend += "#" + HexString.encode(current);
+				dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
 			}
 
 			bufferedOut.write(dataToSend);

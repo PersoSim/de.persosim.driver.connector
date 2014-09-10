@@ -202,7 +202,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult deviceControl(PcscCallData data) {
-		// TODO implement
+		byte [] controlCode = data.getParameters().get(0);
+		if (controlCode.equals(Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST))){
+			return getFeatures();
+		}
 		return null;
 	}
 

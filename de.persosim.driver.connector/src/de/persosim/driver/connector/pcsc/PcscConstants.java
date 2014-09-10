@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
 
-
 public interface PcscConstants {
 	public static final int IFD_POWER_UP = 500;
 	public static final int IFD_POWER_DOWN = 501;
@@ -27,13 +26,11 @@ public interface PcscConstants {
 	public static final int IFD_ICC_NOT_PRESENT = 616;
 	public static final int IFD_NO_SUCH_DEVICE = 617;
 	public static final int IFD_ERROR_INSUFFICIENT_BUFFER = 618;
-	
 
 	public static final int TAG_VENDOR_NAME = 0x0100;
 	public static final int TAG_VENDOR_TYPE = 0x0101;
 	public static final int TAG_VENDOR_VERSION = 0x0102;
 	public static final int TAG_VENDOR_SERIAL = 0x0103;
-	
 
 	public static final int TAG_IFD_ATR = 0x0303;
 	public static final int TAG_IFD_SLOTNUM = 0x0180;
@@ -45,11 +42,17 @@ public interface PcscConstants {
 	public static final int TAG_IFD_POLLING_THREAD_KILLABLE = 0x0FB1;
 	public static final int SCARD_PROTOCOL_T0 = 1;
 	public static final int SCARD_PROTOCOL_T1 = 2;
-	public static final int SCARD_PROTOCOL_ANY = SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1;
+	public static final int SCARD_PROTOCOL_ANY = SCARD_PROTOCOL_T0
+			| SCARD_PROTOCOL_T1;
 	public static final int SCARD_PROTOCOL_RAW = 4;
 	public static final int SCARD_PROTOCOL_T15 = 8;
 
 	public static final int DEVICE_TYPE_SLOT = 1;
 	public static final int DEVICE_TYPE_FUNCTIONAL = 1;
+	/**
+	 * Standard control code to be supported by all class 2 readers as defined
+	 * in the PCSC specification.
+	 */
+	public static final int CONTROL_CODE_GET_FEATURE_REQUEST = 3400;
 
 }

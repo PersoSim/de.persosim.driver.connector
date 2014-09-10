@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import mockit.Expectations;
 import mockit.Mocked;
@@ -56,6 +57,6 @@ public class NativeDriverCommTest {
 		Thread.sleep(100);
 		
 		String data = driver.sendData(0, 0, new byte [0]);
-		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, Integer.parseInt(data.split("#")[0]));
+		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, Integer.parseInt(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0]));
 	}
 }

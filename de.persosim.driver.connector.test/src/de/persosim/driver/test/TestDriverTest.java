@@ -69,7 +69,7 @@ public class TestDriverTest implements DriverEventListener {
 				try {
 					System.out.println("Sim waiting for data");
 					data = reader.readLine();
-					assertEquals("0#0#54657374", data);
+					assertEquals("0" + NativeDriverInterface.MESSAGE_DIVIDER + "0" + NativeDriverInterface.MESSAGE_DIVIDER + "54657374", data);
 					System.out.println("Sim writing data");
 
 					writer.write("Answer");

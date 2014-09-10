@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
@@ -22,8 +23,7 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  *
  */
-public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, PcscConstants, UiEnabled {
-
+public class PersoSimPcscProcessor extends AbstractPcscFeature implements SocketCommunicator, PcscConstants, UiEnabled {
 
 	Socket communicationSocket;
 
@@ -76,6 +76,10 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 	public static final int OFFSET_COMMAND_DATA = 1;
 	public static final int OFFSET_LC = 0;
 
+	public PersoSimPcscProcessor(int controlCode) {
+		super(controlCode, FEATURE_CONTROL_CODE);
+	}
+	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction()) {
@@ -188,11 +192,6 @@ public class PersoSimPcscProcessor implements PcscFeature, SocketCommunicator, P
 	public byte[] getCapabilities() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public byte[] getFeatureDefinition() {
-		return new byte [] {FEATURE_CONTROL_CODE, 4, 0,0,0,0};
 	}
 
 	@Override

@@ -83,7 +83,7 @@ public class CommUtils {
 				iccSocket.getInputStream()));
 
 		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO
-				+ "|LUN:" + lun);
+				+ NativeDriverInterface.MESSAGE_DIVIDER + "LUN:" + lun);
 		String[] helloData = reader.readLine().split(
 				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
