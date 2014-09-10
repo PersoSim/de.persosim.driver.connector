@@ -24,7 +24,6 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscDataHelper;
-import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.SocketSimulator;
 import de.persosim.simulator.exception.CertificateNotParseableException;
