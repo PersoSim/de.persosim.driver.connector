@@ -72,11 +72,6 @@ public interface NativeDriverInterface {
 
 	public static final String MESSAGE_DIVIDER = "|";
 
-	public static final String TYPE_STR = "STR";
-	public static final String TYPE_DWORD = "DWORD";
-	public static final String TYPE_TLV = "TLV";
-	public static final String TYPE_BYTE_ARRAY = "BYTE_ARRAY";
-
 	public static final int PCSC_FUNCTION_DEVICE_CONTROL = 0;
 	public static final int PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
 	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
