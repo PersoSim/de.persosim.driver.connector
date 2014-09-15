@@ -356,10 +356,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
-		byte[] inputData = data.getParameters().get(0);
-		// ignore the header for now
-		// byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
-		byte[] commandApdu = Arrays.copyOfRange(inputData, 8, inputData.length);
+		byte[] commandApdu = data.getParameters().get(0);
 
 		byte[] expectedHeaderAndLc = new byte[] { (byte) 0xff, (byte) 0xc2,
 				0x01, FEATURE_GET_FEATURE_REQUEST, 0 };
