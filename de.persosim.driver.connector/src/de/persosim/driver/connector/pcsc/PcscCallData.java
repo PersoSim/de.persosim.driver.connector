@@ -16,8 +16,8 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class PcscCallData {
-	int function;
-	int logicalUnitNumber;
+	byte function;
+	byte logicalUnitNumber;
 	List<byte[]> parameters;
 
 	/**
@@ -33,14 +33,14 @@ public class PcscCallData {
 	/**
 	 * @return the function
 	 */
-	public int getFunction() {
+	public byte getFunction() {
 		return function;
 	}
 
 	/**
 	 * @return the logicalUnitNumber
 	 */
-	public int getLogicalUnitNumber() {
+	public byte getLogicalUnitNumber() {
 		return logicalUnitNumber;
 	}
 
@@ -64,13 +64,13 @@ public class PcscCallData {
 		return result;
 	}
 
-	private int getLogicalUnitNumber(String data) {
+	private byte getLogicalUnitNumber(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return Integer.parseInt(dataArray[1], 16);
+		return (byte) Integer.parseInt(dataArray[1], 16);
 	}
 
-	private int getCallType(String data) {
+	private byte getCallType(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return Integer.parseInt(dataArray[0], 16);
+		return (byte) Integer.parseInt(dataArray[0], 16);
 	}
 }

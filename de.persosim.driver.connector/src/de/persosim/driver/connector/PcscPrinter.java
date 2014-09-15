@@ -16,10 +16,10 @@ public class PcscPrinter implements PcscListener {
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		System.out.print("PCSC Printer:\t" + data.getFunction() + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber()
+		System.out.print("PCSC Printer:\t" + HexString.encode(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(data.getLogicalUnitNumber())
 				+ NativeDriverInterface.MESSAGE_DIVIDER);
 		for (byte[] current : data.getParameters()) {
-			System.out.println("Param:" + HexString.encode(current));
+			System.out.println(NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current));
 		}
 		return null;
 	}
