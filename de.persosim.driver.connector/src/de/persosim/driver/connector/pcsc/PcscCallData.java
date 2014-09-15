@@ -66,11 +66,11 @@ public class PcscCallData {
 
 	private int getLogicalUnitNumber(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return Integer.parseInt(dataArray[1]);
+		return Integer.parseInt(dataArray[1], 16);
 	}
 
 	private int getCallType(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return Integer.parseInt(dataArray[0]);
+		return Integer.parseInt(dataArray[0], 16);
 	}
 }

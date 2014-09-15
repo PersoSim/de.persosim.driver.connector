@@ -17,6 +17,7 @@ import org.junit.Test;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.simulator.utils.HexString;
 
 public class TestDriverTest implements DriverEventListener {
 	private String message;
@@ -45,10 +46,10 @@ public class TestDriverTest implements DriverEventListener {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO + "|LUN:-1");
-		assertEquals(NativeDriverInterface.MESSAGE_IFD_HELLO + "|LUN:0", reader.readLine());
-		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_DONE);
-		assertEquals(NativeDriverInterface.MESSAGE_IFD_DONE, reader.readLine());
+		CommUtils.writeLine(writer, HexString.encode(NativeDriverInterface.MESSAGE_ICC_HELLO) + "|" + HexString.encode((byte) -1));
+		assertEquals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_HELLO) + "|" + HexString.encode((byte)0), reader.readLine());
+		CommUtils.writeLine(writer, HexString.encode(NativeDriverInterface.MESSAGE_ICC_DONE));
+		assertEquals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_DONE), reader.readLine());
 		iccSocket.close();
 	}
 
@@ -60,21 +61,24 @@ public class TestDriverTest implements DriverEventListener {
 				dataSocket.getInputStream()));
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				dataSocket.getOutputStream()));
-		Thread sim = new Thread(new Runnable() {
-			// this runnable mocks the simulator
+		Thread connector = new Thread(new Runnable() {
+			// this runnable mocks the connector
 			@Override
 			public void run() {
 
 				String data;
 				try {
-					System.out.println("Sim waiting for data");
+					System.out.println("Connector mock waiting for data");
 					data = reader.readLine();
-					assertEquals("0" + NativeDriverInterface.MESSAGE_DIVIDER + "0" + NativeDriverInterface.MESSAGE_DIVIDER + "54657374", data);
-					System.out.println("Sim writing data");
-
-					writer.write("Answer");
+					System.out.println("Connector mock received data: " + data);
+					assertEquals("00" + NativeDriverInterface.MESSAGE_DIVIDER + "00" + NativeDriverInterface.MESSAGE_DIVIDER + "54657374", data);
+					System.out.println("Connector mock writing data");
+					String response = "00112233"; 
+					writer.write(response);
 					writer.newLine();
 					writer.flush();
+
+					System.out.println("Connector mock sent data: " + response);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -83,16 +87,17 @@ public class TestDriverTest implements DriverEventListener {
 			}
 		});
 
-		CommUtils.doHandshake(dataSocket, 0, HandshakeMode.OPEN);
+		byte lun = CommUtils.doHandshake(dataSocket, (byte) -1, HandshakeMode.OPEN);
 
-		sim.start();
+		connector.start();
 		
-		String response = nativeDriver.sendData(0, 0, "Test".getBytes());
-		assertEquals("Answer", response);
+		String response = nativeDriver.sendData(lun, (byte)0, "Test".getBytes());
+		
+		assertEquals("00112233", response);
 		while (message == null) {
 			Thread.yield();
 		}
-		assertEquals("Answer", message);
+		assertEquals("00112233", message);
 		dataSocket.close();
 	}
 

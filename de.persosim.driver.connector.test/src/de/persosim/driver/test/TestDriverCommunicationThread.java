@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.simulator.utils.HexString;
 
 /**
  * This {@link Thread} communicates for the test driver and manages the
@@ -24,15 +25,15 @@ public class TestDriverCommunicationThread extends Thread implements
 		NativeDriverInterface {
 
 	private ServerSocket serverSocket;
-	private HashMap<Integer, Socket> lunMapping;
-	private HashMap<Integer, HandshakeData> lunHandshakeData;
+	private HashMap<Byte, Socket> lunMapping;
+	private HashMap<Byte, HandshakeData> lunHandshakeData;
 	private HandshakeData currentHandshake;
 	private Socket clientSocket;
-	private static final int MAX_LUNS = 10;
+	private static final byte MAX_LUNS = 10;
 
-	private int getLowestFreeLun() {
+	private byte getLowestFreeLun() {
 
-		for (int i = 0; i < MAX_LUNS; i++) {
+		for (byte i = 0; i < MAX_LUNS; i++) {
 			if (!lunMapping.containsKey(i))
 				return 0;
 		}
@@ -40,11 +41,11 @@ public class TestDriverCommunicationThread extends Thread implements
 	}
 
 	public TestDriverCommunicationThread(int port,
-			HashMap<Integer, Socket> lunMapping,
+			HashMap<Byte, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
 		this.setName("TestDriverCommunicationThread");
 		this.lunMapping = lunMapping;
-		lunHandshakeData = new HashMap<Integer, HandshakeData>();
+		lunHandshakeData = new HashMap<Byte, HandshakeData>();
 
 		try {
 			serverSocket = new ServerSocket(port);
@@ -70,14 +71,14 @@ public class TestDriverCommunicationThread extends Thread implements
 					BufferedWriter bufferedOut = new BufferedWriter(
 							new OutputStreamWriter(
 									clientSocket.getOutputStream()));
-					System.out.println("Data from ICC:\t\t" + data);
+					System.out.println("TestDriver received data from the connector:\t" + data);
 					String dataToSend = doHandshake(data);
 					bufferedOut.write(dataToSend);
 					bufferedOut.newLine();
 					bufferedOut.flush();
-					System.out.println("Data sent to ICC:\t" + dataToSend);
-					if (dataToSend.equals(MESSAGE_IFD_DONE)) {
-						if (data.equals(MESSAGE_ICC_STOP)) {
+					System.out.println("TestDriver sent data to the connector:\t" + dataToSend);
+					if (dataToSend.equals(HexString.encode(MESSAGE_IFD_DONE))) {
+						if (data.equals(HexString.encode(MESSAGE_ICC_STOP))) {
 							clientSocket.close();
 							System.out.println("Local socket on port "
 									+ clientSocket.getPort() + " closed.");
@@ -97,15 +98,14 @@ public class TestDriverCommunicationThread extends Thread implements
 	private String doHandshake(String data) {
 		String[] split = data.split("\\|");
 		if (split.length > 0) {
-			switch (split[0]) {
+			switch ((byte) Integer.parseInt(split[0], 16)) {
 			case MESSAGE_ICC_HELLO:
 				if (split.length > 1) {
-					String[] subCommand = split[1].split(":");
-					int lun = -1;
-					if (subCommand.length > 1 && subCommand[0].equals("LUN")) {
-						lun = Integer.parseInt(subCommand[1]);
+					byte lun = -1;
+					if (split.length > 1) {
+						lun = (byte) Integer.parseInt(split[1], 16);
 						if (lun > MAX_LUNS) {
-							return MESSAGE_IFD_ERROR;
+							return HexString.encode(MESSAGE_IFD_ERROR);
 						}
 						if (lun < 0) {
 							lun = getLowestFreeLun();
@@ -129,25 +129,25 @@ public class TestDriverCommunicationThread extends Thread implements
 						currentHandshake.setLun(lun);
 						lunHandshakeData.put(lun, currentHandshake);
 					}
-					return MESSAGE_IFD_HELLO + "|LUN:" + lun;
+					return HexString.encode(MESSAGE_IFD_HELLO) + "|" + HexString.encode(lun);
 				}
 				break;
 			case MESSAGE_ICC_STOP:
 				int lun = currentHandshake.getLun();
 				if (lunHandshakeData.containsKey(lun)
 						&& !lunHandshakeData.get(lun).isHandshakeDone()) {
-					return MESSAGE_IFD_ERROR;
+					return HexString.encode(MESSAGE_IFD_ERROR);
 				}
 				lunHandshakeData.remove(lun);
 				currentHandshake = null;
-				return MESSAGE_IFD_DONE;
+				return HexString.encode(MESSAGE_IFD_DONE);
 
 			case MESSAGE_ICC_DONE:
 				currentHandshake.setHandshakeDone(true);
-				return MESSAGE_IFD_DONE;
+				return HexString.encode(MESSAGE_IFD_DONE);
 			}
 		}
-		return MESSAGE_ICC_ERROR;
+		return HexString.encode(MESSAGE_ICC_ERROR);
 	}
 
 	public int getPort() {

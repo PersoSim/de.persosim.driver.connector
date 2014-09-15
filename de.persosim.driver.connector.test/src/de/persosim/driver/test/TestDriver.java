@@ -26,7 +26,7 @@ public class TestDriver {
 	private Collection<DriverEventListener> listeners = new HashSet<DriverEventListener>();
 
 	private TestDriverCommunicationThread communicationThread;
-	private HashMap<Integer, Socket> lunMapping = new HashMap<>();
+	private HashMap<Byte, Socket> lunMapping = new HashMap<>();
 
 	private boolean running = false;
 
@@ -86,14 +86,14 @@ public class TestDriver {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public String sendData(int lun, int function, byte[]... data)
+	public String sendData(byte lun, byte function, byte[]... data)
 			throws IOException, InterruptedException {
 		Socket iccSocket = lunMapping.get(lun);
 		if (iccSocket != null && iccSocket.isConnected()) {
 			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
-			String dataToSend = function + NativeDriverInterface.MESSAGE_DIVIDER + lun;
+			String dataToSend = HexString.encode(function) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(lun);
 
 			for (byte[] current : data) {
 				dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
@@ -103,6 +103,8 @@ public class TestDriver {
 			bufferedOut.newLine();
 			bufferedOut.flush();
 
+			System.out.println("Driver sent PCSC data:\t\t" + dataToSend);
+			
 			BufferedReader bufferedIn = new BufferedReader(
 					new InputStreamReader(iccSocket.getInputStream()));
 			System.out.println("Driver waiting for response from connector");
@@ -113,6 +115,7 @@ public class TestDriver {
 						+ listener.getClass().getSimpleName());
 				listener.messageReceivedCallback(responseData);
 			}
+			System.out.println("Driver received PCSC data:\t" + responseData);
 			return responseData;
 		}
 		System.out.println("No connected socket found for lun: " + lun);
@@ -137,7 +140,7 @@ public class TestDriver {
 		listeners.remove(listener);
 	}
 
-	private static int lun = -1;
+	private static byte lun = -1;
 
 	/**
 	 * Main method for starting a stand alone test driver using a console
@@ -160,11 +163,11 @@ public class TestDriver {
 			try {
 				switch (commandArgs[0]) {
 				case "lun":
-					lun = Integer.parseInt(commandArgs[1]);
+					lun = (byte) Integer.parseInt(commandArgs[1], 16);
 					break;
 				case "data":
 
-					int function = Integer.parseInt(commandArgs[1]);
+					byte function = (byte) Integer.parseInt(commandArgs[1], 16);
 
 					byte[][] parameterData = new byte[commandArgs.length - 2][];
 

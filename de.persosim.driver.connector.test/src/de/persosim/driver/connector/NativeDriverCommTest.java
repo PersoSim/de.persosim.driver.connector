@@ -56,7 +56,7 @@ public class NativeDriverCommTest {
 		// XXX find better solution for timing issues during tests
 		Thread.sleep(100);
 		
-		String data = driver.sendData(0, 0, new byte [0]);
-		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, Integer.parseInt(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0]));
+		String data = driver.sendData((byte)0, (byte)0, new byte [0]);
+		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, Integer.parseInt(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
 	}
 }

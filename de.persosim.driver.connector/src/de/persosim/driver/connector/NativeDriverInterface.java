@@ -60,31 +60,30 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
  *
  */
 public interface NativeDriverInterface {
-	public static final String MESSAGE_ICC_HELLO = "HELLO_ICC"; // Example:
-	// HELLO_ICC|LUN:-1
-	public static final String MESSAGE_ICC_STOP = "STOP_ICC";
-	public static final String MESSAGE_ICC_ERROR = "ERROR_ICC";
-	public static final String MESSAGE_ICC_DONE = "DONE_ICC";
-	public static final String MESSAGE_IFD_HELLO = "HELLO_IFD"; // Example:
-	// HELLO_IFD|LUN:3
-	public static final String MESSAGE_IFD_DONE = "DONE_IFD";
-	public static final String MESSAGE_IFD_ERROR = "ERROR_IFD";
+	public static final byte MESSAGE_ICC_HELLO = 1;
+	public static final byte MESSAGE_ICC_STOP = 20;
+	public static final byte MESSAGE_ICC_ERROR = 30;
+	public static final byte MESSAGE_ICC_DONE = 40;
+	public static final byte MESSAGE_IFD_HELLO = 50;
+	public static final byte MESSAGE_IFD_DONE = 60;
+	public static final byte MESSAGE_IFD_ERROR = 120;
+	
 
 	public static final String MESSAGE_DIVIDER = "|";
 
-	public static final int PCSC_FUNCTION_DEVICE_CONTROL = 0;
-	public static final int PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
-	public static final int PCSC_FUNCTION_GET_CAPABILITIES = 2;
-	public static final int PCSC_FUNCTION_SET_CAPABILITIES = 3;
-	public static final int PCSC_FUNCTION_POWER_ICC = 4;
-	public static final int PCSC_FUNCTION_TRANSMIT_TO_ICC = 5;
-	public static final int PCSC_FUNCTION_IS_ICC_PRESENT = 6;
-	public static final int PCSC_FUNCTION_IS_ICC_ABSENT = 7;
-	public static final int PCSC_FUNCTION_SWALLOW_ICC = 8;
-	public static final int PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = 9;
-	public static final int PCSC_FUNCTION_LIST_INTERFACES = 10;
-	public static final int PCSC_FUNCTION_LIST_CONTEXTS = 11;
-	public static final int PCSC_FUNCTION_IS_CONTEXT_SUPPORTED = 12;
-	public static final int PCSC_FUNCTION_GET_IFDSP = 13;
-	public static final int PCSC_FUNCTION_EJECT_ICC = 14;
+	public static final byte PCSC_FUNCTION_DEVICE_CONTROL = 0;
+	public static final byte PCSC_FUNCTION_DEVICE_LIST_DEVICES = 1;
+	public static final byte PCSC_FUNCTION_GET_CAPABILITIES = 2;
+	public static final byte PCSC_FUNCTION_SET_CAPABILITIES = 3;
+	public static final byte PCSC_FUNCTION_POWER_ICC = 4;
+	public static final byte PCSC_FUNCTION_TRANSMIT_TO_ICC = 5;
+	public static final byte PCSC_FUNCTION_IS_ICC_PRESENT = 6;
+	public static final byte PCSC_FUNCTION_IS_ICC_ABSENT = 7;
+	public static final byte PCSC_FUNCTION_SWALLOW_ICC = 8;
+	public static final byte PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = 9;
+	public static final byte PCSC_FUNCTION_LIST_INTERFACES = 10;
+	public static final byte PCSC_FUNCTION_LIST_CONTEXTS = 11;
+	public static final byte PCSC_FUNCTION_IS_CONTEXT_SUPPORTED = 12;
+	public static final byte PCSC_FUNCTION_GET_IFDSP = 13;
+	public static final byte PCSC_FUNCTION_EJECT_ICC = 14;
 }

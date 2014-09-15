@@ -77,37 +77,40 @@ public class CommUtils {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public static int doHandshake(Socket iccSocket, int lun, HandshakeMode mode)
+	public static byte doHandshake(Socket iccSocket, byte lun, HandshakeMode mode)
 			throws IOException, InterruptedException {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				iccSocket.getOutputStream()));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO
-				+ NativeDriverInterface.MESSAGE_DIVIDER + "LUN:" + lun);
+		CommUtils.writeLine(
+				writer,
+				HexString.encode(NativeDriverInterface.MESSAGE_ICC_HELLO)
+						+ NativeDriverInterface.MESSAGE_DIVIDER
+						+ HexString.encode(lun));
 		String[] helloData = reader.readLine().split(
 				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
-		if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
+		if (!helloData[0].equals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_HELLO))) {
 			throw new PcscNativeCommunicationException(
 					"Unexpected message type");
 		}
 
 		try {
-			int responseLun = Integer.parseInt(helloData[1].split(":")[1]);
+			byte responseLun = (byte)Integer.parseInt(helloData[1], 16);
 
 			if (mode == HandshakeMode.OPEN) {
-				CommUtils.writeLine(writer,
-						NativeDriverInterface.MESSAGE_ICC_DONE);
+				CommUtils.writeLine(writer, HexString
+						.encode(NativeDriverInterface.MESSAGE_ICC_DONE));
 			} else {
-				CommUtils.writeLine(writer,
-						NativeDriverInterface.MESSAGE_ICC_STOP);
+				CommUtils.writeLine(writer, HexString
+						.encode(NativeDriverInterface.MESSAGE_ICC_STOP));
 			}
 			helloData = reader.readLine().split(
 					Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
-			if (!helloData[0].equals(NativeDriverInterface.MESSAGE_IFD_DONE)) {
+			if (!helloData[0].equals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_DONE))) {
 				throw new PcscNativeCommunicationException(
 						"Unexpected message type");
 			}
@@ -135,9 +138,9 @@ public class CommUtils {
 		writer.newLine();
 		writer.flush();
 	}
-	
-	public static byte [] getNullTerminatedAsciiString(String string){
-		byte [] bytes = string.getBytes(StandardCharsets.US_ASCII);
-		return Utils.concatByteArrays(bytes, new byte [1]);
+
+	public static byte[] getNullTerminatedAsciiString(String string) {
+		byte[] bytes = string.getBytes(StandardCharsets.US_ASCII);
+		return Utils.concatByteArrays(bytes, new byte[1]);
 	}
 }
