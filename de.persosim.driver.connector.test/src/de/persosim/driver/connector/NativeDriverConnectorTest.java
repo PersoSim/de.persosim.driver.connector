@@ -228,6 +228,18 @@ public class NativeDriverConnectorTest {
 		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
 		assertEquals(expected, result);
 	}
+
+	@Test
+	public void testPcscIsIccPresent() throws Exception{
+		
+		//XXX find better solution for timing issues while testing
+		Thread.sleep(100);
+		
+		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT);
+		
+		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_ICC_PRESENT));
+		assertEquals(expected, result);
+	}
 	
 	@Test
 	public void testPcscPowerIccPowerDownWithoutPowerUp() throws Exception{

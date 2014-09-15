@@ -91,6 +91,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	/**
 	 * Add a listener that is to be informed about PCSC calls.
+	 * 
 	 * @param listener
 	 */
 	public void addListener(PcscListener listener) {
@@ -99,6 +100,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	/**
 	 * Remove a listener and stop informing it about PCSC calls.
+	 * 
 	 * @param listener
 	 */
 	public void removeListener(PcscListener listener) {
@@ -107,6 +109,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	/**
 	 * Add an additional user interface.
+	 * 
 	 * @param ui
 	 */
 	public void addUi(VirtualReaderUi ui) {
@@ -115,16 +118,15 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	/**
 	 * Remove a user interface.
+	 * 
 	 * @param ui
 	 */
 	public void removeUi(VirtualReaderUi ui) {
 		this.userInterfaces.remove(ui);
 	}
 
-	private void openSimSocket() throws UnknownHostException, IOException {
-		if (simSocket == null || simSocket.isClosed()) {
-			simSocket = new Socket(simHostName, simPort);
-		}
+	private void powerUp() throws UnknownHostException, IOException {
+		openSimSocket();
 		cachedAtr = CommUtils.exchangeApdu(simSocket,
 				HexString.toByteArray("FF010000"));
 
@@ -133,6 +135,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				((SocketCommunicator) listener)
 						.setCommunicationSocket(simSocket);
 			}
+		}
+	}
+
+	private void openSimSocket() throws UnknownHostException, IOException {
+		if (simSocket == null || simSocket.isClosed()) {
+			simSocket = new Socket(simHostName, simPort);
 		}
 	}
 
@@ -187,11 +195,11 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceListDevices() {
 		// logical card slot
-		byte[] result = Utils.concatByteArrays(
-				CommUtils.getNullTerminatedAsciiString("PersoSim Virtual Reader Slot"),
+		byte[] result = Utils.concatByteArrays(CommUtils
+				.getNullTerminatedAsciiString("PersoSim Virtual Reader Slot"),
 				Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_SLOT));
 
-		for (VirtualReaderUi ui : userInterfaces){
+		for (VirtualReaderUi ui : userInterfaces) {
 			result = Utils.concatByteArrays(result, ui.getDeviceDescriptors());
 		}
 
@@ -199,12 +207,15 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult deviceControl(PcscCallData data) {
-		byte [] controlCode = data.getParameters().get(0);
-		if (Arrays.equals(controlCode,Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST))){
-			List<byte []> features = getFeatures();
-			byte [] resultData = new byte [0];
-			for (int i = 0; i < features.size(); i++){
-				resultData = Utils.concatByteArrays(resultData, features.get(i));
+		byte[] controlCode = data.getParameters().get(0);
+		if (Arrays
+				.equals(controlCode,
+						Utils.toUnsignedByteArray(PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST))) {
+			List<byte[]> features = getFeatures();
+			byte[] resultData = new byte[0];
+			for (int i = 0; i < features.size(); i++) {
+				resultData = Utils
+						.concatByteArrays(resultData, features.get(i));
 			}
 			return new SimplePcscCallResult(IFD_SUCCESS, resultData);
 		}
@@ -316,7 +327,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		} else if (Arrays.equals(
 				Utils.toUnsignedByteArray((short) IFD_POWER_UP), action)) {
 			try {
-				openSimSocket();
+				powerUp();
 				return new TlvPcscCallResult(IFD_SUCCESS,
 						Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
 			} catch (IOException e) {
@@ -356,23 +367,24 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				0x01, FEATURE_GET_FEATURE_REQUEST, 0 };
 
 		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
-			return new SimplePcscCallResult(IFD_SUCCESS, getOnlyTagsFromFeatureList(getFeatures()));
+			return new SimplePcscCallResult(IFD_SUCCESS,
+					getOnlyTagsFromFeatureList(getFeatures()));
 		}
 
 		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 				CommUtils.exchangeApdu(simSocket, commandApdu));
 	}
-	
-	private byte [] getOnlyTagsFromFeatureList(List<byte []> features){
+
+	private byte[] getOnlyTagsFromFeatureList(List<byte[]> features) {
 		byte[] result = new byte[features.size()];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = features.get(i)[0];
 		}
 		return result;
 	}
-	
-	private List<byte []> getFeatures() {
-		List<byte []> featureDefinitions = new ArrayList<byte []>();
+
+	private List<byte[]> getFeatures() {
+		List<byte[]> featureDefinitions = new ArrayList<byte[]>();
 		for (PcscListener listener : listeners) {
 			if (listener instanceof PcscFeature) {
 				featureDefinitions.add(((PcscFeature) listener)
@@ -384,12 +396,32 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {
-		byte[] response = CommUtils.exchangeApdu(simSocket, new byte[] {
-				(byte) 0xff, (byte) 0x90, 0, 0 });
+		boolean closeConnection = false;
+		try {
+			if (simSocket == null || simSocket.isClosed()){
+				openSimSocket();	
+				closeConnection = true;
+			}
 
-		if (Arrays.equals(response,
-				Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
-			return new SimplePcscCallResult(IFD_ICC_PRESENT);
+			byte[] response = CommUtils.exchangeApdu(simSocket, new byte[] {
+					(byte) 0xff, (byte) 0x90, 0, 0 });
+
+			if (Arrays.equals(response,
+					Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
+				return new SimplePcscCallResult(IFD_ICC_PRESENT);
+			}
+		} catch (IOException e) {
+			System.out.println("The socket communication with " + simHostName
+					+ ":" + simPort + " could not be established");
+		} finally {
+			if (closeConnection){
+				try {
+					closeSimSocket();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);
 	}
