@@ -74,7 +74,7 @@ public class TestDriverCommunicationThread extends Thread implements
 					System.out.println("TestDriver received data from the connector:\t" + data);
 					String dataToSend = doHandshake(data);
 
-					if (dataToSend.equals(HexString.encode(MESSAGE_IFD_DONE))) {
+					if (dataToSend == null) {
 						if (data.equals(HexString.encode(MESSAGE_ICC_STOP))) {
 							clientSocket.close();
 							System.out.println("Local socket on port "
@@ -143,11 +143,11 @@ public class TestDriverCommunicationThread extends Thread implements
 				}
 				lunHandshakeData.remove(lun);
 				currentHandshake = null;
-				return HexString.encode(MESSAGE_IFD_DONE);
+				return null;
 
 			case MESSAGE_ICC_DONE:
 				currentHandshake.setHandshakeDone(true);
-				return HexString.encode(MESSAGE_IFD_DONE);
+				return null;
 			}
 		}
 		return HexString.encode(MESSAGE_ICC_ERROR);
