@@ -1,6 +1,6 @@
 package de.persosim.driver.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,7 +49,6 @@ public class TestDriverTest implements DriverEventListener {
 		CommUtils.writeLine(writer, HexString.encode(NativeDriverInterface.MESSAGE_ICC_HELLO) + "|" + HexString.encode((byte) -1));
 		assertEquals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_HELLO) + "|" + HexString.encode((byte)0), reader.readLine());
 		CommUtils.writeLine(writer, HexString.encode(NativeDriverInterface.MESSAGE_ICC_DONE));
-		assertEquals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_DONE), reader.readLine());
 		iccSocket.close();
 	}
 

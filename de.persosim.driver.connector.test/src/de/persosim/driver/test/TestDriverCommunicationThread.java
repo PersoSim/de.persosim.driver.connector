@@ -73,10 +73,7 @@ public class TestDriverCommunicationThread extends Thread implements
 									clientSocket.getOutputStream()));
 					System.out.println("TestDriver received data from the connector:\t" + data);
 					String dataToSend = doHandshake(data);
-					bufferedOut.write(dataToSend);
-					bufferedOut.newLine();
-					bufferedOut.flush();
-					System.out.println("TestDriver sent data to the connector:\t" + dataToSend);
+
 					if (dataToSend.equals(HexString.encode(MESSAGE_IFD_DONE))) {
 						if (data.equals(HexString.encode(MESSAGE_ICC_STOP))) {
 							clientSocket.close();
@@ -84,7 +81,13 @@ public class TestDriverCommunicationThread extends Thread implements
 									+ clientSocket.getPort() + " closed.");
 						}
 						handshakeDone = true;
+					} else {
+						bufferedOut.write(dataToSend);
+						bufferedOut.newLine();
+						bufferedOut.flush();
 					}
+					
+					System.out.println("TestDriver sent data to the connector:\t" + dataToSend);
 				}
 			} catch (SocketException e) {
 				// ignore, expected behaviour on interrupt

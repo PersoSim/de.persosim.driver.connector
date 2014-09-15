@@ -107,13 +107,6 @@ public class CommUtils {
 				CommUtils.writeLine(writer, HexString
 						.encode(NativeDriverInterface.MESSAGE_ICC_STOP));
 			}
-			helloData = reader.readLine().split(
-					Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-
-			if (!helloData[0].equals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_DONE))) {
-				throw new PcscNativeCommunicationException(
-						"Unexpected message type");
-			}
 
 			return responseLun;
 		} catch (NumberFormatException e) {
