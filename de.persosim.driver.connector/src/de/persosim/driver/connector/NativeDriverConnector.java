@@ -305,7 +305,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult powerIcc(PcscCallData data) {
 		byte[] action = data.getParameters().get(0);
-		if (Arrays.equals(Utils.toUnsignedByteArray((short) IFD_POWER_DOWN),
+		if (Arrays.equals(Utils.toUnsignedByteArray(IFD_POWER_DOWN),
 				action)) {
 			if (simSocket != null && !simSocket.isClosed()) {
 				byte[] result = CommUtils.exchangeApdu(simSocket,
@@ -325,23 +325,21 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return new SimplePcscCallResult(
 					PcscConstants.IFD_ERROR_POWER_ACTION);
 		} else if (Arrays.equals(
-				Utils.toUnsignedByteArray((short) IFD_POWER_UP), action)) {
+				Utils.toUnsignedByteArray(IFD_POWER_UP), action)) {
 			try {
 				powerUp();
-				return new TlvPcscCallResult(IFD_SUCCESS,
-						Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return new SimplePcscCallResult(
 					PcscConstants.IFD_ERROR_POWER_ACTION);
-		} else if (Arrays.equals(Utils.toUnsignedByteArray((short) IFD_RESET),
+		} else if (Arrays.equals(Utils.toUnsignedByteArray(IFD_RESET),
 				action)) {
 			cachedAtr = CommUtils.exchangeApdu(simSocket,
 					HexString.toByteArray("FFFF0000"));
-			return new TlvPcscCallResult(IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+			return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);
 		}
 
 		return null;
@@ -370,7 +368,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return new SimplePcscCallResult(IFD_SUCCESS,
 					getOnlyTagsFromFeatureList(getFeatures()));
 		}
-
+		
+		//FIXME MBK do error handling here
 		return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 				CommUtils.exchangeApdu(simSocket, commandApdu));
 	}

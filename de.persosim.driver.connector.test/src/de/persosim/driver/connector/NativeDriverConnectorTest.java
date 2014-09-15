@@ -156,7 +156,7 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		String response = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		String response = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_UP));
 		
 		response = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, testData);
 		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
@@ -223,9 +223,9 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_UP));
 		
-		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
+		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result);
 	}
 
@@ -255,7 +255,7 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_DOWN));
+		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_DOWN));
 		
 		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_ERROR_POWER_ACTION));
 		assertEquals(expected, result);
@@ -278,9 +278,9 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_UP));
 		
-		result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_DOWN));
+		result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_DOWN));
 
 		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS));
 		assertEquals(expected, result);
@@ -304,11 +304,11 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 
-		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_POWER_UP));
+		String result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_POWER_UP));
 		
-		result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray((short)PcscConstants.IFD_RESET));
+		result = driver.sendData((byte)0, NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, Utils.toUnsignedByteArray(PcscConstants.IFD_RESET));
 		
-		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(PcscDataHelper.buildTlv(Utils.toUnsignedByteArray(PcscConstants.TAG_IFD_ATR), testAtr));
+		String expected = HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_SUCCESS)) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result);
 	}
 }
