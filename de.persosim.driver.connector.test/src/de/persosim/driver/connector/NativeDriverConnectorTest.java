@@ -72,6 +72,7 @@ public class NativeDriverConnectorTest {
 				
 		nativeConnector = new NativeDriverConnector("localhost",
 				TestDriver.PORT_NUMBER_DEFAULT, "localhost", 9876);
+		nativeConnector.addListener(new PcscPrinter());
 		nativeConnector.connect();
 	}
 
