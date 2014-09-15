@@ -224,7 +224,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult getCapabilities(PcscCallData data) {
 		// try to find tag in own capabilities
-
+		// FIXME MBK exchange TLV results for Simple
 		PcscCallResult result = null;
 		byte[] currentTag = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
