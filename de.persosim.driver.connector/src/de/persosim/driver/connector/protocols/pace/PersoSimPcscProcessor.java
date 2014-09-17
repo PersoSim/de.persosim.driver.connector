@@ -96,7 +96,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 				Utils.toUnsignedByteArray(getControlCode()))) {
 			switch (data.getParameters().get(1)[OFFSET_FUNCTION]) {
 			case FUNCTION_GET_READER_PACE_CAPABILITIES:
-				return getReaderPaceCapabilities(getInputDataFromPpdu(data.getParameters().get(1)));
+				return getReaderPaceCapabilities();
 			case FUNCTION_ESTABLISH_PACE_CHANNEL:
 				return establishPaceChannel(getInputDataFromPpdu(data.getParameters().get(1)));
 			case FUNCTION_DESTROY_PACE_CHANNEL:
@@ -107,12 +107,8 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	}
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
-		byte[] inputData = data.getParameters().get(0);
-		// ignore the header for now
-		// byte [] scardIoHeader = Arrays.copyOfRange(inputData, 0, 8);
-		byte[] commandPpdu = Arrays.copyOfRange(inputData, 8, inputData.length);
+		byte[] commandPpdu = data.getParameters().get(0);
 
-		// the feature number for EXECUTE_PACE is 0x20
 		byte[] expectedHeader = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01,
 				 FEATURE_CONTROL_CODE};
 
@@ -122,7 +118,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 
 		switch (commandPpdu[OFFSET_FUNCTION]) {
 		case FUNCTION_GET_READER_PACE_CAPABILITIES:
-			return getReaderPaceCapabilities(getInputDataFromPpdu(commandPpdu));
+			return getReaderPaceCapabilities();
 		case FUNCTION_ESTABLISH_PACE_CHANNEL:
 			return establishPaceChannel(getInputDataFromPpdu(commandPpdu));
 		case FUNCTION_DESTROY_PACE_CHANNEL:
@@ -181,7 +177,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, responseData);
 	}
 
-	private PcscCallResult getReaderPaceCapabilities(byte[] inputDataFromPpdu) {
+	private PcscCallResult getReaderPaceCapabilities() {
 		byte [] bitMap = new byte [] {1, BITMAP_IFD_GENERIC_PACE_SUPPORT | BITMAP_EID_APPLICATION_SUPPORT};
 		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, bitMap);
 	}
