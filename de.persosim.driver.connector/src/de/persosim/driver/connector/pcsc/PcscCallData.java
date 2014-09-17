@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -16,8 +17,8 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class PcscCallData {
-	byte function;
-	byte logicalUnitNumber;
+	UnsignedInteger function;
+	UnsignedInteger logicalUnitNumber;
 	List<byte[]> parameters;
 
 	/**
@@ -33,14 +34,14 @@ public class PcscCallData {
 	/**
 	 * @return the function
 	 */
-	public byte getFunction() {
+	public UnsignedInteger getFunction() {
 		return function;
 	}
 
 	/**
 	 * @return the logicalUnitNumber
 	 */
-	public byte getLogicalUnitNumber() {
+	public UnsignedInteger getLogicalUnitNumber() {
 		return logicalUnitNumber;
 	}
 
@@ -64,13 +65,13 @@ public class PcscCallData {
 		return result;
 	}
 
-	private byte getLogicalUnitNumber(String data) {
+	private UnsignedInteger getLogicalUnitNumber(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return (byte) Integer.parseInt(dataArray[1], 16);
+		return UnsignedInteger.parseUnsignedInteger(dataArray[1], 16);
 	}
 
-	private byte getCallType(String data) {
+	private UnsignedInteger getCallType(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
-		return (byte) Integer.parseInt(dataArray[0], 16);
+		return UnsignedInteger.parseUnsignedInteger(dataArray[0], 16);
 	}
 }

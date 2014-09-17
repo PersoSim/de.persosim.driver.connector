@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
@@ -79,10 +80,10 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		switch (data.getFunction()) {
-		case NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC:
+		switch (data.getFunction().getAsInt()) {
+		case NativeDriverInterface.VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
-		case NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL:
+		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
 		default:
 			return null;
@@ -185,7 +186,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, bitMap);
 	}
 
-	private PcscCallResult buildResponse(int pcscResponseCode, int result, byte[] resultData) {
+	private PcscCallResult buildResponse(UnsignedInteger pcscResponseCode, int result, byte[] resultData) {
 		byte[] response = Utils.concatByteArrays(Utils.toUnsignedByteArray(result),
 				Utils.toUnsignedByteArray((short) resultData.length),
 				resultData);

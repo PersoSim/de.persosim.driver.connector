@@ -2,6 +2,7 @@ package de.persosim.driver.connector.pcsc;
 
 import java.util.Arrays;
 
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -41,14 +42,6 @@ public class PcscDataHelper {
 		return true;
 	}
 
-	private static byte[] getPaddedTag(byte[] tag) {
-		byte[] tagPadding = new byte[0];
-		if (tag.length < DWORD_LENGTH) {
-			tagPadding = new byte[DWORD_LENGTH - tag.length];
-		}
-		return Utils.concatByteArrays(tagPadding, tag);
-	}
-
 	/**
 	 * Builds a tlv encoding using 4 bytes for the tag, 4 bytes for the length
 	 * and an arbitrary length value field.
@@ -57,10 +50,10 @@ public class PcscDataHelper {
 	 * @param value
 	 * @return the tlv encoding
 	 */
-	public static byte[] buildTlv(byte[] tag, byte[] value) {
+	public static byte[] buildTlv(UnsignedInteger tag, byte[] value) {
 		// FIXME check in which cases setting the valid boolean to false makes
 		// sense
-		return Utils.concatByteArrays(getPaddedTag(tag),
+		return Utils.concatByteArrays(tag.getAsByteArray(),
 				Utils.toUnsignedByteArray(value.length), value, getBool(true));
 	}
 
@@ -79,14 +72,13 @@ public class PcscDataHelper {
 	 * @param data
 	 * @return the content as byte [] or null if the tag could not be found
 	 */
-	public static byte[] getFieldContent(byte[] tag, byte[] data) {
-		byte[] paddedTag = getPaddedTag(tag);
+	public static byte[] getFieldContent(UnsignedInteger tag, byte[] data) {
 		int offset = 0;
 		int length = 0;
 		while (offset < data.length - DWORD_LENGTH) {
 			length = Utils.getIntFromUnsignedByteArray(Arrays.copyOfRange(data,
 					offset + DWORD_LENGTH, offset + DWORD_LENGTH * 2));
-			if (compare(paddedTag, 0, data, offset, DWORD_LENGTH)) {
+			if (compare(tag.getAsByteArray(), 0, data, offset, DWORD_LENGTH)) {
 				return Arrays.copyOfRange(data, offset, offset + length);
 			} else {
 				offset += length;
@@ -101,14 +93,13 @@ public class PcscDataHelper {
 	 * @return the complete tag field (tag|length|content) as byte [] or null if
 	 *         the tag could not be found
 	 */
-	public static byte[] getField(byte[] tag, byte[] data) {
-		byte[] paddedTag = getPaddedTag(tag);
+	public static byte[] getField(UnsignedInteger tag, byte[] data) {
 		int offset = 0;
 		int length = 0;
 		while (offset < data.length - DWORD_LENGTH) {
 			length = Utils.getIntFromUnsignedByteArray(Arrays.copyOfRange(data,
 					offset + DWORD_LENGTH, offset + DWORD_LENGTH * 2));
-			if (compare(paddedTag, 0, data, offset, DWORD_LENGTH)) {
+			if (compare(tag.getAsByteArray(), 0, data, offset, DWORD_LENGTH)) {
 				return Arrays.copyOfRange(data, offset, offset + length);
 			} else {
 				offset += length;

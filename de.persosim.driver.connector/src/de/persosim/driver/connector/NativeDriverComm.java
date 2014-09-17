@@ -14,8 +14,6 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
-import de.persosim.simulator.utils.HexString;
-import de.persosim.simulator.utils.Utils;
 
 /**
  * This thread reads PCSC data from the native interface and delegates it to the @link
@@ -59,7 +57,7 @@ public class NativeDriverComm extends Thread {
 	@Override
 	public void run() {
 		try {
-			CommUtils.doHandshake(dataSocket, (byte) -1, HandshakeMode.OPEN);
+			CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
 			while (!this.isInterrupted()) {
 				try {
 					String data = bufferedDataIn.readLine();
@@ -92,7 +90,7 @@ public class NativeDriverComm extends Thread {
 							result = new PcscCallResult() {
 								@Override
 								public String getEncoded() {
-									return HexString.encode(Utils.toUnsignedByteArray(PcscConstants.IFD_NOT_SUPPORTED));
+									return PcscConstants.IFD_NOT_SUPPORTED.getAsHexString();
 								}
 							};
 						}

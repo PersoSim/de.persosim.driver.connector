@@ -18,7 +18,7 @@ public class PcscPrinter implements PcscListener {
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		System.out.print("PCSC Printer:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(data.getLogicalUnitNumber()));
+		System.out.print("PCSC Printer:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
 		for (byte[] current : data.getParameters()) {
 			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current));
 		}
@@ -27,19 +27,19 @@ public class PcscPrinter implements PcscListener {
 		return null;
 	}
 	
-	String getStringRep(byte value){
+	String getStringRep(UnsignedInteger value){
 		Field [] fields = NativeDriverInterface.class.getDeclaredFields();
 		for (Field field : fields){
 			try {
-				if (value == field.getByte(new NativeDriverInterface() {
-				})){
+				if (value.equals(field.get(new NativeDriverInterface() {
+				}))){
 					return field.getName();
 				}
 			} catch (Exception e) {
 				continue;
 			}
 		}
-		return HexString.encode(value);
+		return value.getAsHexString();
 	}
 
 }

@@ -60,29 +60,73 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
  *
  */
 public interface NativeDriverInterface {
-	public static final byte MESSAGE_ICC_HELLO = 0x01;
-	public static final byte MESSAGE_ICC_STOP  = 0x02;
-	public static final byte MESSAGE_ICC_ERROR = 0x03;
-	public static final byte MESSAGE_ICC_DONE  = 0x04;
-	public static final byte MESSAGE_IFD_HELLO = 0x05;
-	public static final byte MESSAGE_IFD_ERROR = 0x06;
+	public static final byte VALUE_MESSAGE_ICC_HELLO = 0x01;                     
+	public static final byte VALUE_MESSAGE_ICC_STOP  = 0x02;                     
+	public static final byte VALUE_MESSAGE_ICC_ERROR = 0x03;                     
+	public static final byte VALUE_MESSAGE_ICC_DONE  = 0x04;                     
+	public static final byte VALUE_MESSAGE_IFD_HELLO = 0x05;                     
+	public static final byte VALUE_MESSAGE_IFD_ERROR = 0x06;                     
+	public static final byte VALUE_PCSC_FUNCTION_DEVICE_CONTROL          = 0x10; 
+	public static final byte VALUE_PCSC_FUNCTION_DEVICE_LIST_DEVICES     = 0x11; 
+	public static final byte VALUE_PCSC_FUNCTION_GET_CAPABILITIES        = 0x12; 
+	public static final byte VALUE_PCSC_FUNCTION_SET_CAPABILITIES        = 0x13; 
+	public static final byte VALUE_PCSC_FUNCTION_POWER_ICC               = 0x14; 
+	public static final byte VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC         = 0x15; 
+	public static final byte VALUE_PCSC_FUNCTION_IS_ICC_PRESENT          = 0x16; 
+	public static final byte VALUE_PCSC_FUNCTION_IS_ICC_ABSENT           = 0x17; 
+	public static final byte VALUE_PCSC_FUNCTION_SWALLOW_ICC             = 0x18; 
+	public static final byte VALUE_PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = 0x19; 
+	public static final byte VALUE_PCSC_FUNCTION_LIST_INTERFACES         = 0x1A; 
+	public static final byte VALUE_PCSC_FUNCTION_LIST_CONTEXTS           = 0x1B; 
+	public static final byte VALUE_PCSC_FUNCTION_IS_CONTEXT_SUPPORTED    = 0x1C; 
+	public static final byte VALUE_PCSC_FUNCTION_GET_IFDSP               = 0x1D; 
+	public static final byte VALUE_PCSC_FUNCTION_EJECT_ICC               = 0x1E; 
+	public static final int VALUE_LUN_NOT_ASSIGNED = 0xFFFFFFFF;
+	
+	public static final String MESSAGE_DIVIDER = "|";
+	
+	public static final UnsignedInteger MESSAGE_ICC_HELLO = new UnsignedInteger(VALUE_MESSAGE_ICC_HELLO);
+	public static final UnsignedInteger MESSAGE_ICC_STOP  = new UnsignedInteger(VALUE_MESSAGE_ICC_STOP );
+	public static final UnsignedInteger MESSAGE_ICC_ERROR = new UnsignedInteger(VALUE_MESSAGE_ICC_ERROR);
+	public static final UnsignedInteger MESSAGE_ICC_DONE  = new UnsignedInteger(VALUE_MESSAGE_ICC_DONE );
+	public static final UnsignedInteger MESSAGE_IFD_HELLO = new UnsignedInteger(VALUE_MESSAGE_IFD_HELLO);
+	public static final UnsignedInteger MESSAGE_IFD_ERROR = new UnsignedInteger(VALUE_MESSAGE_IFD_ERROR);
+	public static final UnsignedInteger PCSC_FUNCTION_DEVICE_CONTROL          = new UnsignedInteger(VALUE_PCSC_FUNCTION_DEVICE_CONTROL         );
+	public static final UnsignedInteger PCSC_FUNCTION_DEVICE_LIST_DEVICES     = new UnsignedInteger(VALUE_PCSC_FUNCTION_DEVICE_LIST_DEVICES    );
+	public static final UnsignedInteger PCSC_FUNCTION_GET_CAPABILITIES        = new UnsignedInteger(VALUE_PCSC_FUNCTION_GET_CAPABILITIES       );
+	public static final UnsignedInteger PCSC_FUNCTION_SET_CAPABILITIES        = new UnsignedInteger(VALUE_PCSC_FUNCTION_SET_CAPABILITIES       );
+	public static final UnsignedInteger PCSC_FUNCTION_POWER_ICC               = new UnsignedInteger(VALUE_PCSC_FUNCTION_POWER_ICC              );
+	public static final UnsignedInteger PCSC_FUNCTION_TRANSMIT_TO_ICC         = new UnsignedInteger(VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC        );
+	public static final UnsignedInteger PCSC_FUNCTION_IS_ICC_PRESENT          = new UnsignedInteger(VALUE_PCSC_FUNCTION_IS_ICC_PRESENT         );
+	public static final UnsignedInteger PCSC_FUNCTION_IS_ICC_ABSENT           = new UnsignedInteger(VALUE_PCSC_FUNCTION_IS_ICC_ABSENT          );
+	public static final UnsignedInteger PCSC_FUNCTION_SWALLOW_ICC             = new UnsignedInteger(VALUE_PCSC_FUNCTION_SWALLOW_ICC            );
+	public static final UnsignedInteger PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = new UnsignedInteger(VALUE_PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS);
+	public static final UnsignedInteger PCSC_FUNCTION_LIST_INTERFACES         = new UnsignedInteger(VALUE_PCSC_FUNCTION_LIST_INTERFACES        );
+	public static final UnsignedInteger PCSC_FUNCTION_LIST_CONTEXTS           = new UnsignedInteger(VALUE_PCSC_FUNCTION_LIST_CONTEXTS          );
+	public static final UnsignedInteger PCSC_FUNCTION_IS_CONTEXT_SUPPORTED    = new UnsignedInteger(VALUE_PCSC_FUNCTION_IS_CONTEXT_SUPPORTED   );
+	public static final UnsignedInteger PCSC_FUNCTION_GET_IFDSP               = new UnsignedInteger(VALUE_PCSC_FUNCTION_GET_IFDSP              );
+	public static final UnsignedInteger PCSC_FUNCTION_EJECT_ICC               = new UnsignedInteger(VALUE_PCSC_FUNCTION_EJECT_ICC              );
+	public static final UnsignedInteger LUN_NOT_ASSIGNED = new UnsignedInteger(VALUE_LUN_NOT_ASSIGNED);
 	
 
-	public static final String MESSAGE_DIVIDER = "|";
 
-	public static final byte PCSC_FUNCTION_DEVICE_CONTROL          = 0x10;
-	public static final byte PCSC_FUNCTION_DEVICE_LIST_DEVICES     = 0x11;
-	public static final byte PCSC_FUNCTION_GET_CAPABILITIES        = 0x12;
-	public static final byte PCSC_FUNCTION_SET_CAPABILITIES        = 0x13;
-	public static final byte PCSC_FUNCTION_POWER_ICC               = 0x14;
-	public static final byte PCSC_FUNCTION_TRANSMIT_TO_ICC         = 0x15;
-	public static final byte PCSC_FUNCTION_IS_ICC_PRESENT          = 0x16;
-	public static final byte PCSC_FUNCTION_IS_ICC_ABSENT           = 0x17;
-	public static final byte PCSC_FUNCTION_SWALLOW_ICC             = 0x18;
-	public static final byte PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS = 0x19;
-	public static final byte PCSC_FUNCTION_LIST_INTERFACES         = 0x1A;
-	public static final byte PCSC_FUNCTION_LIST_CONTEXTS           = 0x1B;
-	public static final byte PCSC_FUNCTION_IS_CONTEXT_SUPPORTED    = 0x1C;
-	public static final byte PCSC_FUNCTION_GET_IFDSP               = 0x1D;
-	public static final byte PCSC_FUNCTION_EJECT_ICC               = 0x1E;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

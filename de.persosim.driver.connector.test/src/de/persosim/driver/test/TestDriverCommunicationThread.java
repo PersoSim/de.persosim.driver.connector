@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import de.persosim.driver.connector.NativeDriverInterface;
-import de.persosim.simulator.utils.HexString;
+import de.persosim.driver.connector.UnsignedInteger;
 
 /**
  * This {@link Thread} communicates for the test driver and manages the
@@ -25,27 +25,27 @@ public class TestDriverCommunicationThread extends Thread implements
 		NativeDriverInterface {
 
 	private ServerSocket serverSocket;
-	private HashMap<Byte, Socket> lunMapping;
-	private HashMap<Byte, HandshakeData> lunHandshakeData;
+	private HashMap<Integer, Socket> lunMapping;
+	private HashMap<Integer, HandshakeData> lunHandshakeData;
 	private HandshakeData currentHandshake;
 	private Socket clientSocket;
 	private static final byte MAX_LUNS = 10;
 
-	private byte getLowestFreeLun() {
+	private UnsignedInteger getLowestFreeLun() {
 
 		for (byte i = 0; i < MAX_LUNS; i++) {
 			if (!lunMapping.containsKey(i))
-				return 0;
+				return new UnsignedInteger(i);
 		}
-		return -1;
+		return NativeDriverInterface.LUN_NOT_ASSIGNED;
 	}
 
 	public TestDriverCommunicationThread(int port,
-			HashMap<Byte, Socket> lunMapping,
+			HashMap<Integer, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
 		this.setName("TestDriverCommunicationThread");
 		this.lunMapping = lunMapping;
-		lunHandshakeData = new HashMap<Byte, HandshakeData>();
+		lunHandshakeData = new HashMap<Integer, HandshakeData>();
 
 		try {
 			serverSocket = new ServerSocket(port);
@@ -75,7 +75,7 @@ public class TestDriverCommunicationThread extends Thread implements
 					String dataToSend = doHandshake(data);
 
 					if (dataToSend == null) {
-						if (data.equals(HexString.encode(MESSAGE_ICC_STOP))) {
+						if (data.equals(MESSAGE_ICC_STOP.getAsHexString())) {
 							clientSocket.close();
 							System.out.println("Local socket on port "
 									+ clientSocket.getPort() + " closed.");
@@ -85,9 +85,9 @@ public class TestDriverCommunicationThread extends Thread implements
 						bufferedOut.write(dataToSend);
 						bufferedOut.newLine();
 						bufferedOut.flush();
+						System.out.println("TestDriver sent data to the connector:\t" + dataToSend);
 					}
 					
-					System.out.println("TestDriver sent data to the connector:\t" + dataToSend);
 				}
 			} catch (SocketException e) {
 				// ignore, expected behaviour on interrupt
@@ -101,22 +101,22 @@ public class TestDriverCommunicationThread extends Thread implements
 	private String doHandshake(String data) {
 		String[] split = data.split("\\|");
 		if (split.length > 0) {
-			switch ((byte) Integer.parseInt(split[0], 16)) {
-			case MESSAGE_ICC_HELLO:
+			switch (UnsignedInteger.parseUnsignedInteger(split[0], 16).getAsInt()) {
+			case VALUE_MESSAGE_ICC_HELLO:
 				if (split.length > 1) {
-					byte lun = -1;
+					UnsignedInteger lun = NativeDriverInterface.LUN_NOT_ASSIGNED;
 					if (split.length > 1) {
-						lun = (byte) Integer.parseInt(split[1], 16);
-						if (lun > MAX_LUNS) {
-							return HexString.encode(MESSAGE_IFD_ERROR);
-						}
-						if (lun < 0) {
+						lun = UnsignedInteger.parseUnsignedInteger(split[1], 16);
+						if (lun.equals(NativeDriverInterface.LUN_NOT_ASSIGNED)) {
 							lun = getLowestFreeLun();
 						}
+						if (lun.getAsSignedLong() > MAX_LUNS) {
+							return MESSAGE_IFD_ERROR.getAsHexString();
+						}
 					}
-					if (lunMapping.containsKey(lun)) {
+					if (lunMapping.containsKey(lun.getAsInt())) {
 						try {
-							lunMapping.get(lun).close();
+							lunMapping.get(lun.getAsInt()).close();
 							System.out.println("Closed socket on port: "
 									+ lunMapping.get(lun).getPort());
 						} catch (IOException e) {
@@ -124,33 +124,33 @@ public class TestDriverCommunicationThread extends Thread implements
 							e.printStackTrace();
 						}
 					}
-					lunMapping.put(lun, clientSocket);
+					lunMapping.put(lun.getAsInt(), clientSocket);
 					if (lunHandshakeData.containsKey(lun)) {
 						currentHandshake = lunHandshakeData.get(lun);
 					} else {
 						currentHandshake = new HandshakeData();
 						currentHandshake.setLun(lun);
-						lunHandshakeData.put(lun, currentHandshake);
+						lunHandshakeData.put(lun.getAsInt(), currentHandshake);
 					}
-					return HexString.encode(MESSAGE_IFD_HELLO) + "|" + HexString.encode(lun);
+					return MESSAGE_IFD_HELLO.getAsHexString() + "|" + lun.getAsHexString();
 				}
 				break;
-			case MESSAGE_ICC_STOP:
-				int lun = currentHandshake.getLun();
-				if (lunHandshakeData.containsKey(lun)
-						&& !lunHandshakeData.get(lun).isHandshakeDone()) {
-					return HexString.encode(MESSAGE_IFD_ERROR);
+			case VALUE_MESSAGE_ICC_STOP:
+				UnsignedInteger lun = currentHandshake.getLun();
+				if (lunHandshakeData.containsKey(lun.getAsInt())
+						&& !lunHandshakeData.get(lun.getAsInt()).isHandshakeDone()) {
+					return MESSAGE_IFD_ERROR.getAsHexString();
 				}
 				lunHandshakeData.remove(lun);
 				currentHandshake = null;
 				return null;
 
-			case MESSAGE_ICC_DONE:
+			case VALUE_MESSAGE_ICC_DONE:
 				currentHandshake.setHandshakeDone(true);
 				return null;
 			}
 		}
-		return HexString.encode(MESSAGE_ICC_ERROR);
+		return MESSAGE_ICC_ERROR.getAsHexString();
 	}
 
 	public int getPort() {

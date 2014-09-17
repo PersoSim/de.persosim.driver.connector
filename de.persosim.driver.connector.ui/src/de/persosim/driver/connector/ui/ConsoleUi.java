@@ -52,9 +52,9 @@ public class ConsoleUi implements VirtualReaderUi {
 	@Override
 	public byte[] getDeviceDescriptors() {
 		byte [] result = CommUtils.getNullTerminatedAsciiString("PersoSim Console PinPad");
-		result = Utils.concatByteArrays(result, Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
+		result = Utils.concatByteArrays(result, PcscConstants.DEVICE_TYPE_FUNCTIONAL.getAsByteArray());
 		result = Utils.concatByteArrays(result, CommUtils.getNullTerminatedAsciiString("PersoSim Console Display"));
-		return Utils.concatByteArrays(result, Utils.toUnsignedByteArray(PcscConstants.DEVICE_TYPE_FUNCTIONAL));
+		return Utils.concatByteArrays(result, PcscConstants.DEVICE_TYPE_FUNCTIONAL.getAsByteArray());
 	}
 
 }

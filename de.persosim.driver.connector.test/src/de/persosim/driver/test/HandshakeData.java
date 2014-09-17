@@ -1,5 +1,7 @@
 package de.persosim.driver.test;
 
+import de.persosim.driver.connector.UnsignedInteger;
+
 /**
  * This class stores data that is generated and transmitted during the handshake
  * for later use.
@@ -8,7 +10,7 @@ package de.persosim.driver.test;
  *
  */
 public class HandshakeData {
-	private int lun;
+	private UnsignedInteger lun;
 	private boolean handshakeDone;
 
 	/**
@@ -29,15 +31,11 @@ public class HandshakeData {
 	/**
 	 * @return the lun
 	 */
-	public int getLun() {
+	public UnsignedInteger getLun() {
 		return lun;
 	}
 
-	/**
-	 * @param lun
-	 *            the lun to set
-	 */
-	public void setLun(int lun) {
+	public void setLun(UnsignedInteger lun) {
 		this.lun = lun;
 	}
 }

@@ -1,8 +1,8 @@
 package de.persosim.driver.connector.pcsc;
 
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
-import de.persosim.simulator.utils.Utils;
 
 /**
  * This {@link PcscCallResult} contains a status code and optional data parameters.
@@ -12,11 +12,11 @@ import de.persosim.simulator.utils.Utils;
 public class SimplePcscCallResult implements PcscCallResult {
 	private String resultData;
 	
-	public SimplePcscCallResult(int responseCode){
-		resultData = HexString.encode(Utils.toUnsignedByteArray(responseCode));
+	public SimplePcscCallResult(UnsignedInteger responseCode){
+		resultData = responseCode.getAsHexString();
 	}
 	
-	public SimplePcscCallResult(int responseCode, byte [] ... data) {
+	public SimplePcscCallResult(UnsignedInteger responseCode, byte [] ... data) {
 		this(responseCode);
 		for (byte[] current : data) {
 			resultData += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);

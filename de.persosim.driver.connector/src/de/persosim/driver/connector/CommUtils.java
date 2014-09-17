@@ -65,6 +65,24 @@ public class CommUtils {
 
 	/**
 	 * This method performs a handshake against the
+	 * {@link NativeDriverConnector} if no lun is known. This is the case for
+	 * the initial connection initiation.
+	 * 
+	 * @param iccSocket
+	 *            the socket to communicate over
+	 * @param mode
+	 *            {@link HandshakeMode}
+	 * @return the assigned lun for this connection
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public static UnsignedInteger doHandshake(Socket iccSocket,
+			HandshakeMode mode) throws IOException, InterruptedException {
+		return doHandshake(iccSocket, null, mode);
+	}
+
+	/**
+	 * This method performs a handshake against the
 	 * {@link NativeDriverConnector}.
 	 * 
 	 * @param iccSocket
@@ -77,35 +95,45 @@ public class CommUtils {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public static byte doHandshake(Socket iccSocket, byte lun, HandshakeMode mode)
-			throws IOException, InterruptedException {
+	public static UnsignedInteger doHandshake(Socket iccSocket,
+			UnsignedInteger lun, HandshakeMode mode) throws IOException,
+			InterruptedException {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				iccSocket.getOutputStream()));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
+		//use magic word for not assigned lun
+		if (lun == null){
+			lun = NativeDriverInterface.LUN_NOT_ASSIGNED;
+		}
+		
 		CommUtils.writeLine(
 				writer,
-				HexString.encode(NativeDriverInterface.MESSAGE_ICC_HELLO)
+				NativeDriverInterface.MESSAGE_ICC_HELLO.getAsHexString()
 						+ NativeDriverInterface.MESSAGE_DIVIDER
-						+ HexString.encode(lun));
+						+ lun.getAsHexString());
 		String[] helloData = reader.readLine().split(
 				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
-		if (!helloData[0].equals(HexString.encode(NativeDriverInterface.MESSAGE_IFD_HELLO))) {
+		if (!(new UnsignedInteger(HexString.toByteArray(helloData[0]))).equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
 					"Unexpected message type");
 		}
 
 		try {
-			byte responseLun = (byte)Integer.parseInt(helloData[1], 16);
+			UnsignedInteger responseLun = UnsignedInteger.parseUnsignedInteger(helloData[1], 16);
 
 			if (mode == HandshakeMode.OPEN) {
-				CommUtils.writeLine(writer, HexString
-						.encode(NativeDriverInterface.MESSAGE_ICC_DONE));
+				CommUtils
+						.writeLine(writer,
+								NativeDriverInterface.MESSAGE_ICC_DONE
+										.getAsHexString());
 			} else {
-				CommUtils.writeLine(writer, HexString
-						.encode(NativeDriverInterface.MESSAGE_ICC_STOP));
+				CommUtils
+						.writeLine(writer,
+								NativeDriverInterface.MESSAGE_ICC_STOP
+										.getAsHexString());
 			}
 
 			return responseLun;

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -26,7 +27,7 @@ public class TestDriver {
 	private Collection<DriverEventListener> listeners = new HashSet<DriverEventListener>();
 
 	private TestDriverCommunicationThread communicationThread;
-	private HashMap<Byte, Socket> lunMapping = new HashMap<>();
+	private HashMap<Integer, Socket> lunMapping = new HashMap<>();
 
 	private boolean running = false;
 
@@ -86,14 +87,14 @@ public class TestDriver {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public String sendData(byte lun, byte function, byte[]... data)
+	public String sendData(UnsignedInteger lun, UnsignedInteger function, byte[]... data)
 			throws IOException, InterruptedException {
-		Socket iccSocket = lunMapping.get(lun);
+		Socket iccSocket = lunMapping.get(lun.getAsInt());
 		if (iccSocket != null && iccSocket.isConnected()) {
 			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
-			String dataToSend = HexString.encode(function) + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(lun);
+			String dataToSend = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + lun.getAsHexString();
 
 			for (byte[] current : data) {
 				dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
@@ -140,7 +141,7 @@ public class TestDriver {
 		listeners.remove(listener);
 	}
 
-	private static byte lun = -1;
+	private static UnsignedInteger lun = null;
 
 	/**
 	 * Main method for starting a stand alone test driver using a console
@@ -163,11 +164,15 @@ public class TestDriver {
 			try {
 				switch (commandArgs[0]) {
 				case "lun":
-					lun = (byte) Integer.parseInt(commandArgs[1], 16);
+					if (Long.parseLong(commandArgs[1], 16) < 0){
+						lun = null;
+						break;
+					}
+					lun = UnsignedInteger.parseUnsignedInteger(commandArgs[1], 16);
 					break;
 				case "data":
 
-					byte function = (byte) Integer.parseInt(commandArgs[1], 16);
+					UnsignedInteger function = UnsignedInteger.parseUnsignedInteger(commandArgs[1], 16);
 
 					byte[][] parameterData = new byte[commandArgs.length - 2][];
 
@@ -213,9 +218,9 @@ public class TestDriver {
 					return;
 				default:
 					System.out.println("Possible commands:");
-					System.out.println("lun <number>");
+					System.out.println("lun <hexNumber>");
 					System.out
-							.println("data <functionNumber> <param1> <param2> ...");
+							.println("data <functionHexNumber> <param1> <param2> ...");
 					System.out.println("powerup");
 					System.out.println("powerdown");
 					System.out.println("reset");
