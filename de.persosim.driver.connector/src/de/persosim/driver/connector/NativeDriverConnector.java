@@ -18,7 +18,6 @@ import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
-import de.persosim.driver.connector.pcsc.TlvPcscCallResult;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
@@ -229,57 +228,50 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		byte[] currentTag = data.getParameters().get(0);
 		if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
 				currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					"HJP Consulting".getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_TYPE),
 				currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					"Virtual Card Reader IFD"
 							.getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_VERSION),
 				currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_VENDOR_NAME), new byte[] { 0,
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte[] { 0,
 							0, 0, 0 }); // 0xMMmmbbbb MM=major mm=minor
 										// bbbb=build
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_VENDOR_SERIAL),
 				currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_VENDOR_NAME),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					"Serial000000001".getBytes(StandardCharsets.US_ASCII));
 		} else if (Arrays.equals(Utils.toUnsignedByteArray(TAG_IFD_ATR),
 				currentTag)) {
 			if (cachedAtr != null) {
-				result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-						Utils.toUnsignedByteArray(TAG_IFD_ATR), cachedAtr);
+				result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, cachedAtr);
 			}
 		} else if (Arrays.equals(
 				Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS),
 				currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_IFD_SIMULTANEOUS_ACCESS),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					new byte[] { 1 });
 		} else if (Arrays.equals(
 				Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER), currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_IFD_SLOTS_NUMBER),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					new byte[] { 1 });
 		} else if (Arrays
 				.equals(Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE),
 						currentTag)) {
-			result = new TlvPcscCallResult(PcscConstants.IFD_SUCCESS,
-					Utils.toUnsignedByteArray(TAG_IFD_SLOT_THREAD_SAFE),
+			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS,
 					new byte[] { 0 });
 		} else {
 			for (PcscListener listener : listeners) {
 				if (listener instanceof PcscFeature) {
 					PcscFeature feature = (PcscFeature) listener;
-					result = new SimplePcscCallResult(
-							PcscConstants.IFD_SUCCESS, PcscDataHelper.getField(
-									currentTag, feature.getCapabilities()));
-					if (result != null) {
+					byte [] field = PcscDataHelper.getField(
+							currentTag, feature.getCapabilities());
+					if (field != null){
+						result = new SimplePcscCallResult(
+								PcscConstants.IFD_SUCCESS, field);
 						break;
 					}
 				}
