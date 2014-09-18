@@ -54,7 +54,7 @@ public interface PcscConstants {
 	 * Standard control code to be supported by all class 2 readers as defined
 	 * in the PCSC specification.
 	 */
-	public static final int VALUE_CONTROL_CODE_GET_FEATURE_REQUEST = 3400;
+	public static final int VALUE_CONTROL_CODE_GET_FEATURE_REQUEST = 0x42000d48;
 	
 
 	public static final UnsignedInteger IFD_POWER_UP = new UnsignedInteger(VALUE_IFD_POWER_UP);
