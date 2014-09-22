@@ -129,11 +129,14 @@ public class CommUtils {
 						.writeLine(writer,
 								NativeDriverInterface.MESSAGE_ICC_DONE
 										.getAsHexString());
-			} else {
+			} else if (mode == HandshakeMode.CLOSE) {
 				CommUtils
 						.writeLine(writer,
 								NativeDriverInterface.MESSAGE_ICC_STOP
 										.getAsHexString());
+			} else {
+				throw new PcscNativeCommunicationException(
+						"Unexpected message type");
 			}
 
 			return responseLun;

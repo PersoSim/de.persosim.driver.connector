@@ -108,7 +108,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
-		// the feature number for EXECUTE_PACE is 0x20
+
 		byte[] expectedHeader = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01,
 				 FEATURE_CONTROL_CODE};
 
