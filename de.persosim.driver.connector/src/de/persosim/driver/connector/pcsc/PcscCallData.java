@@ -29,6 +29,7 @@ public class PcscCallData {
 		function = getCallType(data);
 		logicalUnitNumber = getLogicalUnitNumber(data);
 		parameters = getParameters(data);
+		
 	}
 
 	/**

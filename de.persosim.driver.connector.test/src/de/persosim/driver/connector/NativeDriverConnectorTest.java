@@ -82,10 +82,10 @@ public class NativeDriverConnectorTest {
 		sim.stop();
 	}
 
-	private String checkPcscTag(UnsignedInteger tag, UnsignedInteger expectedResponseCode) throws Exception{
+	private String checkPcscTag(UnsignedInteger tag, UnsignedInteger expectedResponseCode, UnsignedInteger expectedLength) throws Exception{
 		String result = driver.sendData(new UnsignedInteger(0),
 				NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES,
-				tag.getAsByteArray());
+				tag.getAsByteArray(), expectedLength.getAsByteArray());
 
 		String expected = "";
 		
@@ -108,35 +108,35 @@ public class NativeDriverConnectorTest {
 	public void testPcscGetCapabilitiesVendorName() throws Exception {
 		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
-		checkPcscTag(PcscConstants.TAG_VENDOR_NAME, PcscConstants.IFD_SUCCESS);
+		checkPcscTag(PcscConstants.TAG_VENDOR_NAME, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSimultaneousAccess() throws Exception {
 		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
-		checkPcscTag(PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS, PcscConstants.IFD_SUCCESS);
+		checkPcscTag(PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotsNumber() throws Exception {
 		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
-		checkPcscTag(PcscConstants.TAG_IFD_SLOTS_NUMBER, PcscConstants.IFD_SUCCESS);
+		checkPcscTag(PcscConstants.TAG_IFD_SLOTS_NUMBER, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotThreadSafe() throws Exception {
 		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
-		checkPcscTag(PcscConstants.TAG_IFD_SLOT_THREAD_SAFE, PcscConstants.IFD_SUCCESS);
+		checkPcscTag(PcscConstants.TAG_IFD_SLOT_THREAD_SAFE, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesNotExisting() throws Exception {
 		// XXX find better solution for timing issues while testing
 		Thread.sleep(100);
-		checkPcscTag(new UnsignedInteger(0xFFFFFFFFl), PcscConstants.IFD_ERROR_TAG);
+		checkPcscTag(new UnsignedInteger(0xFFFFFFFFl), PcscConstants.IFD_ERROR_TAG, UnsignedInteger.MAX_VALUE);
 	}
 	
 	@Test
@@ -154,9 +154,9 @@ public class NativeDriverConnectorTest {
 			}
 		};
 		
-		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray());
+		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, apdu);
+		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, apdu, UnsignedInteger.MAX_VALUE.getAsByteArray());
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
 		assertEquals(expected, response);
 	}
@@ -188,11 +188,11 @@ public class NativeDriverConnectorTest {
 				return null;
 			}
 		});
-		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray());
+		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray());
+		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		//a string of tag|00000004|xxxxxxxx bytes is expected
+		//a string of tag|00000004|xxxxxxxx bytes is expected in all but the last 4 byte
 		byte [] responseData = HexString.toByteArray(response.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[1]);
 		boolean foundFeature = false;
 		for (int i = 0; i < responseData.length / 4; i++){
@@ -221,7 +221,7 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray());
+		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result);
@@ -233,7 +233,7 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT);
+		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT, UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		String expected = PcscConstants.IFD_ICC_PRESENT.getAsHexString();
 		assertEquals(expected, result);
@@ -253,7 +253,7 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray());
+		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		String expected = PcscConstants.IFD_ERROR_POWER_ACTION.getAsHexString();
 		assertEquals(expected, result);
@@ -276,9 +276,9 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 		
-		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray());
+		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray());
+		result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MIN_VALUE.getAsByteArray());
 
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString();
 		assertEquals(expected, result);
@@ -302,9 +302,9 @@ public class NativeDriverConnectorTest {
 		//XXX find better solution for timing issues while testing
 		Thread.sleep(100);
 
-		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray());
+		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_RESET.getAsByteArray());
+		result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_RESET.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result);

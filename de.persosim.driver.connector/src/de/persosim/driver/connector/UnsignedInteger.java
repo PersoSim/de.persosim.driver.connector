@@ -5,11 +5,13 @@ import de.persosim.simulator.utils.Utils;
 
 public class UnsignedInteger {
 	private long value;
-	
-	static final long MAX_VALUE = 0xFFFFFFFFl;
+	private static final long MAX_VALUE_LONG = 0x0FFFFFFFFl;
+	private static final long MIN_VALUE_LONG = 0;
+	public static final UnsignedInteger MAX_VALUE = new UnsignedInteger(MAX_VALUE_LONG);
+	public static final UnsignedInteger MIN_VALUE = new UnsignedInteger(MIN_VALUE_LONG);
 	
 	public UnsignedInteger(long value){
-		if (value > MAX_VALUE || value < 0 ){
+		if (value > MAX_VALUE_LONG || value < 0 ){
 			throw new NumberFormatException("Value to big for this type");
 		}
 		this.value = value;
