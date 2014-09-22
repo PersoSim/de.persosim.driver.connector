@@ -74,7 +74,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	public static final int OFFSET_COMMAND_DATA = 1;
 	public static final int OFFSET_LC = 0;
 
-	public PersoSimPcscProcessor(int controlCode) {
+	public PersoSimPcscProcessor(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_CONTROL_CODE);
 	}
 	
@@ -91,9 +91,17 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	}
 
 	private PcscCallResult deviceControl(PcscCallData data) {
-		byte[] controlCode = data.getParameters().get(0);
-		if (Arrays.equals(controlCode,
-				Utils.toUnsignedByteArray(getControlCode()))) {
+		UnsignedInteger controlCode = new UnsignedInteger(data.getParameters().get(0));
+		UnsignedInteger expectedLength = null;
+		if (2 < data.getParameters().size()){
+			expectedLength = new UnsignedInteger(data.getParameters().get(2));
+		}
+
+		if (expectedLength == null){
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
+		}
+		
+		if (controlCode.equals(getControlCode())) {
 			switch (data.getParameters().get(1)[OFFSET_FUNCTION]) {
 			case FUNCTION_GET_READER_PACE_CAPABILITIES:
 				return getReaderPaceCapabilities();
@@ -108,7 +116,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
-
+		//FIXME add check for expected length
 		byte[] expectedHeader = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01,
 				 FEATURE_CONTROL_CODE};
 

@@ -30,7 +30,6 @@ import de.persosim.simulator.perso.DefaultPersonalization;
 import de.persosim.simulator.platform.PersoSimKernel;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.PersoSimLogger;
-import de.persosim.simulator.utils.Utils;
 
 public class NativeDriverConnectorTest {
 
@@ -174,7 +173,7 @@ public class NativeDriverConnectorTest {
 		};
 		
 		byte fakeTag = (byte) 255;
-		int fakeControlCode = 1357;
+		UnsignedInteger fakeControlCode = new UnsignedInteger(1357);
 		
 		nativeConnector.addListener(new AbstractPcscFeature(fakeControlCode, fakeTag) {
 			
@@ -198,7 +197,7 @@ public class NativeDriverConnectorTest {
 		for (int i = 0; i < responseData.length / 4; i++){
 			assertEquals(4, responseData[i*4+1]);
 			if (responseData[i*4] == fakeTag){
-				Arrays.equals(Utils.toUnsignedByteArray(fakeControlCode), Arrays.copyOfRange(responseData, i*4+2, i*4+6));
+				Arrays.equals(fakeControlCode.getAsByteArray(), Arrays.copyOfRange(responseData, i*4+2, i*4+6));
 				foundFeature = true;
 			}
 		}

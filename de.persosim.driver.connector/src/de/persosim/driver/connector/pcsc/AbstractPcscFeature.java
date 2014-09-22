@@ -1,5 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -11,10 +12,10 @@ import de.persosim.simulator.utils.Utils;
  *
  */
 public abstract class AbstractPcscFeature implements PcscFeature {
-	private int controlCode;
+	private UnsignedInteger controlCode;
 	private byte featureTag;
 
-	public AbstractPcscFeature(int controlCode, byte featureTag) {
+	public AbstractPcscFeature(UnsignedInteger controlCode, byte featureTag) {
 		this.controlCode = controlCode;
 		this.featureTag = featureTag;
 	}
@@ -22,12 +23,12 @@ public abstract class AbstractPcscFeature implements PcscFeature {
 	/**
 	 * @return the controlCode
 	 */
-	public int getControlCode() {
+	public UnsignedInteger getControlCode() {
 		return controlCode;
 	}
 	
 	@Override
 	public byte[] getFeatureDefinition() {
-		return Utils.concatByteArrays(new byte [] {featureTag, 4}, Utils.toUnsignedByteArray(controlCode));
+		return Utils.concatByteArrays(new byte [] {featureTag, 4}, controlCode.getAsByteArray());
 	}
 }
