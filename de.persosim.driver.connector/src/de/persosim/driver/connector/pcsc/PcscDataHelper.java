@@ -94,6 +94,7 @@ public class PcscDataHelper {
 	 *         the tag could not be found
 	 */
 	public static byte[] getField(UnsignedInteger tag, byte[] data) {
+		if (data == null) {return null;};
 		int offset = 0;
 		int length = 0;
 		while (offset < data.length - DWORD_LENGTH) {
