@@ -214,7 +214,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceControl(PcscCallData data) {
 		UnsignedInteger controlCode = new UnsignedInteger(data.getParameters().get(0));
-		UnsignedInteger expectedLength = getExpectedLength(data, 1);
+		UnsignedInteger expectedLength = getExpectedLength(data, 2);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
