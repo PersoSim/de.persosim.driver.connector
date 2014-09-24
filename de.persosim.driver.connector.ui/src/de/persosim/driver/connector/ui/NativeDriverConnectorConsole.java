@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import de.persosim.driver.connector.NativeDriverConnector;
-import de.persosim.driver.connector.PcscPrinter;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.features.MctReaderDirect;
 import de.persosim.driver.connector.features.MctUniversal;
@@ -26,7 +25,6 @@ public class NativeDriverConnectorConsole {
 		NativeDriverConnector connector = new NativeDriverConnector(
 				"localhost", 5678, "localhost", 9876);
 		connector.addUi(new ConsoleUi());
-		connector.addListener(new PcscPrinter());
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x42000DB2)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x42000DB3)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x42000DB4)));

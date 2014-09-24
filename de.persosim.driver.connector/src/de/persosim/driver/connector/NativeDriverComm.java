@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.simulator.utils.HexString;
 
 /**
  * This thread reads PCSC data from the native interface and delegates it to the @link
@@ -65,6 +67,7 @@ public class NativeDriverComm extends Thread {
 					if (data != null) {
 						try {
 							PcscCallData callData = new PcscCallData(data);
+							log(callData);
 							for (PcscListener listener : listeners) {
 								try {
 									PcscCallResult currentResult = listener
@@ -94,7 +97,9 @@ public class NativeDriverComm extends Thread {
 								}
 							};
 						}
-
+						
+						log(result);
+						
 						bufferedDataOut.write(result.getEncoded());
 						bufferedDataOut.newLine();
 						bufferedDataOut.flush();
@@ -110,6 +115,33 @@ public class NativeDriverComm extends Thread {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	
+	public void log(PcscCallResult data){
+		System.out.println("PCSC Out:\t" + data.getEncoded());
+	}
+	
+	public void log(PcscCallData data) {
+		System.out.print("PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
+		for (byte[] current : data.getParameters()) {
+			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current));
+		}
+		System.out.println();
+	}
+	
+	String getStringRep(UnsignedInteger value){
+		Field [] fields = NativeDriverInterface.class.getDeclaredFields();
+		for (Field field : fields){
+			try {
+				if (value.equals(field.get(new NativeDriverInterface() {
+				}))){
+					return field.getName();
+				}
+			} catch (Exception e) {
+				continue;
+			}
+		}
+		return value.getAsHexString();
 	}
 
 	/*
