@@ -1,4 +1,4 @@
-package de.persosim.driver.connector.protocols.pace;
+package de.persosim.driver.connector.features;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -106,9 +106,9 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			case FUNCTION_GET_READER_PACE_CAPABILITIES:
 				return getReaderPaceCapabilities();
 			case FUNCTION_ESTABLISH_PACE_CHANNEL:
-				return establishPaceChannel(getInputDataFromPpdu(data.getParameters().get(1)));
+				return establishPaceChannel(data.getParameters().get(1));
 			case FUNCTION_DESTROY_PACE_CHANNEL:
-				return destroyPaceChannel(getInputDataFromPpdu(data.getParameters().get(1)));
+				return destroyPaceChannel(data.getParameters().get(1));
 			}
 		}
 		return null;

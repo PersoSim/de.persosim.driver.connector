@@ -34,7 +34,7 @@ import de.persosim.simulator.utils.Utils;
 public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
-	private Collection<PcscListener> listeners = new HashSet<PcscListener>();
+	private Collection<PcscListener> listeners = new ArrayList<PcscListener>();
 	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
 	private NativeDriverComm comm;
 	private String nativeDriverHostName;
@@ -214,7 +214,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceControl(PcscCallData data) {
 		UnsignedInteger controlCode = new UnsignedInteger(data.getParameters().get(0));
-		UnsignedInteger expectedLength = getExpectedLength(data, 1);
+		UnsignedInteger expectedLength = getExpectedLength(data, 2);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);

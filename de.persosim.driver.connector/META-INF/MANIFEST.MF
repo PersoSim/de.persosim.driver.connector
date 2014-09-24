@@ -10,4 +10,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: de.persosim.driver.connector,
  de.persosim.driver.connector.pcsc,
- de.persosim.driver.connector.protocols.pace
+ de.persosim.driver.connector.features
