@@ -188,7 +188,7 @@ public class NativeDriverConnectorTest {
 		});
 		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
+		response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray(), new byte[]{}, UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		//a string of tag|00000004|xxxxxxxx bytes is expected in all but the last 4 byte
 		byte [] responseData = HexString.toByteArray(response.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[1]);
