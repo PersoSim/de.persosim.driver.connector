@@ -1,12 +1,9 @@
 package de.persosim.driver.connector.features;
 
-import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
-import de.persosim.driver.connector.pcsc.PcscConstants;
-import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 
 public class VerifyPinDirect extends AbstractPcscFeature {
 
