@@ -8,8 +8,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2CwHwD_MEeS0lKPtDtc_Vw" featurename="children" parentElementId="de.persosim.rcp.mainMenue">
     <elements xsi:type="menu:Menu" xmi:id="_CG2WUD_OEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.menu.togglePinPadMenu" label="Toggle PinPad">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_QX4L8D_OEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.menu.togglePinPadHandler" label="Toggle PinPad (handler)" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
-      <children xsi:type="menu:DirectMenuItem" xmi:id="_14SEgEI6EeS095NvfbDi9w" elementId="de.persosim.driver.connector.ui.menu.togglePinPadDirect" label="Toggle PinPad (direct)" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.PinPadHandler"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_QX4L8D_OEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.menu.togglePinPadHandler" label="Toggle PinPad" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jbTUMEIsEeS095NvfbDi9w" featurename="children" parentElementId="de.persosim.rcp.partSashContainer">
