@@ -1,7 +1,18 @@
 package de.persosim.driver.connector.ui.parts;
 
-import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MTrimmedWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -13,6 +24,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
+import de.persosim.driver.connector.VirtualReaderUi;
+
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
  * in connection with the respective simulated card reader.
@@ -20,7 +33,7 @@ import org.eclipse.swt.widgets.Text;
  * @author slutters
  *
  */
-public class PinPad {
+public class PinPad implements VirtualReaderUi{
 	
 	private static final String FONT_NAME = "Helvetica";
 	
@@ -40,7 +53,7 @@ public class PinPad {
 	public static final String message_007_de = "Neue Geheimzahl" + System.lineSeparator() + "eingeben";
 	public static final String message_008_de = "Eingabe" + System.lineSeparator() + "wiederholen";
 	public static final String message_009_de = "Geheimzahl nicht" + System.lineSeparator() + "gleich. Abbruch";
-	public static final String message_010_de = "Bitte Eingabe" + System.lineSeparator() + "bestätigen";
+	public static final String message_010_de = "Bitte Eingabe" + System.lineSeparator() + "bestï¿½tigen";
 	public static final String message_011_de = "Bitte" + System.lineSeparator() + "Dateneingabe";
 	public static final String message_012_de = "Abbruch";
 	
@@ -53,6 +66,13 @@ public class PinPad {
 	
 	private Button[] keysNumeric;
 	private Button[] keysControl;
+	
+	private List<String> pressedKeys = new ArrayList<>();
+
+	
+	@Inject private MApplication application;
+	@Inject private EModelService modelService;
+	@Inject private EPartService partService;
 	
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -153,13 +173,13 @@ public class PinPad {
 		SelectionListener selectionListener = new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.append(text);
+				widgetDefaultSelected(event);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
 				System.out.println("pin pad button pressed: " + text);
 				txtOutput.append(text);
+				setButton(text);
 			}
 		};
 		
@@ -172,10 +192,7 @@ public class PinPad {
 		SelectionListener selectionListener = new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(message_102_de);
-				txtOutput.setFocus();
-				setEnableKeySet(KEYS_ALL, DISABLE);
+				widgetDefaultSelected(event);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
@@ -183,6 +200,7 @@ public class PinPad {
 				txtOutput.setText(message_102_de);
 				txtOutput.setFocus();
 				setEnableKeySet(KEYS_ALL, DISABLE);
+				setButton(text);
 			}
 		};
 		
@@ -198,13 +216,13 @@ public class PinPad {
 		SelectionListener selectionListener = new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(currentDefaultMessage);
+				widgetDefaultSelected(event);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
 				System.out.println("pin pad button pressed: " + text);
 				txtOutput.setText(currentDefaultMessage);
+				setButton(text);
 			}
 		};
 		
@@ -220,15 +238,14 @@ public class PinPad {
 		SelectionListener selectionListener = new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(message_102_de);
-				setEnableKeySet(KEYS_ALL, DISABLE);
+				widgetDefaultSelected(event);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
 				System.out.println("pin pad button pressed: " + text);
 				txtOutput.setText(message_102_de);
 				setEnableKeySet(KEYS_ALL, DISABLE);
+				setButton(text);
 			}
 		};
 		
@@ -261,6 +278,98 @@ public class PinPad {
         default:
         	break;
 		}
+	}
+	
+	private void hideMe(){
+		
+		// ID of part as defined in fragment.e4xmi application model
+		MPart pinPadPart = partService.findPart("de.persosim.driver.connector.ui.parts.pinPad");
+		// ID of window as defined in fragment.e4xmi application model
+		MTrimmedWindow mainWindowPart = (MTrimmedWindow) modelService.find("de.persosim.rcp.mainWindow", application);
+		int width = mainWindowPart.getWidth();
+		
+		if(pinPadPart.isVisible() || !pinPadPart.isToBeRendered()) {
+			mainWindowPart.setWidth(width -= 500);
+			
+			pinPadPart.setVisible(false);
+			pinPadPart.setToBeRendered(false);
+			
+		}
+		
+	}
+	
+	private void setButton(String value){
+		pressedKeys.add(value);
+		notifyIfReady();
+	}
+	
+	private void notifyIfReady(){
+		synchronized(pressedKeys){
+			if (pressedKeys.get(pressedKeys.size()-1).equals("OK")){
+				pressedKeys.notifyAll();
+			}
+		}
+	}
+	
+	private void showMe(){
+		// ID of part as defined in fragment.e4xmi application model
+		MPart pinPadPart = partService.findPart("de.persosim.driver.connector.ui.parts.pinPad");
+		// ID of window as defined in fragment.e4xmi application model
+		MTrimmedWindow mainWindowPart = (MTrimmedWindow) modelService.find("de.persosim.rcp.mainWindow", application);
+		int width = mainWindowPart.getWidth();
+		
+		if((!pinPadPart.isVisible()) || (!pinPadPart.isToBeRendered())) {
+			
+			mainWindowPart.setWidth(width += 500);
+			
+			pinPadPart.setVisible(true);
+			pinPadPart.setToBeRendered(true);
+			partService.showPart(pinPadPart, PartState.ACTIVATE);
+			
+		}
+	}
+
+	@Override
+	public byte[] getPin() throws IOException {
+		pressedKeys.clear();
+		showMe();
+		synchronized (pressedKeys) {
+			while(pressedKeys.size() == 0 || !pressedKeys.get(pressedKeys.size()-1).equals("OK")){
+				try {
+					pressedKeys.wait();
+				} catch (InterruptedException e) {
+					throw new IOException("The reading of the PIN could not be completed");
+				}
+			}
+		}
+		byte[] result = new byte[pressedKeys.size() - 1];
+		for (int i = 0; i < result.length; i++) {
+			try {
+				byte currentNumber = Byte.parseByte(pressedKeys.get(i));
+				result[i] = currentNumber;
+			} catch (NumberFormatException e) {
+				throw new IOException(
+						"PIN containing non valid characters entered");
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public void display(String... lines) {
+		showMe();
+		StringBuilder text = new StringBuilder();
+		for (String line : lines){
+			text.append(line);
+			text.append(System.lineSeparator());
+		}
+		setText(text.toString());
+	}
+
+	@Override
+	public byte[] getDeviceDescriptors() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

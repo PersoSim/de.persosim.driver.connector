@@ -156,10 +156,13 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		
 		// TODO filter pin data if the type is secret (PIN/PUK)
 
-		if (pin.length == 0){
+		if (pin.length != 0){
 			for (VirtualReaderUi current : interfaces){
 				try {
 					pin = current.getPin();
+					if (pin != null){
+						break;	
+					}
 				} catch (IOException e) {
 					// TODO logging
 					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_ABORT, new byte [0]);

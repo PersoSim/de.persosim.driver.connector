@@ -18,6 +18,7 @@ import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
+import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
@@ -95,6 +96,9 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void addListener(PcscListener listener) {
 		listeners.add(listener);
+		if (listener instanceof UiEnabled){
+			((UiEnabled)listener).setUserInterfaces(userInterfaces);
+		}
 	}
 
 	/**
