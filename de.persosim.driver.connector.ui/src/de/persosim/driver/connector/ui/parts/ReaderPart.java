@@ -15,6 +15,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 
 import de.persosim.driver.connector.NativeDriverConnector;
@@ -35,6 +36,10 @@ import de.persosim.driver.connector.features.VerifyPinDirect;
  */
 public class ReaderPart implements VirtualReaderUi{
 
+	public enum ReaderType {
+		STANDARD, BASIC, NONE;
+	}
+	
 	private static final String FONT_NAME = "Helvetica";
 	
 	public static final boolean ENABLE = true;
@@ -44,25 +49,7 @@ public class ReaderPart implements VirtualReaderUi{
 	public static final int KEYS_ALL_NUMERIC = -2;
 	public static final int KEYS_ALL         = -1;
 	
-	public static final String message_001_de = "Bitte Karte" + System.lineSeparator() + "bereitstellen";
-	public static final String message_002_de = "Bitte Karte" + System.lineSeparator() + "entfernen";
-	public static final String message_003_de = "Karte unlesbar." + System.lineSeparator() + "Falsche Lage?";
-	public static final String message_004_de = "Bitte Geheimzahl" + System.lineSeparator() + "eingeben";
-	public static final String message_005_de = "Aktion" + System.lineSeparator() + "erfolgreich";
-	public static final String message_006_de = "Geheimzahl" + System.lineSeparator() + "falsch/gesperrt";
-	public static final String message_007_de = "Neue Geheimzahl" + System.lineSeparator() + "eingeben";
-	public static final String message_008_de = "Eingabe" + System.lineSeparator() + "wiederholen";
-	public static final String message_009_de = "Geheimzahl nicht" + System.lineSeparator() + "gleich. Abbruch";
-	public static final String message_010_de = "Bitte Eingabe" + System.lineSeparator() + "best�tigen";
-	public static final String message_011_de = "Bitte" + System.lineSeparator() + "Dateneingabe";
-	public static final String message_012_de = "Abbruch";
-	
-	public static final String message_101_de = "PersoSim PinPad" + System.lineSeparator() + "bereit";
-	public static final String message_102_de = "Warte auf" + System.lineSeparator() + "Antwort";
-	
 	private Text txtOutput;
-	
-	private String currentDefaultMessage;
 	
 	private Button[] keysNumeric;
 	private Button[] keysControl;
@@ -73,6 +60,8 @@ public class ReaderPart implements VirtualReaderUi{
 	private Composite root;
 	private Composite basicReaderControls;
 	private Composite standardReaderControls;
+	
+	private ReaderType type = ReaderType.NONE;
 	
 	private void createBasicReader(Composite parent){
 		disposeReaders();
@@ -113,7 +102,6 @@ public class ReaderPart implements VirtualReaderUi{
 		standardReaderControls = new Composite(parent, SWT.NONE);
 
 		GridData gridData;
-		currentDefaultMessage = message_101_de;
 		standardReaderControls.setLayout(new GridLayout(1, false));
 		
 		
@@ -127,7 +115,6 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		txtOutput = new Text(pinpadComposite, SWT.READ_ONLY | SWT.PASSWORD | SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
 		txtOutput.setFont(new Font(pinpadComposite.getDisplay(), FONT_NAME, 24, SWT.BOLD));
-		txtOutput.setText(message_101_de);
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
 		
@@ -178,6 +165,10 @@ public class ReaderPart implements VirtualReaderUi{
 		button = createDefaultButton(controlComposite, "", null, 150, 100);
 		button.setEnabled(DISABLE);
 //		button.setVisible(false);
+		
+
+		setEnableKeySet(KEYS_ALL, false);
+		
 		parent.layout();
 		parent.redraw();
 	}
@@ -238,9 +229,6 @@ public class ReaderPart implements VirtualReaderUi{
 
 			public void widgetDefaultSelected(SelectionEvent event) {
 				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(message_102_de);
-				txtOutput.setFocus();
-				setEnableKeySet(KEYS_ALL, DISABLE);
 				setButton(text);
 			}
 		};
@@ -261,8 +249,6 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(currentDefaultMessage);
 				setButton(text);
 			}
 		};
@@ -283,9 +269,6 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
-				txtOutput.setText(message_102_de);
-				setEnableKeySet(KEYS_ALL, DISABLE);
 				setButton(text);
 			}
 		};
@@ -296,20 +279,38 @@ public class ReaderPart implements VirtualReaderUi{
 		return button;
 	}
 	
-	public void setText(String text) {
-		txtOutput.setText(text);
+	public void setText(final String text) {
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				txtOutput.setText(text);
+			}
+		});
 	}
 	
-	public void setEnableKeySet(int keySet, boolean enabled) {
+	public void setEnableKeySet(int keySet, final boolean enabled) {
 		switch (keySet) {
         case KEYS_ALL_NUMERIC:
-        	for(Button button : keysNumeric) {
-        		button.setEnabled(enabled);
+        	for(final Button button : keysNumeric) {
+        		Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+		        		button.setEnabled(enabled);
+					}
+				});
         	}
         	break;
         case KEYS_ALL_CONTROL:
-        	for(Button button : keysControl) {
-        		button.setEnabled(enabled);
+        	for(final Button button : keysControl) {
+        		Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+		        		button.setEnabled(enabled);
+					}
+				});
         	}
         	break;
         case KEYS_ALL:
@@ -336,37 +337,47 @@ public class ReaderPart implements VirtualReaderUi{
 
 	@Override
 	public byte[] getPin() throws IOException {
-		pressedKeys.clear();
-		synchronized (pressedKeys) {
-			while(pressedKeys.size() == 0 || !pressedKeys.get(pressedKeys.size()-1).equals("OK")){
-				try {
-					pressedKeys.wait();
-				} catch (InterruptedException e) {
-					throw new IOException("The reading of the PIN could not be completed");
+		if (type.equals(ReaderType.STANDARD)) {
+			setEnableKeySet(KEYS_ALL, true);
+			pressedKeys.clear();
+			synchronized (pressedKeys) {
+				while (pressedKeys.size() == 0
+						|| !pressedKeys.get(pressedKeys.size() - 1)
+								.equals("OK")) {
+					try {
+						pressedKeys.wait();
+					} catch (InterruptedException e) {
+						throw new IOException(
+								"The reading of the PIN could not be completed");
+					}
 				}
 			}
-		}
-		byte[] result = new byte[pressedKeys.size() - 1];
-		for (int i = 0; i < result.length; i++) {
-			try {
-				byte currentNumber = Byte.parseByte(pressedKeys.get(i));
-				result[i] = currentNumber;
-			} catch (NumberFormatException e) {
-				throw new IOException(
-						"PIN containing non valid characters entered");
+			byte[] result = new byte[pressedKeys.size() - 1];
+			for (int i = 0; i < result.length; i++) {
+				try {
+					byte currentNumber = Byte.parseByte(pressedKeys.get(i));
+					result[i] = currentNumber;
+				} catch (NumberFormatException e) {
+					throw new IOException(
+							"PIN containing non valid characters entered");
+				}
 			}
+			setEnableKeySet(KEYS_ALL, false);
+			return result;
 		}
-		return result;
+		return null;
 	}
 	
 	@Override
 	public void display(String... lines) {
-		StringBuilder text = new StringBuilder();
-		for (String line : lines){
-			text.append(line);
-			text.append(System.lineSeparator());
+		if (type.equals(ReaderType.STANDARD)) {
+			StringBuilder text = new StringBuilder();
+			for (String line : lines) {
+				text.append(line);
+				text.append(System.lineSeparator());
+			}
+			setText(text.toString());
 		}
-		setText(text.toString());
 	}
 
 	@Override
@@ -405,6 +416,7 @@ public class ReaderPart implements VirtualReaderUi{
 			connector.connect();
 			
 			createBasicReader(root);
+			type = ReaderType.BASIC;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -431,6 +443,7 @@ public class ReaderPart implements VirtualReaderUi{
 			connector.connect();
 
 			createStandardReader(root);
+			type = ReaderType.STANDARD;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -438,8 +451,6 @@ public class ReaderPart implements VirtualReaderUi{
 	}
 	
 	public void disconnectReader(){
-
-
 		if (connector != null){
 
 			try {
@@ -452,6 +463,8 @@ public class ReaderPart implements VirtualReaderUi{
 
 		basicReaderControls.dispose();
 		standardReaderControls.dispose();
+		type = ReaderType.NONE;
+		
 	}
 }
 
