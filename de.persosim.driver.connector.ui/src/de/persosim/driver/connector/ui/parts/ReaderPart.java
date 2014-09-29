@@ -228,7 +228,6 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
 				setButton(text);
 			}
 		};
@@ -249,7 +248,10 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				setButton(text);
+				synchronized (pressedKeys) {
+					pressedKeys.clear();
+					setText("");
+				}
 			}
 		};
 		
@@ -329,8 +331,9 @@ public class ReaderPart implements VirtualReaderUi{
 	
 	private void notifyIfReady(){
 		synchronized(pressedKeys){
-			if (pressedKeys.get(pressedKeys.size()-1).equals("OK")){
+			if (pressedKeys.get(pressedKeys.size()-1).equals("OK") || pressedKeys.get(pressedKeys.size()-1).equals("C")){
 				pressedKeys.notifyAll();
+				setText("");
 			}
 		}
 	}
@@ -342,8 +345,8 @@ public class ReaderPart implements VirtualReaderUi{
 			pressedKeys.clear();
 			synchronized (pressedKeys) {
 				while (pressedKeys.size() == 0
-						|| !pressedKeys.get(pressedKeys.size() - 1)
-								.equals("OK")) {
+						|| (!pressedKeys.get(pressedKeys.size() - 1)
+								.equals("OK") && !pressedKeys.get(pressedKeys.size() - 1).equals("C"))) {
 					try {
 						pressedKeys.wait();
 					} catch (InterruptedException e) {
@@ -352,6 +355,12 @@ public class ReaderPart implements VirtualReaderUi{
 					}
 				}
 			}
+			if (pressedKeys.get(pressedKeys.size() - 1).equals("C")){
+				setText("");
+				setEnableKeySet(KEYS_ALL, false);
+				return null;
+			}
+			
 			byte[] result = new byte[pressedKeys.size() - 1];
 			for (int i = 0; i < result.length; i++) {
 				try {
@@ -398,7 +407,11 @@ public class ReaderPart implements VirtualReaderUi{
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
 				0x42000DCC)));
 	}
+
 	
+	/**
+	 * Switch the parts user interface and behavior to the basic reader state.
+	 */
 	public void switchToBasic() {
 		if (connector != null){
 
@@ -424,6 +437,9 @@ public class ReaderPart implements VirtualReaderUi{
 
 	}
 	
+	/**
+	 * Switch the parts user interface and behavior to the standard reader state.
+	 */
 	public void switchToStandard(){
 
 		if (connector != null){
@@ -450,6 +466,9 @@ public class ReaderPart implements VirtualReaderUi{
 		}
 	}
 	
+	/**
+	 * Switch the parts user interface and behavior to the off state.
+	 */
 	public void disconnectReader(){
 		if (connector != null){
 
