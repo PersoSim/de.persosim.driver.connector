@@ -1,5 +1,10 @@
 package de.persosim.driver.connector;
 
+/**
+ * This interface contains messages, that are defined in the TR-03119 for display on card interface devices.
+ * @author mboonk
+ *
+ */
 public interface Tr03119 {
 	public static final String MESSAGE_001_de = "Bitte Karte" + System.lineSeparator() + "bereitstellen";
 	public static final String MESSAGE_002_de = "Bitte Karte" + System.lineSeparator() + "entfernen";
