@@ -5,14 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MTrimmedWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -24,7 +17,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
+import de.persosim.driver.connector.NativeDriverConnector;
+import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.features.MctReaderDirect;
+import de.persosim.driver.connector.features.MctUniversal;
+import de.persosim.driver.connector.features.ModifyPinDirect;
+import de.persosim.driver.connector.features.PersoSimPcscProcessor;
+import de.persosim.driver.connector.features.VerifyPinDirect;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -33,8 +33,8 @@ import de.persosim.driver.connector.VirtualReaderUi;
  * @author slutters
  *
  */
-public class PinPad implements VirtualReaderUi{
-	
+public class ReaderPart implements VirtualReaderUi{
+
 	private static final String FONT_NAME = "Helvetica";
 	
 	public static final boolean ENABLE = true;
@@ -68,24 +68,57 @@ public class PinPad implements VirtualReaderUi{
 	private Button[] keysControl;
 	
 	private List<String> pressedKeys = new ArrayList<>();
+	private NativeDriverConnector connector;
 
+	private Composite root;
+	private Composite basicReaderControls;
+	private Composite standardReaderControls;
 	
-	@Inject private MApplication application;
-	@Inject private EModelService modelService;
-	@Inject private EPartService partService;
-	
-	@PostConstruct
-	public void createComposite(Composite parent) {
+	private void createBasicReader(Composite parent){
+		disposeReaders();
+		basicReaderControls = new Composite(parent, SWT.NONE);
+		
 		
 		GridData gridData;
+		basicReaderControls.setLayout(new GridLayout(1, false));
 		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		
+		Text txtOutput = new Text(basicReaderControls, SWT.READ_ONLY | SWT.PASSWORD | SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
+		txtOutput.setFont(new Font(basicReaderControls.getDisplay(), FONT_NAME, 24, SWT.BOLD));
+		txtOutput.setText("Basisleser");
+		txtOutput.setEditable(false);
+		txtOutput.setCursor(null);
+
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = SWT.FILL;
+		gridData.heightHint = 80;
+		txtOutput.setLayoutData(gridData);
+		parent.layout();
+		parent.redraw();
+	}
+	
+	private void disposeReaders(){
+		if (basicReaderControls != null)
+		basicReaderControls.dispose();
+		if (standardReaderControls != null)
+		standardReaderControls.dispose();
+	}
+	
+	private void createStandardReader(Composite parent){
+		disposeReaders();
+		standardReaderControls = new Composite(parent, SWT.NONE);
+
+		GridData gridData;
 		currentDefaultMessage = message_101_de;
-		
-		parent.setLayout(new GridLayout(1, false));
-		
+		standardReaderControls.setLayout(new GridLayout(1, false));
 		
 		
-		Composite pinpadComposite = new Composite(parent, SWT.NONE);
+		
+		Composite pinpadComposite = new Composite(standardReaderControls, SWT.NONE);
 		pinpadComposite.setLayout(new GridLayout(1, false));
 		
 		gridData = new GridData();
@@ -145,7 +178,15 @@ public class PinPad implements VirtualReaderUi{
 		button = createDefaultButton(controlComposite, "", null, 150, 100);
 		button.setEnabled(DISABLE);
 //		button.setVisible(false);
-		
+		parent.layout();
+		parent.redraw();
+	}
+	
+	
+	@PostConstruct
+	public void createComposite(Composite parent) {
+		root = parent;
+		switchToStandard();
 	}
 	
 	private Button createDefaultButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
@@ -280,24 +321,6 @@ public class PinPad implements VirtualReaderUi{
 		}
 	}
 	
-	private void hideMe(){
-		
-		// ID of part as defined in fragment.e4xmi application model
-		MPart pinPadPart = partService.findPart("de.persosim.driver.connector.ui.parts.pinPad");
-		// ID of window as defined in fragment.e4xmi application model
-		MTrimmedWindow mainWindowPart = (MTrimmedWindow) modelService.find("de.persosim.rcp.mainWindow", application);
-		int width = mainWindowPart.getWidth();
-		
-		if(pinPadPart.isVisible() || !pinPadPart.isToBeRendered()) {
-			mainWindowPart.setWidth(width -= 500);
-			
-			pinPadPart.setVisible(false);
-			pinPadPart.setToBeRendered(false);
-			
-		}
-		
-	}
-	
 	private void setButton(String value){
 		pressedKeys.add(value);
 		notifyIfReady();
@@ -310,29 +333,10 @@ public class PinPad implements VirtualReaderUi{
 			}
 		}
 	}
-	
-	private void showMe(){
-		// ID of part as defined in fragment.e4xmi application model
-		MPart pinPadPart = partService.findPart("de.persosim.driver.connector.ui.parts.pinPad");
-		// ID of window as defined in fragment.e4xmi application model
-		MTrimmedWindow mainWindowPart = (MTrimmedWindow) modelService.find("de.persosim.rcp.mainWindow", application);
-		int width = mainWindowPart.getWidth();
-		
-		if((!pinPadPart.isVisible()) || (!pinPadPart.isToBeRendered())) {
-			
-			mainWindowPart.setWidth(width += 500);
-			
-			pinPadPart.setVisible(true);
-			pinPadPart.setToBeRendered(true);
-			partService.showPart(pinPadPart, PartState.ACTIVATE);
-			
-		}
-	}
 
 	@Override
 	public byte[] getPin() throws IOException {
 		pressedKeys.clear();
-		showMe();
 		synchronized (pressedKeys) {
 			while(pressedKeys.size() == 0 || !pressedKeys.get(pressedKeys.size()-1).equals("OK")){
 				try {
@@ -354,10 +358,9 @@ public class PinPad implements VirtualReaderUi{
 		}
 		return result;
 	}
-
+	
 	@Override
 	public void display(String... lines) {
-		showMe();
 		StringBuilder text = new StringBuilder();
 		for (String line : lines){
 			text.append(line);
@@ -371,6 +374,84 @@ public class PinPad implements VirtualReaderUi{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	private void addStandardListeners(NativeDriverConnector connector){
+		connector.addListener(new VerifyPinDirect(new UnsignedInteger(
+				0x42000DB2)));
+		connector.addListener(new ModifyPinDirect(new UnsignedInteger(
+				0x42000DB3)));
+		connector.addListener(new MctReaderDirect(new UnsignedInteger(
+				0x42000DB4)));
+		connector
+				.addListener(new MctUniversal(new UnsignedInteger(0x42000DB5)));
+		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
+				0x42000DCC)));
+	}
 	
+	public void switchToBasic() {
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			connector = new NativeDriverConnector("localhost", 5678,
+					"localhost", 9876);
+			connector.addUi(this);
+			connector.connect();
+			
+			createBasicReader(root);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void switchToStandard(){
+
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			connector = new NativeDriverConnector("localhost", 5678,
+					"localhost", 9876);
+			connector.addUi(this);
+			addStandardListeners(connector);
+			connector.connect();
+
+			createStandardReader(root);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void disconnectReader(){
+
+
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		basicReaderControls.dispose();
+		standardReaderControls.dispose();
+	}
 }
 
