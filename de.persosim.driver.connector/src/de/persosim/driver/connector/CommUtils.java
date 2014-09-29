@@ -46,21 +46,16 @@ public class CommUtils {
 	 * @param commandApdu
 	 *            the data to transmit
 	 * @return the response received on the socket or null in case of errors
+	 * @throws IOException 
 	 */
-	public static byte[] exchangeApdu(Socket socket, byte[] commandApdu) {
-		try {
-			BufferedReader bufferedIn = new BufferedReader(
-					new InputStreamReader(socket.getInputStream()));
-			PrintWriter printOut;
-			printOut = new PrintWriter(socket.getOutputStream());
-			printOut.println(HexString.encode(commandApdu));
-			printOut.flush();
-			return HexString.toByteArray(bufferedIn.readLine());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public static byte[] exchangeApdu(Socket socket, byte[] commandApdu) throws IOException {
+		BufferedReader bufferedIn = new BufferedReader(
+				new InputStreamReader(socket.getInputStream()));
+		PrintWriter printOut;
+		printOut = new PrintWriter(socket.getOutputStream());
+		printOut.println(HexString.encode(commandApdu));
+		printOut.flush();
+		return HexString.toByteArray(bufferedIn.readLine());
 	}
 
 	/**

@@ -318,8 +318,13 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		if (IFD_POWER_DOWN.equals(
 				action)) {
 			if (simSocket != null && !simSocket.isClosed()) {
-				byte[] result = CommUtils.exchangeApdu(simSocket,
-						HexString.toByteArray("FF000000"));
+				byte[] result;
+				try {
+					result = CommUtils.exchangeApdu(simSocket,
+							HexString.toByteArray("FF000000"));
+				} catch (IOException e) {
+					return new SimplePcscCallResult(IFD_COMMUNICATION_ERROR);
+				}
 				try {
 					closeSimSocket();
 					if (Arrays
@@ -344,8 +349,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				}
 			} else if (IFD_RESET.equals(
 					action)) {
-				cachedAtr = CommUtils.exchangeApdu(simSocket,
-						HexString.toByteArray("FFFF0000"));
+				try {
+					cachedAtr = CommUtils.exchangeApdu(simSocket,
+							HexString.toByteArray("FFFF0000"));
+				} catch (IOException e) {
+					return new SimplePcscCallResult(IFD_COMMUNICATION_ERROR);
+				}
 			}
 			if (cachedAtr.length <= expectedLength.getAsSignedLong()){
 				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);	
@@ -380,7 +389,11 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
 			result = getOnlyTagsFromFeatureList(getFeatures());
 		} else {
-			result = CommUtils.exchangeApdu(simSocket, commandApdu);
+			try {
+				result = CommUtils.exchangeApdu(simSocket, commandApdu);
+			} catch (IOException e) {
+				return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR);
+			}
 		}
 
 		if (result.length > expectedLength.getAsSignedLong()){
