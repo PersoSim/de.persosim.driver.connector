@@ -461,8 +461,7 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 		}
 
-		basicReaderControls.dispose();
-		standardReaderControls.dispose();
+		disposeReaders();
 		type = ReaderType.NONE;
 		
 	}

@@ -163,6 +163,9 @@ public class NativeDriverComm extends Thread {
 			CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
 			dataSocket.close();
 			temp.close();
+			
+			// FIXME Hack (wait for pcsc to poll and kill connections until the driver handles the closure handshakes)
+			Thread.sleep(3000);
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
