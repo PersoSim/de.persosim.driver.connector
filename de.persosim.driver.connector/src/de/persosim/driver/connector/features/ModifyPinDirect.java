@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.features;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -40,6 +41,9 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
 				List<byte[]> params = data.getParameters();
 				byte[] param = params.get(1);
+				byte[] apduHeaderReceived = Arrays.copyOfRange(param, 24, param.length);
+				byte[] apduHeaderExpected = HexString.toByteArray("002C0203");
+				byte[] expectedLength = params.get(2);
 				
 				// XXX SLS actually use data from param
 				
@@ -77,12 +81,17 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 						match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
 						
 						if(match) {
-							resetRetryCounterApduBytes = Utils.concatByteArrays(param, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
-							params.set(1, resetRetryCounterApduBytes);
-							System.out.println("end: " + HexString.encode(params.get(1)));
-							System.out.println("modified param 1: " + HexString.encode(data.getParameters().get(1)));
+							List<byte[]> list = new ArrayList<>(2);
+							
+							resetRetryCounterApduBytes = Utils.concatByteArrays(apduHeaderExpected, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
+
+							list.add(resetRetryCounterApduBytes);
+							list.add(expectedLength);
 							
 							data.setFunction(NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
+							data.setParameters(list);
+
+							System.out.println("modified param 0: " + HexString.encode(data.getParameters().get(0)));
 						} else {
 							virtualReaderUi.display("new PIN does not match");
 						}
