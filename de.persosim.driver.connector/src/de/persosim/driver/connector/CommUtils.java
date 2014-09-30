@@ -162,4 +162,8 @@ public class CommUtils {
 		byte[] bytes = string.getBytes(StandardCharsets.US_ASCII);
 		return Utils.concatByteArrays(bytes, new byte[1]);
 	}
+	
+	public static byte [] toUnsignedShortFlippedBytes(short value){
+		return new byte [] { (byte) (0xFF & value), (byte) (0xFF & value >>> 8) };
+	}
 }

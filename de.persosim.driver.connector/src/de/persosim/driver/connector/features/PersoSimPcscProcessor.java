@@ -16,10 +16,14 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
+import de.persosim.simulator.platform.Iso7816Lib;
 import de.persosim.simulator.protocols.pace.Pace;
 import de.persosim.simulator.tlv.PrimitiveTlvDataObject;
 import de.persosim.simulator.tlv.TlvConstants;
+import de.persosim.simulator.tlv.TlvDataObject;
 import de.persosim.simulator.tlv.TlvDataObjectContainer;
+import de.persosim.simulator.tlv.TlvTag;
+import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -184,16 +188,70 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		if (chat.length > 0){
 			data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_7F4C, chat));	
 		}
-		byte [] pseudoApduHeader = new byte []{ (byte) 0xff, (byte) 0x86, 0, 0, (byte) (0xFF & data.toByteArray().length)};
 		
+		
+		byte [] select = HexString.toByteArray("00 A4 02 0C 02 2F 00");
+		byte [] readBinary = HexString.toByteArray("00 B0 00 00 00");
 		try {
-			byte [] response = CommUtils.exchangeApdu(communicationSocket, Utils.concatByteArrays(pseudoApduHeader, data.toByteArray()));
-			return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, response);
-		} catch (IOException e) {
+			byte [] response = CommUtils.exchangeApdu(communicationSocket, select);
+			
+			if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
+				// TODO logging
+				return buildResponse(PcscConstants.IFD_SUCCESS,
+						RESULT_COMMUNICATION_ABORT, new byte[0]);
+			}
+			response = CommUtils.exchangeApdu(communicationSocket, readBinary);
+			
+				
+			if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
+				// TODO logging
+				return buildResponse(PcscConstants.IFD_SUCCESS,
+						RESULT_COMMUNICATION_ABORT, new byte[0]);
+			} else {
+				byte [] efCardAccess = Arrays.copyOf(response, response.length - 2);
+				
+				byte [] pseudoApduHeader = new byte []{ (byte) 0xff, (byte) 0x86, 0, 0, (byte) (0xFF & data.toByteArray().length)};
+				try {
+					response = CommUtils.exchangeApdu(communicationSocket, Utils.concatByteArrays(pseudoApduHeader, data.toByteArray()));
+					
+					TlvDataObjectContainer responseData = new TlvDataObjectContainer(Arrays.copyOf(response, response.length - 2));
+					
+					byte [] mseSetAtStatusWord = Arrays.copyOfRange(response, response.length - 2, response.length);
+					TlvDataObject currentCar = responseData.getTlvDataObject(TlvConstants.TAG_87);
+					TlvDataObject previousCar = responseData.getTlvDataObject(TlvConstants.TAG_88);
+					TlvDataObject idIcc = responseData.getTlvDataObject(TlvConstants.TAG_86);
+
+					if (currentCar == null){
+						currentCar = new PrimitiveTlvDataObject(new TlvTag((byte)0));
+					}
+					if (previousCar == null){
+						previousCar = new PrimitiveTlvDataObject(new TlvTag((byte)0));
+					}
+					if (idIcc == null){
+						idIcc = new PrimitiveTlvDataObject(new TlvTag((byte)0));
+					}
+
+					byte[] pcscResponse = Utils.concatByteArrays(mseSetAtStatusWord,
+							CommUtils.toUnsignedShortFlippedBytes((short) efCardAccess.length),
+							efCardAccess, new byte[] { (byte) (0xFF & currentCar.getLengthValue()) },
+							currentCar.getValueField(), new byte[] { (byte) (0xFF & previousCar.getLengthValue()) },
+							previousCar.getValueField(), CommUtils.toUnsignedShortFlippedBytes((short) idIcc.getLengthValue()), idIcc.getValueField());
+					
+					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, pcscResponse);
+				} catch (IOException e) {
+					// TODO logging
+					return buildResponse(PcscConstants.IFD_SUCCESS,
+							RESULT_COMMUNICATION_ABORT, new byte[0]);
+				}
+			}
+
+			
+		} catch (IOException e){
 			// TODO logging
 			return buildResponse(PcscConstants.IFD_SUCCESS,
 					RESULT_COMMUNICATION_ABORT, new byte[0]);
 		}
+		
 		/*
 		// TODO implement PACE steps
 		short mseSetAtStatusWord = 0;
@@ -236,7 +294,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 
 	private PcscCallResult buildResponse(UnsignedInteger pcscResponseCode, int result, byte[] resultData) {
 		byte[] response = Utils.concatByteArrays(Utils.toUnsignedByteArray(result),
-				new byte []{(byte) resultData.length, (byte) (resultData.length>>>8)},
+				CommUtils.toUnsignedShortFlippedBytes((short) resultData.length),
 				resultData);
 		return new SimplePcscCallResult(pcscResponseCode, response);
 	}
