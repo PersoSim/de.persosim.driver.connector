@@ -51,15 +51,12 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 				
 				byte[] resetRetryCounterApduBytes;
 				
-				byte[] currentPin, newPin1, newPin2;
+				byte[] newPin1, newPin2;
 				boolean match;
 				
 				for(VirtualReaderUi virtualReaderUi : interfaces) {
 					try {
 						match = false;
-						
-						virtualReaderUi.display("Please enter current PIN");
-						currentPin = virtualReaderUi.getPin();
 						
 						while(!match) {
 							virtualReaderUi.display("Please enter new PIN");
