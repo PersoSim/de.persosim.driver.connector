@@ -41,7 +41,7 @@ public class ConsoleUi implements VirtualReaderUi {
 		}
 		System.out.println("Virtual Reader Display\n");
 		printCrossedLine(maxChars + 2);
-		System.out.print(builder.toString());
+		System.out.print("\n" + builder.toString() + "\n");
 		printCrossedLine(maxChars + 2);
 	}
 	
