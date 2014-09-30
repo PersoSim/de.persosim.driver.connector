@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -30,6 +29,10 @@ public class PcscCallData {
 		logicalUnitNumber = getLogicalUnitNumber(data);
 		parameters = getParameters(data);
 		
+	}
+
+	public void setFunction(UnsignedInteger function) {
+		this.function = function;
 	}
 
 	/**
