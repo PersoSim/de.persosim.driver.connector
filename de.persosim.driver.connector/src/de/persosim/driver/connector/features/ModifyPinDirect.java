@@ -40,14 +40,8 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
 				List<byte[]> params = data.getParameters();
 				byte[] param = params.get(1);
-				byte[] encodedLengthBytes = Arrays.copyOfRange(param, 20, 24);
-				byte[] apduHeaderBytes = Arrays.copyOfRange(param, 24, param.length);
 				
-				System.out.println("Param 1: " + HexString.encode(param));
-				System.out.println("expected length: " + HexString.encode(encodedLengthBytes));
-				System.out.println("APDU header: " + HexString.encode(apduHeaderBytes));
-				
-				// XXX SLS actually use data from params
+				// XXX SLS actually use data from param
 				
 				byte[] resetRetryCounterApduBytes;
 				
