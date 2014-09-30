@@ -17,7 +17,6 @@ import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.platform.Iso7816Lib;
-import de.persosim.simulator.protocols.pace.Pace;
 import de.persosim.simulator.tlv.PrimitiveTlvDataObject;
 import de.persosim.simulator.tlv.TlvConstants;
 import de.persosim.simulator.tlv.TlvDataObject;
@@ -163,9 +162,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		byte [] pin = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_PIN_LENGTH);
 		offset += pin.length + LENGTH_ESTABLISH_PACE_PIN_LENGTH;
 		
-		if (pinId == Pace.PWD_PIN || pinId == Pace.PWD_PUK){
-			pin = new byte [0];
-		}
 		if (pin.length == 0) {
 			for (VirtualReaderUi current : interfaces) {
 				try {
@@ -175,16 +171,23 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 					}
 				} catch (IOException e) {
 					// TODO logging
-					return buildResponse(PcscConstants.IFD_SUCCESS,
-							RESULT_ABORT, new byte[0]);
+					return new SimplePcscCallResult(IFD_ERROR_NOT_SUPPORTED);
 				}
 			}
+			
+		}
+		
+		if (pin == null){
+			return buildResponse(PcscConstants.IFD_SUCCESS,
+					RESULT_ABORT, new byte[0]);
 		}
 		
 		TlvDataObjectContainer data = new TlvDataObjectContainer();
-		//add password
+		//add password id
 		data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_83, new byte [] { pinId }));
+		//add password data
 		data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_92, pin));
+		//add chat
 		if (chat.length > 0){
 			data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_7F4C, chat));	
 		}
