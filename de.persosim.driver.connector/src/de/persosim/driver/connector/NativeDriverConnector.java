@@ -144,6 +144,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private void openSimSocket() throws UnknownHostException, IOException {
 		if (simSocket == null || simSocket.isClosed()) {
 			simSocket = new Socket(simHostName, simPort);
+			simSocket.setSoTimeout(2000);
 		}
 	}
 
