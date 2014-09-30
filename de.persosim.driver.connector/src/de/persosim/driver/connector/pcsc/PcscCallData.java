@@ -50,11 +50,7 @@ public class PcscCallData {
 	 * @return the parameters
 	 */
 	public List<byte[]> getParameters() {
-		List<byte[]> result = new ArrayList<byte[]>();
-		for (byte[] array : parameters) {
-			result.add(Arrays.copyOf(array, array.length));
-		}
-		return result;
+		return parameters;
 	}
 
 	private List<byte[]> getParameters(String data) {
