@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 
+import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -16,6 +17,9 @@ import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.protocols.pace.Pace;
+import de.persosim.simulator.tlv.PrimitiveTlvDataObject;
+import de.persosim.simulator.tlv.TlvConstants;
+import de.persosim.simulator.tlv.TlvDataObjectContainer;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -173,6 +177,24 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			}
 		}
 		
+		TlvDataObjectContainer data = new TlvDataObjectContainer();
+		//add password
+		data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_83, new byte [] { pinId }));
+		data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_92, pin));
+		if (chat.length > 0){
+			data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_7F4C, chat));	
+		}
+		byte [] pseudoApduHeader = new byte []{ (byte) 0xff, (byte) 0x86, 0, 0, (byte) (0xFF & data.toByteArray().length)};
+		
+		try {
+			byte [] response = CommUtils.exchangeApdu(communicationSocket, Utils.concatByteArrays(pseudoApduHeader, data.toByteArray()));
+			return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, response);
+		} catch (IOException e) {
+			// TODO logging
+			return buildResponse(PcscConstants.IFD_SUCCESS,
+					RESULT_COMMUNICATION_ABORT, new byte[0]);
+		}
+		/*
 		// TODO implement PACE steps
 		short mseSetAtStatusWord = 0;
 		byte [] efCardAccess = new byte [0];
@@ -203,9 +225,8 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			 (byte) 0x64, (byte) 0x2E, (byte) 0x64, (byte) 0x65, (byte) 0x2F, (byte) 0x63, (byte) 0x69, (byte) 0x66, (byte) 0x2F, (byte) 0x6E, (byte) 0x70, (byte) 0x61, (byte) 0x2E, (byte) 0x78, (byte) 0x6D, (byte) 0x6C,
 			 (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x65, (byte) 0x46, (byte) 0x29, (byte) 0x1C, (byte) 0x79, (byte) 0x16, (byte) 0xBE, (byte) 0xFE, (byte) 0x68, (byte) 0x35, (byte) 0x87, (byte) 0x2D,
 			 (byte) 0x29, (byte) 0xB8, (byte) 0x2B, (byte) 0x72, (byte) 0xA9, (byte) 0x6A, (byte) 0x63, (byte) 0x4C, (byte) 0xBC, (byte) 0xB5, (byte) 0x3D, (byte) 0x6D, (byte) 0xEA, (byte) 0x30, (byte) 0x10, (byte) 0xA5,
-			 (byte) 0x68, (byte) 0x84, (byte) 0xFC, (byte) 0xC3 };
+			 (byte) 0x68, (byte) 0x84, (byte) 0xFC, (byte) 0xC3 };*/
 		
-		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, responseData);
 	}
 
 	private PcscCallResult getReaderPaceCapabilities() {
