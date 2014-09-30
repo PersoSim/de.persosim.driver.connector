@@ -33,6 +33,10 @@ import de.persosim.simulator.utils.Utils;
  */
 public class PersoSimPcscProcessor extends AbstractPcscFeature implements SocketCommunicator, PcscConstants, UiEnabled {
 
+	public enum PaceState {
+		NO_SM, SM_ESTABLISHED;
+	}
+	
 	Socket communicationSocket;
 
 	private Collection<VirtualReaderUi> interfaces;
@@ -82,6 +86,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	public static final int OFFSET_COMMAND_DATA = 1;
 	public static final int OFFSET_LC = 0;
 
+	private PaceState currentState = PaceState.NO_SM;
 
 	public PersoSimPcscProcessor(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_CONTROL_CODE);
@@ -94,6 +99,8 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			return transmitToIcc(data);
 		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
+		case NativeDriverInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
+			return powerIcc(data);
 		default:
 			return null;
 		}
@@ -123,6 +130,18 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		return null;
 	}
 
+
+
+	private PcscCallResult powerIcc(PcscCallData data) {
+		UnsignedInteger action = new UnsignedInteger(data.getParameters().get(0));
+		
+		if (IFD_POWER_DOWN.equals(action) || IFD_POWER_UP.equals(action)
+				|| IFD_RESET.equals(action)) {
+			currentState = PaceState.NO_SM;
+		}
+		return null;
+	}
+	
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
 		//FIXME add check for expected length
@@ -130,6 +149,16 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 				 FEATURE_CONTROL_CODE};
 
 		if (!Utils.arrayHasPrefix(commandPpdu, expectedHeader)) {
+			if (currentState.equals(PaceState.SM_ESTABLISHED)){
+				// destroy the channel when a secure messaging apdu arrives
+				if ((commandPpdu[Iso7816Lib.OFFSET_CLA] & 0x0c) == 0x0c){
+					currentState = PaceState.NO_SM;
+					return null;
+				}
+				//set logical channel to 3 
+				commandPpdu[Iso7816Lib.OFFSET_CLA] |= 0b011;
+			}
+			
 			return null;
 		}
 
@@ -145,7 +174,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	}
 
 	private PcscCallResult destroyPaceChannel(byte[] inputDataFromPpdu) {
-		// TODO Auto-generated method stub
+		// not supported
 		return null;
 	}
 
@@ -194,7 +223,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		}
 		
 		
-		byte [] select = HexString.toByteArray("00 A4 02 0C 02 2F 00");
+		byte [] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
 		byte [] readBinary = HexString.toByteArray("00 B0 00 00 00");
 		try {
 			byte [] response = CommUtils.exchangeApdu(communicationSocket, select);
@@ -241,6 +270,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 							currentCar.getValueField(), new byte[] { (byte) (0xFF & previousCar.getLengthValue()) },
 							previousCar.getValueField(), CommUtils.toUnsignedShortFlippedBytes((short) idIcc.getLengthValue()), idIcc.getValueField());
 					
+					currentState = PaceState.SM_ESTABLISHED;
 					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, pcscResponse);
 				} catch (IOException e) {
 					// TODO logging
