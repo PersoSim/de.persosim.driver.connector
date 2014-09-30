@@ -56,6 +56,10 @@ public class PcscCallData {
 		return parameters;
 	}
 
+	public void setParameters(List<byte[]> parameters) {
+		this.parameters = parameters;
+	}
+
 	private List<byte[]> getParameters(String data) {
 		List<byte []> result = new ArrayList<byte []>();
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
