@@ -188,13 +188,32 @@ public class TestDriver {
 					}
 
 					break;
+				case "transmit":
+
+					byte[][] params = new byte[2][];
+					
+					params[0] = HexString.toByteArray(commandArgs[1]);
+					params[1] = new UnsignedInteger(4000).getAsByteArray();
+
+					for (int i = 2; i < commandArgs.length; i++) {
+						params[i - 2] = HexString
+								.toByteArray(commandArgs[i]);
+					}
+					response = driver.sendData(lun, NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC,
+							params);
+
+					if (response != null) {
+						System.out.println("Response: " + response);
+					}
+
+					break;
 				case "powerup":
 					System.out
 							.println("Response: "
 									+ driver.sendData(
 											lun,
 											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
-											new byte[] { 0x01, (byte) 0xf4 }));
+											new byte[] { 0x01, (byte) 0xf4 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
 				case "powerdown":
 					System.out
@@ -202,7 +221,7 @@ public class TestDriver {
 									+ driver.sendData(
 											lun,
 											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
-											new byte[] { 0x01, (byte) 0xf5 }));
+											new byte[] { 0x01, (byte) 0xf5 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
 				case "reset":
 					System.out
@@ -210,8 +229,16 @@ public class TestDriver {
 									+ driver.sendData(
 											lun,
 											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
-											new byte[] { 0x01, (byte) 0xf6 }));
+											new byte[] { 0x01, (byte) 0xf6 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
+				case "iccpresent":
+					System.out
+					.println("Response: "
+							+ driver.sendData(
+									lun,
+									NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT));
+			break;
+					
 				case "exit":
 				case "quit":
 					driver.stop();
@@ -223,6 +250,8 @@ public class TestDriver {
 							.println("data <functionHexNumber> <param1> <param2> ...");
 					System.out.println("powerup");
 					System.out.println("powerdown");
+					System.out.println("iccpresent");
+					System.out.println("transmit <payload>");
 					System.out.println("reset");
 					System.out.println("exit");
 					System.out.println("quit");
