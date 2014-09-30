@@ -1,0 +1,488 @@
+package de.persosim.driver.connector.ui.parts;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
+
+import de.persosim.driver.connector.NativeDriverConnector;
+import de.persosim.driver.connector.UnsignedInteger;
+import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.features.MctReaderDirect;
+import de.persosim.driver.connector.features.MctUniversal;
+import de.persosim.driver.connector.features.ModifyPinDirect;
+import de.persosim.driver.connector.features.PersoSimPcscProcessor;
+import de.persosim.driver.connector.features.VerifyPinDirect;
+
+/**
+ * This class defines the appearance and behavior of the PinPad GUI to be used
+ * in connection with the respective simulated card reader.
+ * 
+ * @author slutters
+ *
+ */
+public class ReaderPart implements VirtualReaderUi{
+
+	public enum ReaderType {
+		STANDARD, BASIC, NONE;
+	}
+	
+	private static final String FONT_NAME = "Helvetica";
+	
+	public static final boolean ENABLE = true;
+	public static final boolean DISABLE = false;
+	
+	public static final int KEYS_ALL_CONTROL = -3;
+	public static final int KEYS_ALL_NUMERIC = -2;
+	public static final int KEYS_ALL         = -1;
+	
+	private Text txtOutput;
+	
+	private Button[] keysNumeric;
+	private Button[] keysControl;
+	
+	private List<String> pressedKeys = new ArrayList<>();
+	private NativeDriverConnector connector;
+
+	private Composite root;
+	private Composite basicReaderControls;
+	private Composite standardReaderControls;
+	
+	private ReaderType type = ReaderType.NONE;
+	
+	private void createBasicReader(Composite parent){
+		disposeReaders();
+		basicReaderControls = new Composite(parent, SWT.NONE);
+		
+		
+		GridData gridData;
+		basicReaderControls.setLayout(new GridLayout(1, false));
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		
+		Text txtOutput = new Text(basicReaderControls, SWT.READ_ONLY | SWT.PASSWORD | SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
+		txtOutput.setFont(new Font(basicReaderControls.getDisplay(), FONT_NAME, 24, SWT.BOLD));
+		txtOutput.setText("Basisleser");
+		txtOutput.setEditable(false);
+		txtOutput.setCursor(null);
+
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = SWT.FILL;
+		gridData.heightHint = 80;
+		txtOutput.setLayoutData(gridData);
+		parent.layout();
+		parent.redraw();
+	}
+	
+	private void disposeReaders(){
+		if (basicReaderControls != null)
+		basicReaderControls.dispose();
+		if (standardReaderControls != null)
+		standardReaderControls.dispose();
+	}
+	
+	private void createStandardReader(Composite parent){
+		disposeReaders();
+		standardReaderControls = new Composite(parent, SWT.NONE);
+
+		GridData gridData;
+		standardReaderControls.setLayout(new GridLayout(1, false));
+		
+		
+		
+		Composite pinpadComposite = new Composite(standardReaderControls, SWT.NONE);
+		pinpadComposite.setLayout(new GridLayout(1, false));
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		pinpadComposite.setLayoutData(gridData);
+		
+		txtOutput = new Text(pinpadComposite, SWT.READ_ONLY | SWT.PASSWORD | SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
+		txtOutput.setFont(new Font(pinpadComposite.getDisplay(), FONT_NAME, 24, SWT.BOLD));
+		txtOutput.setEditable(false);
+		txtOutput.setCursor(null);
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.heightHint = 80;
+		txtOutput.setLayoutData(gridData);
+		
+		
+		
+		Composite keyComposite = new Composite(pinpadComposite, SWT.NONE);
+		keyComposite.setLayout(new GridLayout(2, false));
+		
+		
+		
+		Composite numericComposite = new Composite(keyComposite, SWT.NONE);
+		numericComposite.setLayout(new GridLayout(3, false));
+		
+		keysNumeric = new Button[10];
+		for(int i=1; i<10; i++) {keysNumeric[i] = getNumericKey(numericComposite, i);}
+		
+		Button button;
+		
+		button = createDefaultButton(numericComposite, "", null, 100, 100);
+		button.setEnabled(DISABLE);
+//		button.setVisible(false);
+		
+		keysNumeric[0] = getNumericKey(numericComposite, 0);
+		
+		button = createDefaultButton(numericComposite, "", null, 100, 100);
+		button.setEnabled(DISABLE);
+//		button.setVisible(false);
+		
+		
+		
+		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
+		controlComposite.setLayout(new GridLayout(1, false));
+		
+		gridData = new GridData();
+		gridData.verticalAlignment = SWT.BEGINNING;
+		controlComposite.setLayoutData(gridData);
+		
+		keysControl = new Button[3];
+		keysControl[0] = getCancelKey(controlComposite);
+		keysControl[1] = getCorrectionKey(controlComposite);
+		keysControl[2] = getConfirmationKey(controlComposite);
+		
+		button = createDefaultButton(controlComposite, "", null, 150, 100);
+		button.setEnabled(DISABLE);
+//		button.setVisible(false);
+		
+
+		setEnableKeySet(KEYS_ALL, false);
+		
+		parent.layout();
+		parent.redraw();
+	}
+	
+	
+	@PostConstruct
+	public void createComposite(Composite parent) {
+		root = parent;
+		switchToStandard();
+	}
+	
+	private Button createDefaultButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
+		final Button button = new Button(parent, SWT.PUSH);
+		button.setText(text);
+		button.setFont(new Font(parent.getDisplay(), FONT_NAME, 36, SWT.BOLD));
+		
+		if(selectionListener != null) {
+			button.addSelectionListener(selectionListener);
+		}
+		
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.widthHint = width;
+		gridData.heightHint = height;
+		
+		button.setLayoutData(gridData);
+		
+		return button;
+	}
+	
+	private Button getNumericKey(Composite parent, int number) {
+		final String text = String.valueOf(number);
+		
+		SelectionListener selectionListener = new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				System.out.println("pin pad button pressed: " + text);
+				txtOutput.append(text);
+				setButton(text);
+			}
+		};
+		
+		return createDefaultButton(parent, String.valueOf(number), selectionListener, 100, 100);
+	}
+	
+	private Button getCancelKey(Composite parent) {
+		final String text = "C";
+		
+		SelectionListener selectionListener = new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				setButton(text);
+			}
+		};
+		
+		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		button.setBackground(new Color(parent.getDisplay(), 255, 0, 0));
+		
+		return button;
+	}
+	
+	private Button getCorrectionKey(Composite parent) {
+		final String text = "CLR";
+		
+		SelectionListener selectionListener = new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				synchronized (pressedKeys) {
+					pressedKeys.clear();
+					setText("");
+				}
+			}
+		};
+		
+		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		button.setBackground(new Color(parent.getDisplay(), 255, 255, 0));
+		
+		return button;
+	}
+	
+	private Button getConfirmationKey(Composite parent) {
+		final String text = "OK";
+		
+		SelectionListener selectionListener = new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				setButton(text);
+			}
+		};
+		
+		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		button.setBackground(new Color(parent.getDisplay(), 0, 255, 0));
+		
+		return button;
+	}
+	
+	public void setText(final String text) {
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				txtOutput.setText(text);
+			}
+		});
+	}
+	
+	public void setEnableKeySet(int keySet, final boolean enabled) {
+		switch (keySet) {
+        case KEYS_ALL_NUMERIC:
+        	for(final Button button : keysNumeric) {
+        		Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+		        		button.setEnabled(enabled);
+					}
+				});
+        	}
+        	break;
+        case KEYS_ALL_CONTROL:
+        	for(final Button button : keysControl) {
+        		Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+		        		button.setEnabled(enabled);
+					}
+				});
+        	}
+        	break;
+        case KEYS_ALL:
+        	setEnableKeySet(KEYS_ALL_NUMERIC, enabled);
+        	setEnableKeySet(KEYS_ALL_CONTROL, enabled);
+        	break;
+        default:
+        	break;
+		}
+	}
+	
+	private void setButton(String value){
+		pressedKeys.add(value);
+		notifyIfReady();
+	}
+	
+	private void notifyIfReady(){
+		synchronized(pressedKeys){
+			if (pressedKeys.get(pressedKeys.size()-1).equals("OK") || pressedKeys.get(pressedKeys.size()-1).equals("C")){
+				pressedKeys.notifyAll();
+				setText("");
+			}
+		}
+	}
+
+	@Override
+	public byte[] getPin() throws IOException {
+		if (type.equals(ReaderType.STANDARD)) {
+			setEnableKeySet(KEYS_ALL, true);
+			pressedKeys.clear();
+			synchronized (pressedKeys) {
+				while (pressedKeys.size() == 0
+						|| (!pressedKeys.get(pressedKeys.size() - 1)
+								.equals("OK") && !pressedKeys.get(pressedKeys.size() - 1).equals("C"))) {
+					try {
+						pressedKeys.wait();
+					} catch (InterruptedException e) {
+						throw new IOException(
+								"The reading of the PIN could not be completed");
+					}
+				}
+			}
+			if (pressedKeys.get(pressedKeys.size() - 1).equals("C")){
+				setText("");
+				setEnableKeySet(KEYS_ALL, false);
+				return null;
+			}
+			
+			byte[] result = new byte[pressedKeys.size() - 1];
+			for (int i = 0; i < result.length; i++) {
+				try {
+					byte currentNumber = Byte.parseByte(pressedKeys.get(i));
+					result[i] = currentNumber;
+				} catch (NumberFormatException e) {
+					throw new IOException(
+							"PIN containing non valid characters entered");
+				}
+			}
+			setEnableKeySet(KEYS_ALL, false);
+			return result;
+		}
+		return null;
+	}
+	
+	@Override
+	public void display(String... lines) {
+		if (type.equals(ReaderType.STANDARD)) {
+			StringBuilder text = new StringBuilder();
+			for (String line : lines) {
+				text.append(line);
+				text.append(System.lineSeparator());
+			}
+			setText(text.toString());
+		}
+	}
+
+	@Override
+	public byte[] getDeviceDescriptors() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private void addStandardListeners(NativeDriverConnector connector){
+		connector.addListener(new VerifyPinDirect(new UnsignedInteger(
+				0x42000DB2)));
+		connector.addListener(new ModifyPinDirect(new UnsignedInteger(
+				0x42000DB3)));
+		connector.addListener(new MctReaderDirect(new UnsignedInteger(
+				0x42000DB4)));
+		connector
+				.addListener(new MctUniversal(new UnsignedInteger(0x42000DB5)));
+		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
+				0x42000DCC)));
+	}
+
+	
+	/**
+	 * Switch the parts user interface and behavior to the basic reader state.
+	 */
+	public void switchToBasic() {
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			connector = new NativeDriverConnector("localhost", 5678,
+					"localhost", 9876);
+			connector.addUi(this);
+			connector.connect();
+			
+			createBasicReader(root);
+			type = ReaderType.BASIC;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	/**
+	 * Switch the parts user interface and behavior to the standard reader state.
+	 */
+	public void switchToStandard(){
+
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			connector = new NativeDriverConnector("localhost", 5678,
+					"localhost", 9876);
+			connector.addUi(this);
+			addStandardListeners(connector);
+			connector.connect();
+
+			createStandardReader(root);
+			type = ReaderType.STANDARD;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Switch the parts user interface and behavior to the off state.
+	 */
+	public void disconnectReader(){
+		if (connector != null){
+
+			try {
+				connector.disconnect();
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		disposeReaders();
+		type = ReaderType.NONE;
+		
+	}
+}
+

@@ -15,6 +15,7 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
+import de.persosim.simulator.protocols.pace.Pace;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -70,9 +71,10 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	public static final int OFFSET_FUNCTION = 0;
 	public static final int OFFSET_DATA_LENGTH = 1;
 	public static final int OFFSET_INPUT_DATA = 3;
-	public static final int OFFSET_ESTABLISH_PACE_PIN_ID = 0;
+	public static final int OFFSET_ESTABLISH_PACE_PIN_ID = 3;
 	public static final int OFFSET_COMMAND_DATA = 1;
 	public static final int OFFSET_LC = 0;
+
 
 	public PersoSimPcscProcessor(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_CONTROL_CODE);
@@ -147,22 +149,26 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	
 	private PcscCallResult establishPaceChannel(byte[] inputDataFromPpdu) {
 		int offset = OFFSET_ESTABLISH_PACE_PIN_ID;
-		//commented out while not used to prevent the unused warning
-		//byte pinId = inputDataFromPpdu[OFFSET_ESTABLISH_PACE_PIN_ID];
-		byte [] chat = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
+		byte pinId = inputDataFromPpdu[offset];
+		byte [] chat = getValue(inputDataFromPpdu, ++ offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
 		offset += chat.length + LENGTH_ESTABLISH_PACE_CHAT_LENGTH;
-		byte [] pin = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
+		byte [] pin = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_PIN_LENGTH);
 		offset += pin.length + LENGTH_ESTABLISH_PACE_PIN_LENGTH;
 		
-		// TODO filter pin data if the type is secret (PIN/PUK)
-
-		if (pin.length == 0){
-			for (VirtualReaderUi current : interfaces){
+		if (pinId == Pace.PWD_PIN || pinId == Pace.PWD_PUK){
+			pin = new byte [0];
+		}
+		if (pin.length == 0) {
+			for (VirtualReaderUi current : interfaces) {
 				try {
 					pin = current.getPin();
+					if (pin != null) {
+						break;
+					}
 				} catch (IOException e) {
 					// TODO logging
-					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_ABORT, new byte [0]);
+					return buildResponse(PcscConstants.IFD_SUCCESS,
+							RESULT_ABORT, new byte[0]);
 				}
 			}
 		}

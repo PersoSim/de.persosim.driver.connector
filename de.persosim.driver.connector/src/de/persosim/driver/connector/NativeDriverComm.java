@@ -29,7 +29,11 @@ public class NativeDriverComm extends Thread {
 	private BufferedReader bufferedDataIn;
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
+	private UnsignedInteger lun;
 
+	String hostName;
+	int dataPort;
+	
 	/**
 	 * Constructor using the connection information and a {@link Collection} of
 	 * listeners.
@@ -45,6 +49,8 @@ public class NativeDriverComm extends Thread {
 			Collection<PcscListener> listeners) throws IOException {
 		this.listeners = listeners;
 		this.dataSocket = new Socket(hostName, dataPort);
+		this.hostName = hostName;
+		this.dataPort = dataPort;
 		bufferedDataIn = new BufferedReader(new InputStreamReader(
 				dataSocket.getInputStream()));
 		bufferedDataOut = new BufferedWriter(new OutputStreamWriter(
@@ -59,7 +65,7 @@ public class NativeDriverComm extends Thread {
 	@Override
 	public void run() {
 		try {
-			CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
+			lun = CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
 			while (!this.isInterrupted()) {
 				try {
 					String data = bufferedDataIn.readLine();
@@ -153,8 +159,14 @@ public class NativeDriverComm extends Thread {
 	public void interrupt() {
 		super.interrupt();
 		try {
+			Socket temp = new Socket(hostName, dataPort);
+			CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
 			dataSocket.close();
-		} catch (IOException e) {
+			temp.close();
+			
+			// XXX Hack (wait for pcsc to poll and kill connections until the driver handles the closure handshakes)
+			Thread.sleep(3000);
+		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
