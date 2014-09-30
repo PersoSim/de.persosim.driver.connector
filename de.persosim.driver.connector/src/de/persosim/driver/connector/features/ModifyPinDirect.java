@@ -3,6 +3,7 @@ package de.persosim.driver.connector.features;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -13,6 +14,8 @@ import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.UiEnabled;
+import de.persosim.simulator.utils.HexString;
+import de.persosim.simulator.utils.Utils;
 
 public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 
@@ -35,9 +38,18 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		if (data.getFunction().equals(NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
-				byte[] param = data.getParameters().get(0);
+				List<byte[]> params = data.getParameters();
+				byte[] param = params.get(1);
+				byte[] encodedLengthBytes = Arrays.copyOfRange(param, 20, 24);
+				byte[] apduHeaderBytes = Arrays.copyOfRange(param, 24, param.length);
+				
+				System.out.println("Param 1: " + HexString.encode(param));
+				System.out.println("expected length: " + HexString.encode(encodedLengthBytes));
+				System.out.println("APDU header: " + HexString.encode(apduHeaderBytes));
 				
 				// XXX SLS actually use data from params
+				
+				byte[] resetRetryCounterApduBytes;
 				
 				byte[] currentPin, newPin1, newPin2;
 				boolean match;
@@ -58,7 +70,12 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 							
 							match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
 							
-							if(!match) {
+							if(match) {
+								resetRetryCounterApduBytes = Utils.concatByteArrays(param, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
+								params.set(1, resetRetryCounterApduBytes);
+								System.out.println("end: " + HexString.encode(params.get(1)));
+								System.out.println("modified param 1: " + HexString.encode(data.getParameters().get(1)));
+							} else {
 								virtualReaderUi.display("new PIN does not match");
 							}
 						}
