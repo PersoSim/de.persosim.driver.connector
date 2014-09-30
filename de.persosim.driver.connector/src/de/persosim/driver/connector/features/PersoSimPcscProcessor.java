@@ -144,7 +144,13 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
-		//FIXME add check for expected length
+
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 1);
+
+		if (expectedLength == null){
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
+		}
+		
 		byte[] expectedHeader = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01,
 				 FEATURE_CONTROL_CODE};
 
@@ -162,14 +168,20 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			return null;
 		}
 
+		PcscCallResult result = null;
 		switch (commandPpdu[OFFSET_FUNCTION]) {
 		case FUNCTION_GET_READER_PACE_CAPABILITIES:
-			return getReaderPaceCapabilities();
+			result = getReaderPaceCapabilities();
 		case FUNCTION_ESTABLISH_PACE_CHANNEL:
-			return establishPaceChannel(getInputDataFromPpdu(commandPpdu));
+			result = establishPaceChannel(getInputDataFromPpdu(commandPpdu));
 		case FUNCTION_DESTROY_PACE_CHANNEL:
-			return destroyPaceChannel(getInputDataFromPpdu(commandPpdu));
+			result =  destroyPaceChannel(getInputDataFromPpdu(commandPpdu));
 		}
+
+		if (result != null && result.getEncoded().length() - 9 > expectedLength.getAsSignedLong()){
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
+		}
+		
 		return null;
 	}
 
