@@ -49,37 +49,47 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 				boolean match;
 				
 				for(VirtualReaderUi virtualReaderUi : interfaces) {
-					try {
-						match = false;
-						
-						while(!match) {
-							virtualReaderUi.display("Please enter new PIN");
+					match = false;
+					
+					while(!match) {
+						virtualReaderUi.display("Please enter new PIN");
+						try {
 							newPin1 = virtualReaderUi.getPin();
-							
-							virtualReaderUi.display("Please re-enter new PIN");
-							newPin2 = virtualReaderUi.getPin();
-							
-							match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
-							
-							if(match) {
-								resetRetryCounterApduBytes = Utils.concatByteArrays(param, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
-								params.set(1, resetRetryCounterApduBytes);
-								System.out.println("end: " + HexString.encode(params.get(1)));
-								System.out.println("modified param 1: " + HexString.encode(data.getParameters().get(1)));
-							} else {
-								virtualReaderUi.display("new PIN does not match");
-							}
+						} catch (IOException e) {
+							newPin1 = null;
 						}
 						
+						if(newPin1 == null) {
+							return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR, new byte[0]);
+						}
 						
+						virtualReaderUi.display("Please re-enter new PIN");
+						try {
+							newPin2 = virtualReaderUi.getPin();
+						} catch (IOException e) {
+							newPin2 = null;
+						}
 						
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						if(newPin2 == null) {
+							return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR, new byte[0]);
+						}
+						
+						match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
+						
+						if(match) {
+							resetRetryCounterApduBytes = Utils.concatByteArrays(param, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
+							params.set(1, resetRetryCounterApduBytes);
+							System.out.println("end: " + HexString.encode(params.get(1)));
+							System.out.println("modified param 1: " + HexString.encode(data.getParameters().get(1)));
+							
+							data.setFunction(NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
+						} else {
+							virtualReaderUi.display("new PIN does not match");
+						}
 					}
 				}
 				
-				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte [] {(byte) 0x90,0});
+//				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte [] {(byte) 0x90,0});
 			}
 		}
 		return null;
