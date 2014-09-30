@@ -12,19 +12,23 @@ import java.io.IOException;
 public interface VirtualReaderUi {
 	/**
 	 * Prompt the user to enter a PIN
-	 * @return the PIN data
+	 * 
+	 * @return the PIN data as byte array or null if the user canceled the
+	 *         process
 	 * @throws IOException
 	 */
 	public abstract byte[] getPin() throws IOException;
 
 	/**
 	 * Show a string based display to the user.
-	 * @param lines the lines to display a multiple {@link String} objects
+	 * 
+	 * @param lines
+	 *            the lines to display a multiple {@link String} objects
 	 */
 	public abstract void display(String... lines);
-	
+
 	/**
 	 * @return the PCSC device descriptors for this user interface
 	 */
-	public abstract byte [] getDeviceDescriptors();
+	public abstract byte[] getDeviceDescriptors();
 }

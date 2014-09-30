@@ -16,9 +16,13 @@ public class ConsoleUi implements VirtualReaderUi {
 	@Override
 	public byte[] getPin() throws IOException {
 		String line = reader.readLine();
+		System.out.println("Enter password (empty password to cancel):");
 		byte [] result = new byte [line.length()];
 		for (int i = 0; i < line.length(); i++){
-			result[i] = (byte) Integer.parseInt(line.charAt(i) + "");
+			result[i] = (byte) line.charAt(i);
+		}
+		if (result.length == 0){
+			return null;
 		}
 		return result;
 	}

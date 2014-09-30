@@ -364,7 +364,7 @@ public class ReaderPart implements VirtualReaderUi{
 			byte[] result = new byte[pressedKeys.size() - 1];
 			for (int i = 0; i < result.length; i++) {
 				try {
-					byte currentNumber = Byte.parseByte(pressedKeys.get(i));
+					byte currentNumber = (byte) pressedKeys.get(i).charAt(0);
 					result[i] = currentNumber;
 				} catch (NumberFormatException e) {
 					throw new IOException(
