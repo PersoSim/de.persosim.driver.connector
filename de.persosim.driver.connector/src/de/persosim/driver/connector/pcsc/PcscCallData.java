@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,6 +31,10 @@ public class PcscCallData {
 		
 	}
 
+	public void setFunction(UnsignedInteger function) {
+		this.function = function;
+	}
+
 	/**
 	 * @return the function
 	 */
@@ -50,11 +53,11 @@ public class PcscCallData {
 	 * @return the parameters
 	 */
 	public List<byte[]> getParameters() {
-		List<byte[]> result = new ArrayList<byte[]>();
-		for (byte[] array : parameters) {
-			result.add(Arrays.copyOf(array, array.length));
-		}
-		return result;
+		return parameters;
+	}
+
+	public void setParameters(List<byte[]> parameters) {
+		this.parameters = parameters;
 	}
 
 	private List<byte[]> getParameters(String data) {
