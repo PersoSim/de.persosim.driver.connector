@@ -165,6 +165,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		if (pin.length == 0) {
 			for (VirtualReaderUi current : interfaces) {
 				try {
+					current.display("Enter PACE password");
 					pin = current.getPin();
 					if (pin != null) {
 						break;
