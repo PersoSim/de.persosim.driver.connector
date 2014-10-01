@@ -15,7 +15,7 @@ public class ConsoleUi implements VirtualReaderUi {
 	
 	@Override
 	public byte[] getPin() throws IOException {
-		System.out.println("Enter password (empty password to cancel):");
+		System.out.println("(enter empty password to cancel)");
 		String line = reader.readLine();
 		byte [] result = new byte [line.length()];
 		for (int i = 0; i < line.length(); i++){
@@ -31,18 +31,26 @@ public class ConsoleUi implements VirtualReaderUi {
 	public void display(String... lines) {
 		int maxChars = 0;
 		StringBuilder builder = new StringBuilder();
+		
 		for (String line : lines){
 			if (maxChars < line.length()){
 				maxChars = line.length();
 			}
+		}
+		
+		for (String line : lines){
 			builder.append("|");
 			builder.append(line);
+			for (int i = line.length(); i < maxChars + 2 ; i++){
+				builder.append(" ");
+			}
 			builder.append("|\n");
 		}
 		System.out.println("Virtual Reader Display\n");
 		printCrossedLine(maxChars + 2);
-		System.out.print(builder.toString());
+		System.out.print("\n" + builder.toString());
 		printCrossedLine(maxChars + 2);
+		System.out.println();
 	}
 	
 	private void printCrossedLine(int length){

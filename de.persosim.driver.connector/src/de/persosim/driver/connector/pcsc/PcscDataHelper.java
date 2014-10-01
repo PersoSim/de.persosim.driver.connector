@@ -20,7 +20,7 @@ public class PcscDataHelper {
 	 * @return the given value encoded as PCSC boolean value
 	 */
 	public static byte[] getBool(boolean value) {
-		// FIXME these values are not confirmed, check them
+		// TODO these values are not confirmed but seem to be working, check them
 		if (value) {
 			return new byte[] { 0, 1 };
 		}

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
+import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
@@ -165,5 +166,12 @@ public class CommUtils {
 	
 	public static byte [] toUnsignedShortFlippedBytes(short value){
 		return new byte [] { (byte) (0xFF & value), (byte) (0xFF & value >>> 8) };
+	}
+
+	public static UnsignedInteger getExpectedLength(PcscCallData data, int expectedLengthParameterIndex){
+		if (expectedLengthParameterIndex < data.getParameters().size()){
+			return new UnsignedInteger(data.getParameters().get(expectedLengthParameterIndex));
+		}
+		return null;
 	}
 }

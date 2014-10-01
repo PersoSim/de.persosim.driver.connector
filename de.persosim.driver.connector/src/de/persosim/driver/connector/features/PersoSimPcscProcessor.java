@@ -33,6 +33,10 @@ import de.persosim.simulator.utils.Utils;
  */
 public class PersoSimPcscProcessor extends AbstractPcscFeature implements SocketCommunicator, PcscConstants, UiEnabled {
 
+	public enum PaceState {
+		NO_SM, SM_ESTABLISHED;
+	}
+	
 	Socket communicationSocket;
 
 	private Collection<VirtualReaderUi> interfaces;
@@ -82,6 +86,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	public static final int OFFSET_COMMAND_DATA = 1;
 	public static final int OFFSET_LC = 0;
 
+	private PaceState currentState = PaceState.NO_SM;
 
 	public PersoSimPcscProcessor(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_CONTROL_CODE);
@@ -94,6 +99,8 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			return transmitToIcc(data);
 		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
+		case NativeDriverInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
+			return powerIcc(data);
 		default:
 			return null;
 		}
@@ -123,29 +130,63 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		return null;
 	}
 
+
+
+	private PcscCallResult powerIcc(PcscCallData data) {
+		UnsignedInteger action = new UnsignedInteger(data.getParameters().get(0));
+		
+		if (IFD_POWER_DOWN.equals(action) || IFD_POWER_UP.equals(action)
+				|| IFD_RESET.equals(action)) {
+			currentState = PaceState.NO_SM;
+		}
+		return null;
+	}
+	
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
-		//FIXME add check for expected length
+
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 1);
+
+		if (expectedLength == null){
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
+		}
+		
 		byte[] expectedHeader = new byte[] { (byte) 0xff, (byte) 0xc2, 0x01,
 				 FEATURE_CONTROL_CODE};
 
 		if (!Utils.arrayHasPrefix(commandPpdu, expectedHeader)) {
+			if (currentState.equals(PaceState.SM_ESTABLISHED)){
+				// destroy the channel when a secure messaging apdu arrives
+				if ((commandPpdu[Iso7816Lib.OFFSET_CLA] & 0x0c) == 0x0c){
+					currentState = PaceState.NO_SM;
+					return null;
+				}
+				//set logical channel to 3 
+				commandPpdu[Iso7816Lib.OFFSET_CLA] |= 0b011;
+			}
+			
 			return null;
 		}
 
+		PcscCallResult result = null;
 		switch (commandPpdu[OFFSET_FUNCTION]) {
 		case FUNCTION_GET_READER_PACE_CAPABILITIES:
-			return getReaderPaceCapabilities();
+			result = getReaderPaceCapabilities();
 		case FUNCTION_ESTABLISH_PACE_CHANNEL:
-			return establishPaceChannel(getInputDataFromPpdu(commandPpdu));
+			result = establishPaceChannel(getInputDataFromPpdu(commandPpdu));
 		case FUNCTION_DESTROY_PACE_CHANNEL:
-			return destroyPaceChannel(getInputDataFromPpdu(commandPpdu));
+			result =  destroyPaceChannel(getInputDataFromPpdu(commandPpdu));
 		}
+
+		if (result != null && result.getEncoded().length() - 9 > expectedLength.getAsSignedLong()){
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
+		}
+		
 		return null;
 	}
 
 	private PcscCallResult destroyPaceChannel(byte[] inputDataFromPpdu) {
-		// TODO Auto-generated method stub
+		// not supported
 		return null;
 	}
 
@@ -165,6 +206,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		if (pin.length == 0) {
 			for (VirtualReaderUi current : interfaces) {
 				try {
+					current.display("Enter PACE password");
 					pin = current.getPin();
 					if (pin != null) {
 						break;
@@ -193,7 +235,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		}
 		
 		
-		byte [] select = HexString.toByteArray("00 A4 02 0C 02 2F 00");
+		byte [] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
 		byte [] readBinary = HexString.toByteArray("00 B0 00 00 00");
 		try {
 			byte [] response = CommUtils.exchangeApdu(communicationSocket, select);
@@ -240,6 +282,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 							currentCar.getValueField(), new byte[] { (byte) (0xFF & previousCar.getLengthValue()) },
 							previousCar.getValueField(), CommUtils.toUnsignedShortFlippedBytes((short) idIcc.getLengthValue()), idIcc.getValueField());
 					
+					currentState = PaceState.SM_ESTABLISHED;
 					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, pcscResponse);
 				} catch (IOException e) {
 					// TODO logging
@@ -254,39 +297,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 			return buildResponse(PcscConstants.IFD_SUCCESS,
 					RESULT_COMMUNICATION_ABORT, new byte[0]);
 		}
-		
-		/*
-		// TODO implement PACE steps
-		short mseSetAtStatusWord = 0;
-		byte [] efCardAccess = new byte [0];
-		byte [] currentCar = new byte [0];
-		byte [] previousCar = new byte [0];
-		byte [] idIcc = new byte [0];
-		
-		
-		byte[] responseData = Utils.concatByteArrays(
-				Utils.toUnsignedByteArray(mseSetAtStatusWord),
-				Utils.toUnsignedByteArray((short) efCardAccess.length),
-				efCardAccess, new byte[] { (byte) (0xFF & currentCar.length) },
-				currentCar, new byte[] { (byte) (0xFF & previousCar.length) },
-				previousCar, Utils.toUnsignedByteArray((short) idIcc.length), idIcc);
-		
-		responseData =new byte []{
-			 (byte) 0x90, (byte) 0x00, (byte) 0xB6, (byte) 0x00, (byte) 0x31, (byte) 0x81, (byte) 0xB3, (byte) 0x30, (byte) 0x0D, (byte) 0x06,
-			 (byte) 0x08, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x02, (byte) 0x30, (byte) 0x12, (byte) 0x06, (byte) 0x0A,
-			 (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x03, (byte) 0x02, (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x41,
-			 (byte) 0x30, (byte) 0x12, (byte) 0x06, (byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x03, (byte) 0x02, (byte) 0x02, (byte) 0x02, (byte) 0x01,
-			 (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x45, (byte) 0x30, (byte) 0x12, (byte) 0x06, (byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x04,
-			 (byte) 0x02, (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x02, (byte) 0x02, (byte) 0x01, (byte) 0x0D, (byte) 0x30, (byte) 0x1C, (byte) 0x06, (byte) 0x09, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00,
-			 (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x03, (byte) 0x02, (byte) 0x30, (byte) 0x0C, (byte) 0x06, (byte) 0x07, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x01, (byte) 0x02,
-			 (byte) 0x02, (byte) 0x01, (byte) 0x0D, (byte) 0x02, (byte) 0x01, (byte) 0x41, (byte) 0x30, (byte) 0x1C, (byte) 0x06, (byte) 0x09, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02,
-			 (byte) 0x02, (byte) 0x03, (byte) 0x02, (byte) 0x30, (byte) 0x0C, (byte) 0x06, (byte) 0x07, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x01, (byte) 0x02, (byte) 0x02, (byte) 0x01,
-			 (byte) 0x0D, (byte) 0x02, (byte) 0x01, (byte) 0x45, (byte) 0x30, (byte) 0x2A, (byte) 0x06, (byte) 0x08, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02, (byte) 0x06,
-			 (byte) 0x16, (byte) 0x1E, (byte) 0x68, (byte) 0x74, (byte) 0x74, (byte) 0x70, (byte) 0x3A, (byte) 0x2F, (byte) 0x2F, (byte) 0x62, (byte) 0x73, (byte) 0x69, (byte) 0x2E, (byte) 0x62, (byte) 0x75, (byte) 0x6E,
-			 (byte) 0x64, (byte) 0x2E, (byte) 0x64, (byte) 0x65, (byte) 0x2F, (byte) 0x63, (byte) 0x69, (byte) 0x66, (byte) 0x2F, (byte) 0x6E, (byte) 0x70, (byte) 0x61, (byte) 0x2E, (byte) 0x78, (byte) 0x6D, (byte) 0x6C,
-			 (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x65, (byte) 0x46, (byte) 0x29, (byte) 0x1C, (byte) 0x79, (byte) 0x16, (byte) 0xBE, (byte) 0xFE, (byte) 0x68, (byte) 0x35, (byte) 0x87, (byte) 0x2D,
-			 (byte) 0x29, (byte) 0xB8, (byte) 0x2B, (byte) 0x72, (byte) 0xA9, (byte) 0x6A, (byte) 0x63, (byte) 0x4C, (byte) 0xBC, (byte) 0xB5, (byte) 0x3D, (byte) 0x6D, (byte) 0xEA, (byte) 0x30, (byte) 0x10, (byte) 0xA5,
-			 (byte) 0x68, (byte) 0x84, (byte) 0xFC, (byte) 0xC3 };*/
 		
 	}
 

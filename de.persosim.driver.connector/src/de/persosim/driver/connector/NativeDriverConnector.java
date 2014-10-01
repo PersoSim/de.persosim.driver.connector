@@ -159,13 +159,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	public boolean isConnected() {
 		return comm.isAlive() && !comm.isInterrupted();
 	}
-	
-	private UnsignedInteger getExpectedLength(PcscCallData data, int expectedLengthParameterIndex){
-		if (expectedLengthParameterIndex < data.getParameters().size()){
-			return new UnsignedInteger(data.getParameters().get(expectedLengthParameterIndex));
-		}
-		return null;
-	}
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
@@ -219,7 +212,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult deviceControl(PcscCallData data) {
 		UnsignedInteger controlCode = new UnsignedInteger(data.getParameters().get(0));
-		UnsignedInteger expectedLength = getExpectedLength(data, 2);
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 2);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
@@ -244,7 +237,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		// try to find tag in own capabilities
 		byte [] result = null;
 		UnsignedInteger currentTag = new UnsignedInteger(data.getParameters().get(0));
-		UnsignedInteger expectedLength = getExpectedLength(data, 1);
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 1);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
@@ -314,7 +307,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult powerIcc(PcscCallData data) {
 		UnsignedInteger action = new UnsignedInteger(data.getParameters().get(0));
-		UnsignedInteger expectedLength = getExpectedLength(data, 1);
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 1);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
@@ -380,7 +373,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandApdu = data.getParameters().get(0);
-		UnsignedInteger expectedLength = getExpectedLength(data, 1);
+		UnsignedInteger expectedLength = CommUtils.getExpectedLength(data, 1);
 
 		if (expectedLength == null){
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
