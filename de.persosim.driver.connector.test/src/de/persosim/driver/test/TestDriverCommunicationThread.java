@@ -118,7 +118,7 @@ public class TestDriverCommunicationThread extends Thread implements
 						try {
 							lunMapping.get(lun.getAsInt()).close();
 							System.out.println("Closed socket on port: "
-									+ lunMapping.get(lun).getPort());
+									+ lunMapping.get(lun.getAsInt()).getPort());
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
