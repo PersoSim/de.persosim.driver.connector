@@ -23,7 +23,7 @@ public class UnsignedInteger {
 	
 	public UnsignedInteger(byte [] data){
 		if (data.length > 4){
-			throw new NullPointerException("Source byte array to long");
+			throw new NumberFormatException("Source byte array to long");
 		}
 		this.value = Utils.getIntFromUnsignedByteArray(data) & 0xFFFFFFFFl;
 	}
