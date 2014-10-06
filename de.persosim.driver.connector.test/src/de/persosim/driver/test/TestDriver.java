@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ public class TestDriver {
 
 	private TestDriverCommunicationThread communicationThread;
 	private HashMap<Integer, Socket> lunMapping = new HashMap<>();
+	private int timeout = 2000;
 
 	private boolean running = false;
 
@@ -53,7 +55,21 @@ public class TestDriver {
 					lunMapping, listeners);
 			communicationThread.setDaemon(true);
 			communicationThread.start();
+			
 
+
+			long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
+			
+			while (!communicationThread.isRunning()){
+				if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
+					throw new IOException("The server thread has run into a timeout");
+				}
+				try {
+					Thread.sleep(5);
+				} catch (InterruptedException e) {
+					throw new IOException("The communication thread was interrupted");
+				}
+			}
 			running = true;
 		} else {
 			System.out.println("This test driver instance is already runnning");
@@ -83,7 +99,7 @@ public class TestDriver {
 	 * @param lun
 	 * @param function
 	 * @param data
-	 * @return the resulting answer to the PCSC call
+	 * @return the resulting answer to the PCSC call or null if the data could not be sent
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */

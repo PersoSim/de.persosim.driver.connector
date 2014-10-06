@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private Socket simSocket;
 	private String simHostName;
 	private int simPort;
+	private int timeout = 2000;
 
 	/**
 	 * Create a connector object using the connection data for the native driver
@@ -76,6 +78,18 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners);
 		comm.start();
+
+		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
+		while (!comm.isConnected()){
+			if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
+				throw new IOException("The communication thread has run into a timeout");
+			}
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				throw new IOException("The waiting for the communication thread was interrupted");
+			}
+		}
 	}
 
 	/**

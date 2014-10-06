@@ -30,6 +30,7 @@ public class NativeDriverComm extends Thread {
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
 	private UnsignedInteger lun;
+	private boolean isConnected = false;
 
 	String hostName;
 	int dataPort;
@@ -66,6 +67,7 @@ public class NativeDriverComm extends Thread {
 	public void run() {
 		try {
 			lun = CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
+			isConnected = true;
 			while (!this.isInterrupted()) {
 				try {
 					String data = bufferedDataIn.readLine();
@@ -170,6 +172,14 @@ public class NativeDriverComm extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return true, iff the this object is connected to a native driver and has
+	 *         successfully executed the handshake
+	 */
+	public boolean isConnected() {
+		return isConnected;
 	}
 
 }

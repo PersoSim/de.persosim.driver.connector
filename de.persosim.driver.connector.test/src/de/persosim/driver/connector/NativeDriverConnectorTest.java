@@ -92,43 +92,31 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscGetCapabilitiesVendorName() throws Exception {
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		checkPcscTag(PcscConstants.TAG_VENDOR_NAME, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSimultaneousAccess() throws Exception {
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		checkPcscTag(PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotsNumber() throws Exception {
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		checkPcscTag(PcscConstants.TAG_IFD_SLOTS_NUMBER, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesSlotThreadSafe() throws Exception {
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		checkPcscTag(PcscConstants.TAG_IFD_SLOT_THREAD_SAFE, PcscConstants.IFD_SUCCESS, UnsignedInteger.MAX_VALUE);
 	}
 
 	@Test
 	public void testPcscGetCapabilitiesNotExisting() throws Exception {
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		checkPcscTag(new UnsignedInteger(0xFFFFFFFFl), PcscConstants.IFD_ERROR_TAG, UnsignedInteger.MAX_VALUE);
 	}
 	
 	@Test
 	public void testPcscTransmitToIcc() throws IOException, InterruptedException{
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		final byte [] apdu = new byte []{0,0,0,0};
 
 		new Expectations(PersoSimKernel.class){
@@ -149,8 +137,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscControl() throws IOException, InterruptedException{
-		// XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 
 		new Expectations(PersoSimKernel.class){
 			{
@@ -204,9 +190,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			}
 		};
 		
-		//XXX find better solution for timing issues while testing
-		Thread.sleep(100);
-		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
@@ -215,9 +198,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 	@Test
 	public void testPcscIsIccPresent() throws Exception{
-		
-		//XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT, UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -235,9 +215,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				result = new byte [] {(byte) 0x90, 0};
 			}
 		};
-		
-		//XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -258,9 +235,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				result = new byte [] {(byte) 0x90, 0};
 			}
 		};
-		
-		//XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -284,9 +258,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				result = testAtr;
 			}
 		};
-		
-		//XXX find better solution for timing issues while testing
-		Thread.sleep(100);
 
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		

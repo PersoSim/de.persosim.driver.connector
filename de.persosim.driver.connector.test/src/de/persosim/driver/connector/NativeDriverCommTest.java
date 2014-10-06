@@ -34,7 +34,8 @@ public class NativeDriverCommTest extends ConnectorTest{
 		driver.start(TESTDRIVER_PORT);
 		listeners = new HashSet<>();
 		nativeComm = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
-		nativeComm.setName("NativeDriverCommunicationThread");	}
+		nativeComm.setName("NativeDriverCommunicationThread");
+		}
 	
 	@After
 	public void tearDown() throws Exception {
@@ -54,8 +55,9 @@ public class NativeDriverCommTest extends ConnectorTest{
 		
 		nativeComm.start();
 		
-		// XXX find better solution for timing issues during tests
-		Thread.sleep(100);
+		while (!nativeComm.isConnected()){
+			Thread.sleep(5);
+		}
 		
 		String data = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0), new byte [0]);
 		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, UnsignedInteger.parseUnsignedInteger(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
