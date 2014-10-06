@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -13,25 +12,23 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.SocketSimulator;
 import de.persosim.simulator.exception.CertificateNotParseableException;
 import de.persosim.simulator.perso.DefaultPersonalization;
 import de.persosim.simulator.platform.PersoSimKernel;
 import de.persosim.simulator.utils.HexString;
-import de.persosim.simulator.utils.PersoSimLogger;
 
-public class NativeDriverConnectorTest {
+public class NativeDriverConnectorTest extends ConnectorTest{
 
 	private NativeDriverConnector nativeConnector;
 	private TestDriver driver;
@@ -39,17 +36,6 @@ public class NativeDriverConnectorTest {
 	@Mocked
 	PersoSimKernel kernel;
 	SocketSimulator sim;
-
-	@BeforeClass
-	public static void setUpClass() {
-		//setup logging
-		PersoSimLogger.init();
-		
-		//register BouncyCastle provider
-		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-			Security.addProvider(new BouncyCastleProvider());
-		}
-	}
 	
 	//XXX use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
 	
@@ -64,14 +50,14 @@ public class NativeDriverConnectorTest {
 		sim = new SocketSimulator(new DefaultPersonalization() {
 			@Override
 			protected void addTaTrustPoints() throws CertificateNotParseableException {}
-		}, 9876);
+		}, SIMULATOR_PORT);
 		sim.start();
 		
 		driver = new TestDriver();
-		driver.start();
+		driver.start(TESTDRIVER_PORT);
 				
-		nativeConnector = new NativeDriverConnector("localhost",
-				TestDriver.PORT_NUMBER_DEFAULT, "localhost", 9876);
+		nativeConnector = new NativeDriverConnector(TESTDRIVER_HOST,
+				TESTDRIVER_PORT, SIMULATOR_HOST, SIMULATOR_PORT);
 		nativeConnector.connect();
 	}
 

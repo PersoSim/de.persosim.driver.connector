@@ -17,9 +17,10 @@ import org.junit.Test;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
 
-public class NativeDriverCommTest {
+public class NativeDriverCommTest extends ConnectorTest{
 	
 	private NativeDriverComm nativeComm;
 	@Mocked
@@ -30,9 +31,9 @@ public class NativeDriverCommTest {
 	@Before
 	public void setUp() throws Exception{
 		driver = new TestDriver();
-		driver.start();
+		driver.start(TESTDRIVER_PORT);
 		listeners = new HashSet<>();
-		nativeComm = new NativeDriverComm("localhost", TestDriver.PORT_NUMBER_DEFAULT, listeners);
+		nativeComm = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
 		nativeComm.setName("NativeDriverCommunicationThread");	}
 	
 	@After

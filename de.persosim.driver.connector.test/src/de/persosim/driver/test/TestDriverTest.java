@@ -19,7 +19,7 @@ import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 
-public class TestDriverTest implements DriverEventListener {
+public class TestDriverTest extends ConnectorTest implements DriverEventListener {
 	private String message;
 	private TestDriver nativeDriver;
 
@@ -27,7 +27,7 @@ public class TestDriverTest implements DriverEventListener {
 	public void setUp() throws IOException {
 		nativeDriver = new TestDriver();
 		nativeDriver.addListener(this);
-		nativeDriver.start();
+		nativeDriver.start(TESTDRIVER_PORT);
 		message = null;
 	}
 
@@ -39,8 +39,8 @@ public class TestDriverTest implements DriverEventListener {
 	@Test
 	public void testHandshake() throws UnknownHostException, IOException,
 			InterruptedException {
-		Socket iccSocket = new Socket("localhost",
-				TestDriver.PORT_NUMBER_DEFAULT);
+		Socket iccSocket = new Socket(TESTDRIVER_HOST,
+				TESTDRIVER_PORT);
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				iccSocket.getOutputStream()));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -54,8 +54,8 @@ public class TestDriverTest implements DriverEventListener {
 
 	@Test
 	public void testSendData() throws IOException, InterruptedException {
-		final Socket dataSocket = new Socket("localhost",
-				TestDriver.PORT_NUMBER_DEFAULT);
+		Socket dataSocket = new Socket(TESTDRIVER_HOST,
+				TESTDRIVER_PORT);
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(
 				dataSocket.getInputStream()));
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
