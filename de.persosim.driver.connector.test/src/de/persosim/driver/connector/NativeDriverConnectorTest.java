@@ -51,6 +51,8 @@ public class NativeDriverConnectorTest {
 		}
 	}
 	
+	//XXX use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
+	
 	@Before
 	public void setUp() throws Exception {
 		new NonStrictExpectations(PersoSimKernel.class){
