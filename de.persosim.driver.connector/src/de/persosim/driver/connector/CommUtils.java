@@ -47,11 +47,12 @@ public class CommUtils {
 	 * @param commandApdu
 	 *            the data to transmit
 	 * @return the response received on the socket or null in case of errors
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static byte[] exchangeApdu(Socket socket, byte[] commandApdu) throws IOException {
-		BufferedReader bufferedIn = new BufferedReader(
-				new InputStreamReader(socket.getInputStream()));
+	public static byte[] exchangeApdu(Socket socket, byte[] commandApdu)
+			throws IOException {
+		BufferedReader bufferedIn = new BufferedReader(new InputStreamReader(
+				socket.getInputStream()));
 		PrintWriter printOut;
 		printOut = new PrintWriter(socket.getOutputStream());
 		printOut.println(HexString.encode(commandApdu));
@@ -74,7 +75,7 @@ public class CommUtils {
 	 */
 	public static UnsignedInteger doHandshake(Socket iccSocket,
 			HandshakeMode mode) throws IOException, InterruptedException {
-		return doHandshake(iccSocket, null, mode);
+		return doHandshake(iccSocket, NativeDriverInterface.LUN_NOT_ASSIGNED, mode);
 	}
 
 	/**
@@ -99,11 +100,6 @@ public class CommUtils {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		//use magic word for not assigned lun
-		if (lun == null){
-			lun = NativeDriverInterface.LUN_NOT_ASSIGNED;
-		}
-		
 		CommUtils.writeLine(
 				writer,
 				NativeDriverInterface.MESSAGE_ICC_HELLO.getAsHexString()
@@ -112,13 +108,15 @@ public class CommUtils {
 		String[] helloData = reader.readLine().split(
 				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
 
-		if (!(new UnsignedInteger(HexString.toByteArray(helloData[0]))).equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
+		if (!(new UnsignedInteger(HexString.toByteArray(helloData[0])))
+				.equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
 					"Unexpected message type");
 		}
 
 		try {
-			UnsignedInteger responseLun = UnsignedInteger.parseUnsignedInteger(helloData[1], 16);
+			UnsignedInteger responseLun = UnsignedInteger.parseUnsignedInteger(
+					helloData[1], 16);
 
 			if (mode == HandshakeMode.OPEN) {
 				CommUtils
@@ -163,14 +161,24 @@ public class CommUtils {
 		byte[] bytes = string.getBytes(StandardCharsets.US_ASCII);
 		return Utils.concatByteArrays(bytes, new byte[1]);
 	}
-	
-	public static byte [] toUnsignedShortFlippedBytes(short value){
-		return new byte [] { (byte) (0xFF & value), (byte) (0xFF & value >>> 8) };
+
+	public static byte[] toUnsignedShortFlippedBytes(short value) {
+		return new byte[] { (byte) (0xFF & value), (byte) (0xFF & value >>> 8) };
 	}
 
-	public static UnsignedInteger getExpectedLength(PcscCallData data, int expectedLengthParameterIndex){
-		if (expectedLengthParameterIndex < data.getParameters().size()){
-			return new UnsignedInteger(data.getParameters().get(expectedLengthParameterIndex));
+	/**
+	 * The expected length is stored as a parameter in the data object.
+	 * 
+	 * @param data
+	 * @param expectedLengthParameterIndex
+	 * @return the parameter with the given index as {@link UnsignedInteger} or
+	 *         null if the given index is out of range
+	 */
+	public static UnsignedInteger getExpectedLength(PcscCallData data,
+			int expectedLengthParameterIndex) {
+		if (expectedLengthParameterIndex < data.getParameters().size() && expectedLengthParameterIndex > 0) {
+			return new UnsignedInteger(data.getParameters().get(
+					expectedLengthParameterIndex));
 		}
 		return null;
 	}
