@@ -3,12 +3,9 @@ package de.persosim.driver.connector;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
 
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -22,6 +19,7 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.streams.FakeInputStream;
 import de.persosim.driver.test.streams.FakeOutputStream;
+import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
 public class CommUtilsTest extends ConnectorTest {
@@ -40,27 +38,11 @@ public class CommUtilsTest extends ConnectorTest {
 	 */
 	@Test
 	public void testExchangeApdu() throws Exception {
+		final byte[] apduResponse = "00010203\n".getBytes();
 
-		final byte[] testData = new byte[] { 1, 2, 3, 4 };
+		final InputStream input = new FakeInputStream(apduResponse);
 
-		final LinkedList<Byte> buffer = new LinkedList<Byte>();
-
-		final InputStream input = new InputStream() {
-			@Override
-			public int read() throws IOException {
-				if (buffer.size() > 0) {
-					return buffer.removeLast();
-				}
-				return -1;
-			}
-		};
-
-		final OutputStream output = new OutputStream() {
-			@Override
-			public void write(int b) throws IOException {
-				buffer.addFirst((byte) b);
-			}
-		};
+		final FakeOutputStream output = new FakeOutputStream(true);
 
 		new NonStrictExpectations() {
 			{
@@ -71,8 +53,11 @@ public class CommUtilsTest extends ConnectorTest {
 			}
 		};
 
-		assertArrayEquals(testData,
-				CommUtils.exchangeApdu(dataSocket, testData));
+		assertArrayEquals(HexString.toByteArray("00010203"),
+				CommUtils.exchangeApdu(dataSocket, apduResponse));
+		byte [] expected = Utils.appendBytes(HexString.encode(apduResponse).getBytes(), (byte)'\n');
+		
+		assertArrayEquals(expected, output.getWrittenBytes());
 		input.close();
 		output.close();
 	}
