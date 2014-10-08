@@ -57,7 +57,11 @@ public class CommUtils {
 		printOut = new PrintWriter(socket.getOutputStream());
 		printOut.println(HexString.encode(commandApdu));
 		printOut.flush();
-		return HexString.toByteArray(bufferedIn.readLine());
+		String result = bufferedIn.readLine();
+		if (result == null){
+			throw new IOException("The response could not be read from the socket");
+		}
+		return HexString.toByteArray(result);
 	}
 
 	/**
