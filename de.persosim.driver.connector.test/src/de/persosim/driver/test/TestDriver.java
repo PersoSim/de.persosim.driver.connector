@@ -87,6 +87,7 @@ public class TestDriver {
 			System.out.println("Stopping test driver on port "
 					+ communicationThread.getPort());
 			communicationThread.interrupt();
+			communicationThread.join();
 			running = false;
 		} else {
 			System.out.println("This test driver instance is not running");

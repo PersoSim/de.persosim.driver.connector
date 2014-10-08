@@ -41,6 +41,7 @@ public class NativeDriverCommTest extends ConnectorTest{
 	@After
 	public void tearDown() throws Exception {
 		nativeComm.interrupt();
+		nativeComm.join();
 		driver.stop();
 	}
 
