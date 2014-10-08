@@ -14,7 +14,6 @@ import java.util.List;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
-import de.persosim.driver.connector.pcsc.PcscDataHelper;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
@@ -286,18 +285,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 						currentTag)) {
 			result = 
 					new byte[] { 0 };
-		} else {
-			for (PcscListener listener : listeners) {
-				if (listener instanceof PcscFeature) {
-					PcscFeature feature = (PcscFeature) listener;
-					byte [] field = PcscDataHelper.getField(
-							currentTag, feature.getCapabilities());
-					if (field != null){
-						result = field;
-						break;
-					}
-				}
-			}
 		}
 
 		if (result != null) {

@@ -15,12 +15,6 @@ public class MctReaderDirect extends AbstractPcscFeature {
 	}
 
 	@Override
-	public byte[] getCapabilities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		// TODO Auto-generated method stub
 		return null;

@@ -324,12 +324,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	}
 
 	@Override
-	public byte[] getCapabilities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void setUserInterfaces(Collection<VirtualReaderUi> interfaces) {
 		this.interfaces = interfaces;
 	}

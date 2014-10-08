@@ -30,12 +30,6 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 	}
 
 	@Override
-	public byte[] getCapabilities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		if (data.getFunction().equals(NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){

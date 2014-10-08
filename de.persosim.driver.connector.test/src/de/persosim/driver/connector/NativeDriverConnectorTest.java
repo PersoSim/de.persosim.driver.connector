@@ -154,11 +154,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			public PcscCallResult processPcscCall(PcscCallData data) {
 				return null;
 			}
-			
-			@Override
-			public byte[] getCapabilities() {
-				return null;
-			}
 		});
 		String response = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
