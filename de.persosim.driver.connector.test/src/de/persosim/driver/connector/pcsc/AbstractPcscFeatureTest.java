@@ -45,8 +45,9 @@ public class AbstractPcscFeatureTest extends ConnectorTest {
 	 */
 	@Test
 	public void testGetFeatureDefinitionImmutability() {
+		byte [] original = feature.getFeatureDefinition();
 		byte [] toManipulate = feature.getFeatureDefinition();
 		toManipulate[0] = (byte) 0xFF;
-		assertArrayEquals(toManipulate, feature.getFeatureDefinition());
+		assertArrayEquals(original, feature.getFeatureDefinition());
 	}
 }
