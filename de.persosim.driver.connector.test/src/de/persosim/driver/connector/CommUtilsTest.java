@@ -20,6 +20,8 @@ import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.test.ConnectorTest;
+import de.persosim.driver.test.streams.FakeInputStream;
+import de.persosim.driver.test.streams.FakeOutputStream;
 import de.persosim.simulator.utils.Utils;
 
 public class CommUtilsTest extends ConnectorTest {
@@ -99,35 +101,10 @@ public class CommUtilsTest extends ConnectorTest {
 
 		final byte[] answers = simulatedDriverAnswers.getBytes();
 		final byte[] expected = expectedConnectorHandshakeMessages.getBytes();
-		final StringBuilder received = new StringBuilder();
 
-		final InputStream input = new InputStream() {
-			int current = 0;
+		final InputStream input = new FakeInputStream(answers);
 
-			@Override
-			public int read() throws IOException {
-				if (answers.length > current) {
-					return answers[current++];
-				}
-				return -1;
-			}
-		};
-
-		final OutputStream output = new OutputStream() {
-			boolean ignoreNext = false;
-
-			@Override
-			public void write(int b) throws IOException {
-				if (ignoreNext && (char) b == '\n') {
-					return;
-				}
-				if ((char) b == '\r') {
-					ignoreNext = true;
-				} else {
-					received.append((char)b);
-				}
-			}
-		};
+		final FakeOutputStream output = new FakeOutputStream(true);
 
 		new NonStrictExpectations() {
 			{
@@ -139,7 +116,7 @@ public class CommUtilsTest extends ConnectorTest {
 		};
 		
 		UnsignedInteger receivedLun = CommUtils.doHandshake(dataSocket, lun, mode);
-		assertArrayEquals(expected, received.toString().getBytes());
+		assertArrayEquals(expected, output.getWrittenBytes());
 		assertEquals(expectedLun, receivedLun);
 		
 		input.close();
