@@ -92,35 +92,31 @@ public class TestDriver {
 			System.out.println("This test driver instance is not running");
 		}
 	}
-
+	
 	/**
-	 * Send data from the test driver to simulate PCSC calls.
+	 * This method allows to directly send raw data over the socket to the
+	 * connector at the given lun. The lun is NOT used for constructing a
+	 * protocol compliant message.
 	 * 
 	 * @param lun
-	 * @param function
+	 *            the lun to communicate with
 	 * @param data
-	 * @return the resulting answer to the PCSC call or null if the data could not be sent
+	 *            the data string to send
+	 * @return the raw data returned as string
 	 * @throws IOException
-	 * @throws InterruptedException
 	 */
-	public String sendData(UnsignedInteger lun, UnsignedInteger function, byte[]... data)
-			throws IOException, InterruptedException {
+	public String sendDataDirect(UnsignedInteger lun, String data) throws IOException{
 		Socket iccSocket = lunMapping.get(lun.getAsInt());
 		if (iccSocket != null && iccSocket.isConnected()) {
 			System.out.println("Driver sending data to connector");
 			BufferedWriter bufferedOut = new BufferedWriter(
 					new OutputStreamWriter(iccSocket.getOutputStream()));
-			String dataToSend = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + lun.getAsHexString();
-
-			for (byte[] current : data) {
-				dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
-			}
-
-			bufferedOut.write(dataToSend);
+			
+			bufferedOut.write(data);
 			bufferedOut.newLine();
 			bufferedOut.flush();
 
-			System.out.println("Driver sent PCSC data:\t\t" + dataToSend);
+			System.out.println("Driver sent PCSC data:\t\t" + data);
 			
 			BufferedReader bufferedIn = new BufferedReader(
 					new InputStreamReader(iccSocket.getInputStream()));
@@ -137,6 +133,27 @@ public class TestDriver {
 		}
 		System.out.println("No connected socket found for lun: " + lun);
 		return null;
+	}
+
+	/**
+	 * Send correctly formated data from the test driver to simulate PCSC calls.
+	 * 
+	 * @param lun
+	 * @param function
+	 * @param data
+	 * @return the resulting answer to the PCSC call or null if the data could not be sent
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public String sendData(UnsignedInteger lun, UnsignedInteger function, byte[]... data)
+			throws IOException, InterruptedException {
+
+		String dataToSend = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + lun.getAsHexString();
+
+		for (byte[] current : data) {
+			dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+		}
+		return sendDataDirect(lun, dataToSend);
 	}
 
 	/**
