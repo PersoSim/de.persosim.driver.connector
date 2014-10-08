@@ -16,9 +16,9 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class PcscCallData {
-	UnsignedInteger function;
-	UnsignedInteger logicalUnitNumber;
-	List<byte[]> parameters;
+	private UnsignedInteger function;
+	private UnsignedInteger logicalUnitNumber;
+	private List<byte[]> parameters;
 
 	/**
 	 * Create a new instance by parsing the given data.
