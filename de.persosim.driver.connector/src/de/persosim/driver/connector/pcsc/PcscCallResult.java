@@ -11,7 +11,7 @@ public interface PcscCallResult {
 	 * The format used for this response is:
 	 * RESPONSECODE|[data]
 	 * <br/>
-	 * [data] consists of a concatenation of byte arrays divided by |
+	 * [data] consists of a concatenation of hex encoded byte arrays divided by |
 	 * 
 	 * @return the data encoded for sending to the native driver
 	 */

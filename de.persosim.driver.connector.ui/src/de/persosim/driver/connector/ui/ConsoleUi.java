@@ -9,6 +9,13 @@ import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.simulator.utils.Utils;
 
+/**
+ * This class represents a console user interface for pin entry and string
+ * display.
+ * 
+ * @author mboonk
+ *
+ */
 public class ConsoleUi implements VirtualReaderUi {
 
 	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -53,9 +60,16 @@ public class ConsoleUi implements VirtualReaderUi {
 		System.out.println();
 	}
 	
-	private void printCrossedLine(int length){
+	/**
+	 * This methods prints a line using '+' for the end points and uses '-' for
+	 * the line itself.
+	 * 
+	 * @param length
+	 *            the length of the line in characters between the end points
+	 */
+	private void printCrossedLine(int length) {
 		System.out.print("+");
-		for (int i = 0; i < length; i++){
+		for (int i = 0; i < length; i++) {
 			System.out.print("-");
 		}
 		System.out.print("+");

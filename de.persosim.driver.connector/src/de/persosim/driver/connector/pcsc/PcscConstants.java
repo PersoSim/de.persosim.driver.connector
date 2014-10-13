@@ -3,6 +3,11 @@ package de.persosim.driver.connector.pcsc;
 import de.persosim.driver.connector.UnsignedInteger;
 
 
+/**
+ * This interface defines often used values as specified in the PCSC specification.
+ * @author mboonk
+ *
+ */
 public interface PcscConstants {
 	public static final int VALUE_IFD_POWER_UP = 500;
 	public static final int VALUE_IFD_POWER_DOWN = 501;

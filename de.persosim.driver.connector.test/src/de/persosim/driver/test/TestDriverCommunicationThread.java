@@ -29,6 +29,7 @@ public class TestDriverCommunicationThread extends Thread implements
 	private HashMap<Integer, HandshakeData> lunHandshakeData;
 	private HandshakeData currentHandshake;
 	private Socket clientSocket;
+	private boolean isRunning = false;
 	private static final byte MAX_LUNS = 10;
 
 	private UnsignedInteger getLowestFreeLun() {
@@ -59,6 +60,7 @@ public class TestDriverCommunicationThread extends Thread implements
 	public void run() {
 		while (!isInterrupted()) {
 			try {
+				isRunning = true;
 				clientSocket = serverSocket.accept();
 				System.out.println("New local socket on port: "
 						+ clientSocket.getPort());
@@ -118,7 +120,7 @@ public class TestDriverCommunicationThread extends Thread implements
 						try {
 							lunMapping.get(lun.getAsInt()).close();
 							System.out.println("Closed socket on port: "
-									+ lunMapping.get(lun).getPort());
+									+ lunMapping.get(lun.getAsInt()).getPort());
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -171,5 +173,9 @@ public class TestDriverCommunicationThread extends Thread implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public boolean isRunning() {
+		return isRunning;
 	}
 }

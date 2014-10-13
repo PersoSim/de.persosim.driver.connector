@@ -7,10 +7,6 @@ package de.persosim.driver.connector.pcsc;
  * 
  */
 public interface PcscFeature extends PcscListener {
-	/**
-	 * @return the capabilities provided by this PCSC feature
-	 */
-	public abstract byte[] getCapabilities();
 
 	/**
 	 * This is a concatenation of the one byte feature description, a length

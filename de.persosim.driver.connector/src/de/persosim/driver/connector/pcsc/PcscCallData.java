@@ -1,5 +1,6 @@
 package de.persosim.driver.connector.pcsc;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -16,9 +17,9 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class PcscCallData {
-	UnsignedInteger function;
-	UnsignedInteger logicalUnitNumber;
-	List<byte[]> parameters;
+	private UnsignedInteger function;
+	private UnsignedInteger logicalUnitNumber;
+	private List<byte[]> parameters;
 
 	/**
 	 * Create a new instance by parsing the given data.
@@ -71,11 +72,17 @@ public class PcscCallData {
 
 	private UnsignedInteger getLogicalUnitNumber(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		if (dataArray.length < 1){
+			throw new InvalidParameterException("Given data does not contain a logical number");
+		}
 		return UnsignedInteger.parseUnsignedInteger(dataArray[1], 16);
 	}
 
 	private UnsignedInteger getCallType(String data) {
 		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		if (dataArray.length < 2){
+			throw new InvalidParameterException("Given data does not contain a function number");
+		}
 		return UnsignedInteger.parseUnsignedInteger(dataArray[0], 16);
 	}
 }

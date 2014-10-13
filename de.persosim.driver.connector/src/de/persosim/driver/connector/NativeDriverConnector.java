@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.List;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
-import de.persosim.driver.connector.pcsc.PcscDataHelper;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
@@ -44,6 +44,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private Socket simSocket;
 	private String simHostName;
 	private int simPort;
+	private int timeout = 2000;
 
 	/**
 	 * Create a connector object using the connection data for the native driver
@@ -76,6 +77,18 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners);
 		comm.start();
+
+		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
+		while (!comm.isConnected()){
+			if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
+				throw new IOException("The communication thread has run into a timeout");
+			}
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				throw new IOException("The waiting for the communication thread was interrupted");
+			}
+		}
 	}
 
 	/**
@@ -272,18 +285,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 						currentTag)) {
 			result = 
 					new byte[] { 0 };
-		} else {
-			for (PcscListener listener : listeners) {
-				if (listener instanceof PcscFeature) {
-					PcscFeature feature = (PcscFeature) listener;
-					byte [] field = PcscDataHelper.getField(
-							currentTag, feature.getCapabilities());
-					if (field != null){
-						result = field;
-						break;
-					}
-				}
-			}
 		}
 
 		if (result != null) {

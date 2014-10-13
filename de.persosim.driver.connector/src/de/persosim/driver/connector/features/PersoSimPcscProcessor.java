@@ -142,6 +142,14 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		return null;
 	}
 	
+	/**
+	 * An APDU will be modified by setting the logical channel bits to 1 but not
+	 * send. This method can also be used to execute PACE commands using PPDUs
+	 * with an FFC20120 prefix.
+	 * 
+	 * @param data
+	 * @return
+	 */
 	private PcscCallResult transmitToIcc(PcscCallData data) {
 		byte[] commandPpdu = data.getParameters().get(0);
 
@@ -198,32 +206,131 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	private PcscCallResult establishPaceChannel(byte[] inputDataFromPpdu) {
 		int offset = OFFSET_ESTABLISH_PACE_PIN_ID;
 		byte pinId = inputDataFromPpdu[offset];
-		byte [] chat = getValue(inputDataFromPpdu, ++ offset, LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
+		byte[] chat = getValue(inputDataFromPpdu, ++offset,
+				LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
 		offset += chat.length + LENGTH_ESTABLISH_PACE_CHAT_LENGTH;
-		byte [] pin = getValue(inputDataFromPpdu, offset, LENGTH_ESTABLISH_PACE_PIN_LENGTH);
+		byte[] pin = getValue(inputDataFromPpdu, offset,
+				LENGTH_ESTABLISH_PACE_PIN_LENGTH);
 		offset += pin.length + LENGTH_ESTABLISH_PACE_PIN_LENGTH;
+
+		try {
+			if (pin.length == 0) {
+				pin = getPinFromInterfaces(pin);
+
+			}
+		} catch (IOException e) {
+			// TODO logging
+			return new SimplePcscCallResult(IFD_ERROR_NOT_SUPPORTED);
+		}
+
+		if (pin == null) {
+			return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_ABORT,
+					new byte[0]);
+		}
+
+		TlvDataObjectContainer data = buildPseudoApduData(pinId, chat, pin);
+
+		try {
+
+			byte[] efCardAccess = readCardAccess();
+
+			byte[] pseudoApduHeader = new byte[] { (byte) 0xff, (byte) 0x86, 0,
+					0, (byte) (0xFF & data.toByteArray().length) };
+			byte[] responseApdu = CommUtils.exchangeApdu(communicationSocket, Utils
+					.concatByteArrays(pseudoApduHeader, data.toByteArray()));
+
+			byte[] pcscResponse = buildPcscResponseData(efCardAccess, responseApdu);
+			return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR,
+					pcscResponse);
+
+		} catch (IOException e) {
+			// TODO logging
+			return buildResponse(PcscConstants.IFD_SUCCESS,
+					RESULT_COMMUNICATION_ABORT, new byte[0]);
+		}
 		
-		if (pin.length == 0) {
+	}
+
+	private byte[] getPinFromInterfaces(byte[] pin) throws IOException {
+		if (interfaces != null) {
 			for (VirtualReaderUi current : interfaces) {
-				try {
-					current.display("Enter PACE password");
-					pin = current.getPin();
-					if (pin != null) {
-						break;
-					}
-				} catch (IOException e) {
-					// TODO logging
-					return new SimplePcscCallResult(IFD_ERROR_NOT_SUPPORTED);
+				current.display("Enter PACE password");
+				pin = current.getPin();
+				if (pin != null) {
+					break;
 				}
 			}
+			return pin;
+		}
+		return null;
+	}
+
+	private byte[] buildPcscResponseData(byte[] efCardAccess, byte[] responseApdu) {
+		TlvDataObjectContainer responseData = new TlvDataObjectContainer(
+				Arrays.copyOf(responseApdu, responseApdu.length - 2));
+
+		byte[] mseSetAtStatusWord = Arrays.copyOfRange(responseApdu,
+				responseApdu.length - 2, responseApdu.length);
+		TlvDataObject currentCar = responseData
+				.getTlvDataObject(TlvConstants.TAG_87);
+		TlvDataObject previousCar = responseData
+				.getTlvDataObject(TlvConstants.TAG_88);
+		TlvDataObject idIcc = responseData
+				.getTlvDataObject(TlvConstants.TAG_86);
+
+		if (currentCar == null) {
+			currentCar = new PrimitiveTlvDataObject(new TlvTag((byte) 0));
+		}
+		if (previousCar == null) {
+			previousCar = new PrimitiveTlvDataObject(new TlvTag((byte) 0));
+		}
+		if (idIcc == null) {
+			idIcc = new PrimitiveTlvDataObject(new TlvTag((byte) 0));
+		}
+
+		byte[] pcscResponse = Utils
+				.concatByteArrays(
+						mseSetAtStatusWord,
+						CommUtils
+								.toUnsignedShortFlippedBytes((short) efCardAccess.length),
+						efCardAccess,
+						new byte[] { (byte) (0xFF & currentCar
+								.getLengthValue()) }, currentCar
+								.getValueField(),
+						new byte[] { (byte) (0xFF & previousCar
+								.getLengthValue()) }, previousCar
+								.getValueField(), CommUtils
+								.toUnsignedShortFlippedBytes((short) idIcc
+										.getLengthValue()), idIcc
+								.getValueField());
+
+		currentState = PaceState.SM_ESTABLISHED;
+		return pcscResponse;
+	}
+
+	private byte[] readCardAccess() throws IOException {
+		byte [] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
+		byte [] readBinary = HexString.toByteArray("00 B0 00 00 00");
+		
+		byte [] response = CommUtils.exchangeApdu(communicationSocket, select);
+		
+		if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
+			// TODO logging
+			throw new IOException("Selection efCardAccess unsuccessfull");
+		}
+		response = CommUtils.exchangeApdu(communicationSocket, readBinary);
+		
 			
+		if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
+			// TODO logging
+			throw new IOException("Read binary of efCardAccess unsuccessfull");
 		}
 		
-		if (pin == null){
-			return buildResponse(PcscConstants.IFD_SUCCESS,
-					RESULT_ABORT, new byte[0]);
-		}
-		
+		return Arrays.copyOf(response, response.length - 2);
+	}
+
+	private TlvDataObjectContainer buildPseudoApduData(byte pinId, byte[] chat,
+			byte[] pin) {
 		TlvDataObjectContainer data = new TlvDataObjectContainer();
 		//add password id
 		data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_83, new byte [] { pinId }));
@@ -233,71 +340,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 		if (chat.length > 0){
 			data.addTlvDataObject(new PrimitiveTlvDataObject(TlvConstants.TAG_7F4C, chat));	
 		}
-		
-		
-		byte [] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
-		byte [] readBinary = HexString.toByteArray("00 B0 00 00 00");
-		try {
-			byte [] response = CommUtils.exchangeApdu(communicationSocket, select);
-			
-			if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
-				// TODO logging
-				return buildResponse(PcscConstants.IFD_SUCCESS,
-						RESULT_COMMUNICATION_ABORT, new byte[0]);
-			}
-			response = CommUtils.exchangeApdu(communicationSocket, readBinary);
-			
-				
-			if (Iso7816Lib.isReportingError(Utils.getShortFromUnsignedByteArray(Arrays.copyOfRange(response, response.length - 2, response.length - 1)))){
-				// TODO logging
-				return buildResponse(PcscConstants.IFD_SUCCESS,
-						RESULT_COMMUNICATION_ABORT, new byte[0]);
-			} else {
-				byte [] efCardAccess = Arrays.copyOf(response, response.length - 2);
-				
-				byte [] pseudoApduHeader = new byte []{ (byte) 0xff, (byte) 0x86, 0, 0, (byte) (0xFF & data.toByteArray().length)};
-				try {
-					response = CommUtils.exchangeApdu(communicationSocket, Utils.concatByteArrays(pseudoApduHeader, data.toByteArray()));
-					
-					TlvDataObjectContainer responseData = new TlvDataObjectContainer(Arrays.copyOf(response, response.length - 2));
-					
-					byte [] mseSetAtStatusWord = Arrays.copyOfRange(response, response.length - 2, response.length);
-					TlvDataObject currentCar = responseData.getTlvDataObject(TlvConstants.TAG_87);
-					TlvDataObject previousCar = responseData.getTlvDataObject(TlvConstants.TAG_88);
-					TlvDataObject idIcc = responseData.getTlvDataObject(TlvConstants.TAG_86);
-
-					if (currentCar == null){
-						currentCar = new PrimitiveTlvDataObject(new TlvTag((byte)0));
-					}
-					if (previousCar == null){
-						previousCar = new PrimitiveTlvDataObject(new TlvTag((byte)0));
-					}
-					if (idIcc == null){
-						idIcc = new PrimitiveTlvDataObject(new TlvTag((byte)0));
-					}
-
-					byte[] pcscResponse = Utils.concatByteArrays(mseSetAtStatusWord,
-							CommUtils.toUnsignedShortFlippedBytes((short) efCardAccess.length),
-							efCardAccess, new byte[] { (byte) (0xFF & currentCar.getLengthValue()) },
-							currentCar.getValueField(), new byte[] { (byte) (0xFF & previousCar.getLengthValue()) },
-							previousCar.getValueField(), CommUtils.toUnsignedShortFlippedBytes((short) idIcc.getLengthValue()), idIcc.getValueField());
-					
-					currentState = PaceState.SM_ESTABLISHED;
-					return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, pcscResponse);
-				} catch (IOException e) {
-					// TODO logging
-					return buildResponse(PcscConstants.IFD_SUCCESS,
-							RESULT_COMMUNICATION_ABORT, new byte[0]);
-				}
-			}
-
-			
-		} catch (IOException e){
-			// TODO logging
-			return buildResponse(PcscConstants.IFD_SUCCESS,
-					RESULT_COMMUNICATION_ABORT, new byte[0]);
-		}
-		
+		return data;
 	}
 
 	private PcscCallResult getReaderPaceCapabilities() {
@@ -321,12 +364,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements Socket
 	@Override
 	public void setCommunicationSocket(Socket socket) {
 		this.communicationSocket = socket;
-	}
-
-	@Override
-	public byte[] getCapabilities() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
