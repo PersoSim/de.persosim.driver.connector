@@ -34,12 +34,12 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 		if (data.getFunction().equals(NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
 				List<byte[]> params = data.getParameters();
-				byte[] param = params.get(1);
-				byte[] apduHeaderReceived = Arrays.copyOfRange(param, 24, param.length);
+				// XXX SLS actually use data from param
+//				byte[] param = params.get(1);
+//				byte[] apduHeaderReceived = Arrays.copyOfRange(param, 24, param.length);
 				byte[] apduHeaderExpected = HexString.toByteArray("002C0203");
 				byte[] expectedLength = params.get(2);
 				
-				// XXX SLS actually use data from param
 				
 				byte[] resetRetryCounterApduBytes;
 				
