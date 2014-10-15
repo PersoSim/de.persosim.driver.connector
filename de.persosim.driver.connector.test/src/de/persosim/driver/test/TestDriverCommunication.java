@@ -21,7 +21,7 @@ import de.persosim.driver.connector.UnsignedInteger;
  * @author mboonk
  *
  */
-public class TestDriverCommunication extends Thread implements
+public class TestDriverCommunication implements Runnable,
 		NativeDriverInterface {
 
 	private ServerSocket serverSocket;
@@ -44,7 +44,6 @@ public class TestDriverCommunication extends Thread implements
 	public TestDriverCommunication(int port,
 			HashMap<Integer, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
-		this.setName("TestDriverCommunicationThread");
 		this.lunMapping = lunMapping;
 		lunHandshakeData = new HashMap<Integer, HandshakeData>();
 
@@ -58,9 +57,9 @@ public class TestDriverCommunication extends Thread implements
 
 	@Override
 	public void run() {
-		while (!isInterrupted()) {
+		isRunning = true;
+		while (isRunning) {
 			try {
-				isRunning = true;
 				clientSocket = serverSocket.accept();
 				System.out.println("New local socket on port: "
 						+ clientSocket.getPort());
@@ -158,15 +157,9 @@ public class TestDriverCommunication extends Thread implements
 	public int getPort() {
 		return serverSocket.getLocalPort();
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#interrupt()
-	 */
-	@Override
-	public void interrupt() {
-		super.interrupt();
+	
+	public void stop(){
+		isRunning = false;
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
