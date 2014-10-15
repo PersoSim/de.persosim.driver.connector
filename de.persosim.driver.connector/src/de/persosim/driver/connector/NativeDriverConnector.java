@@ -76,7 +76,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void connect() throws IOException {
 		addListener(this);
-		NativeDriverComm comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
+		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners); 
 		commThread = new Thread(comm);
 		commThread.start();
