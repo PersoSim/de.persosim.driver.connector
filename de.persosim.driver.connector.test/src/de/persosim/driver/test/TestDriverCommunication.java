@@ -21,7 +21,7 @@ import de.persosim.driver.connector.UnsignedInteger;
  * @author mboonk
  *
  */
-public class TestDriverCommunicationThread extends Thread implements
+public class TestDriverCommunication extends Thread implements
 		NativeDriverInterface {
 
 	private ServerSocket serverSocket;
@@ -41,7 +41,7 @@ public class TestDriverCommunicationThread extends Thread implements
 		return NativeDriverInterface.LUN_NOT_ASSIGNED;
 	}
 
-	public TestDriverCommunicationThread(int port,
+	public TestDriverCommunication(int port,
 			HashMap<Integer, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
 		this.setName("TestDriverCommunicationThread");

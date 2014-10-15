@@ -27,7 +27,7 @@ public class TestDriver {
 
 	private Collection<DriverEventListener> listeners = new HashSet<DriverEventListener>();
 
-	private TestDriverCommunicationThread communicationThread;
+	private TestDriverCommunication communicationThread;
 	private HashMap<Integer, Socket> lunMapping = new HashMap<>();
 	private int timeout = 2000;
 
@@ -51,7 +51,7 @@ public class TestDriver {
 	public void start(int port) throws IOException {
 		if (!running) {
 			System.out.println("Starting test driver on port " + port);
-			communicationThread = new TestDriverCommunicationThread(port,
+			communicationThread = new TestDriverCommunication(port,
 					lunMapping, listeners);
 			communicationThread.setDaemon(true);
 			communicationThread.start();
