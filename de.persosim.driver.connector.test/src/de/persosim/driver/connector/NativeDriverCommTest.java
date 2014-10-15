@@ -23,7 +23,7 @@ import de.persosim.driver.test.TestDriver;
 
 public class NativeDriverCommTest extends ConnectorTest{
 	
-	private NativeDriverComm nativeComm;
+	private NativeDriverComm nativeCommunication;
 	private Thread nativeCommThread;
 	@Mocked
 	private PcscListener mockedListener;
@@ -35,13 +35,13 @@ public class NativeDriverCommTest extends ConnectorTest{
 		driver = new TestDriver();
 		driver.start(TESTDRIVER_PORT);
 		listeners = new HashSet<>();
-		nativeComm = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
-		nativeCommThread = new Thread(nativeComm);
+		nativeCommunication = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
+		nativeCommThread = new Thread(nativeCommunication);
 		}
 	
 	@After
 	public void tearDown() throws Exception {
-		nativeComm.disconnect();
+		nativeCommunication.disconnect();
 		nativeCommThread.join();
 		driver.stop();
 	}
@@ -63,7 +63,7 @@ public class NativeDriverCommTest extends ConnectorTest{
 		
 		nativeCommThread.start();
 		
-		while (!nativeComm.isConnected()){
+		while (!nativeCommunication.isConnected()){
 			Thread.sleep(5);
 		}
 		
@@ -91,7 +91,7 @@ public class NativeDriverCommTest extends ConnectorTest{
 		
 		nativeCommThread.start();
 		
-		while (!nativeComm.isConnected()){
+		while (!nativeCommunication.isConnected()){
 			Thread.sleep(5);
 		}
 		

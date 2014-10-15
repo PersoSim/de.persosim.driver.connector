@@ -35,7 +35,7 @@ public class NativeDriverComm implements Runnable {
 
 	String hostName;
 	int dataPort;
-	
+
 	/**
 	 * Constructor using the connection information and a {@link Collection} of
 	 * listeners.
@@ -103,13 +103,14 @@ public class NativeDriverComm implements Runnable {
 							result = new PcscCallResult() {
 								@Override
 								public String getEncoded() {
-									return PcscConstants.IFD_NOT_SUPPORTED.getAsHexString();
+									return PcscConstants.IFD_NOT_SUPPORTED
+											.getAsHexString();
 								}
 							};
 						}
-						
+
 						log(result);
-						
+
 						bufferedDataOut.write(result.getEncoded());
 						bufferedDataOut.newLine();
 						bufferedDataOut.flush();
@@ -126,25 +127,28 @@ public class NativeDriverComm implements Runnable {
 			e1.printStackTrace();
 		}
 	}
-	
-	public void log(PcscCallResult data){
+
+	public void log(PcscCallResult data) {
 		System.out.println("PCSC Out:\t" + data.getEncoded());
 	}
-	
+
 	public void log(PcscCallData data) {
-		System.out.print("PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
+		System.out.print("PCSC In:\t" + getStringRep(data.getFunction())
+				+ NativeDriverInterface.MESSAGE_DIVIDER
+				+ data.getLogicalUnitNumber().getAsHexString());
 		for (byte[] current : data.getParameters()) {
-			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current));
+			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER
+					+ HexString.encode(current));
 		}
 		System.out.println();
 	}
-	
-	String getStringRep(UnsignedInteger value){
-		Field [] fields = NativeDriverInterface.class.getDeclaredFields();
-		for (Field field : fields){
+
+	String getStringRep(UnsignedInteger value) {
+		Field[] fields = NativeDriverInterface.class.getDeclaredFields();
+		for (Field field : fields) {
 			try {
 				if (value.equals(field.get(new NativeDriverInterface() {
-				}))){
+				}))) {
 					return field.getName();
 				}
 			} catch (Exception e) {
@@ -153,18 +157,26 @@ public class NativeDriverComm implements Runnable {
 		}
 		return value.getAsHexString();
 	}
-	
-	public void disconnect() throws IOException, InterruptedException{
+
+	/**
+	 * Disconnects the communication thread from the native driver and does a
+	 * closure handshake.
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void disconnect() throws IOException, InterruptedException {
 		isRunning = false;
-		
+
 		dataSocket.close();
-		
+
 		Socket temp = new Socket(hostName, dataPort);
 		CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
 		dataSocket.close();
 		temp.close();
-		
-		// XXX Hack (wait for pcsc to poll and kill connections until the driver handles the closure handshakes)
+
+		// XXX Hack (wait for pcsc to poll and kill connections until the driver
+		// handles the closure handshakes)
 		Thread.sleep(3000);
 		isConnected = false;
 	}
