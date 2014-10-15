@@ -11,7 +11,8 @@ public class TestSocketSimComm implements Runnable {
 
 	private ServerSocket serverSocket;
 	private TestApduHandler handler;
-	private boolean isRunning;
+	private boolean isActive;
+	private boolean isRunning = false;
 	private Socket clientSocket;
 	
 	public TestSocketSimComm(int port, TestApduHandler handler) throws IOException{
@@ -22,6 +23,8 @@ public class TestSocketSimComm implements Runnable {
 	@Override
 	public void run() {
 		clientSocket = null;
+		isActive = true;
+		isRunning = true;
 		try {
 			clientSocket = serverSocket.accept();
 
@@ -33,17 +36,24 @@ public class TestSocketSimComm implements Runnable {
 				out.println(handler.processCommand(apduLine));
 				out.flush();
 
-			} while (isRunning);
+			} while (isActive);
 		}catch (IOException e){
 			e.printStackTrace();
 		}
 	}
 
 	public void stop() throws IOException{
-		isRunning = false;
+		isActive = false;
 		if (clientSocket != null){
 			clientSocket.close();
 		}
 		serverSocket.close();
+		isRunning = false;
 	}
+
+	public boolean isRunning() {
+		return isRunning;
+	}
+	
+	
 }

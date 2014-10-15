@@ -19,6 +19,15 @@ public class TestSocketSim {
 		communication = new TestSocketSimComm(port, handler);
 		communicationThread = new Thread(communication);
 		communicationThread.start();
+		while (!communication.isRunning()){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		isRunning = true;
 	}
 	
