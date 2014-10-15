@@ -37,14 +37,16 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private Collection<PcscListener> listeners = new ArrayList<PcscListener>();
 	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
+	private Thread commThread;
 	private NativeDriverComm comm;
+	
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
 	private byte[] cachedAtr = null;
 	private Socket simSocket;
 	private String simHostName;
 	private int simPort;
-	private int timeout = 2000;
+	private int timeout = 5000;
 
 	/**
 	 * Create a connector object using the connection data for the native driver
@@ -74,9 +76,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void connect() throws IOException {
 		addListener(this);
-		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
-				listeners);
-		comm.start();
+		NativeDriverComm comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
+				listeners); 
+		commThread = new Thread(comm);
+		commThread.start();
 
 		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
 		while (!comm.isConnected()){
@@ -98,8 +101,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws InterruptedException
 	 */
 	public void disconnect() throws IOException, InterruptedException {
-		comm.interrupt();
-		comm.join();
+		comm.disconnect();
+		commThread.join();
 	}
 
 	/**
@@ -170,7 +173,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @return true, iff the communication thread is alive and not interrupted
 	 */
 	public boolean isConnected() {
-		return comm.isAlive() && !comm.isInterrupted();
+		return commThread.isAlive() && !commThread.isInterrupted();
 	}
 
 	@Override

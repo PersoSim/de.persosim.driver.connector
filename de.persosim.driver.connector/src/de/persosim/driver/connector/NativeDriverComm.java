@@ -24,12 +24,13 @@ import de.persosim.simulator.utils.HexString;
  * @author mboonk
  * 
  */
-public class NativeDriverComm extends Thread {
+public class NativeDriverComm implements Runnable {
 	private Collection<PcscListener> listeners;
 	private BufferedReader bufferedDataIn;
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
 	private UnsignedInteger lun;
+	private boolean isRunning = true;
 	private boolean isConnected = false;
 
 	String hostName;
@@ -66,9 +67,10 @@ public class NativeDriverComm extends Thread {
 	@Override
 	public void run() {
 		try {
+			isRunning = true;
 			lun = CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
 			isConnected = true;
-			while (!this.isInterrupted()) {
+			while (isRunning) {
 				try {
 					String data = bufferedDataIn.readLine();
 					PcscCallResult result = null;
@@ -151,27 +153,20 @@ public class NativeDriverComm extends Thread {
 		}
 		return value.getAsHexString();
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#interrupt()
-	 */
-	@Override
-	public void interrupt() {
-		super.interrupt();
-		try {
-			Socket temp = new Socket(hostName, dataPort);
-			CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
-			dataSocket.close();
-			temp.close();
-			
-			// XXX Hack (wait for pcsc to poll and kill connections until the driver handles the closure handshakes)
-			Thread.sleep(3000);
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+	public void disconnect() throws IOException, InterruptedException{
+		isRunning = false;
+		
+		dataSocket.close();
+		
+		Socket temp = new Socket(hostName, dataPort);
+		CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
+		dataSocket.close();
+		temp.close();
+		
+		// XXX Hack (wait for pcsc to poll and kill connections until the driver handles the closure handshakes)
+		Thread.sleep(3000);
+		isConnected = false;
 	}
 
 	/**
