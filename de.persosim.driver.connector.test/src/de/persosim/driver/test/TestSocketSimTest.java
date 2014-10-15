@@ -25,7 +25,7 @@ public class TestSocketSimTest extends ConnectorTest {
 	
 	@Before
 	public void setUp() throws IOException{
-		sim = new TestSocketSim(SIMULATOR_PORT, handler);
+		sim = new TestSocketSim(SIMULATOR_PORT);
 		sim.start();
 	}
 	
@@ -36,7 +36,7 @@ public class TestSocketSimTest extends ConnectorTest {
 	
 	@Test
 	public void testHandleApdu() throws UnknownHostException, IOException {
-
+		sim.setHandler(handler);
 		new Expectations() {
 			{
 				handler.processCommand(withEqual("TESTSTRING"));

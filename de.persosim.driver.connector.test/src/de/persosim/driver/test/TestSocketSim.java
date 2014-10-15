@@ -7,16 +7,14 @@ public class TestSocketSim {
 	private Thread communicationThread;
 	private TestSocketSimComm communication;
 	private int port;
-	private TestApduHandler handler;
 	private boolean isRunning;
 	
-	public TestSocketSim(int port, TestApduHandler handler) {
+	public TestSocketSim(int port) {
 		this.port = port;
-		this.handler = handler;
 	}
 	
 	public void start() throws IOException{
-		communication = new TestSocketSimComm(port, handler);
+		communication = new TestSocketSimComm(port);
 		communicationThread = new Thread(communication);
 		communicationThread.start();
 		while (!communication.isRunning()){
@@ -29,6 +27,14 @@ public class TestSocketSim {
 		}
 		
 		isRunning = true;
+	}
+	
+	public void setHandler(TestApduHandler handler){
+		if (communication != null){
+			communication.setHandler(handler);
+		} else {
+			throw new NullPointerException("The communication thread is not running, therefore no handler can be set");
+		}
 	}
 	
 	public void stop() throws IOException, InterruptedException{
