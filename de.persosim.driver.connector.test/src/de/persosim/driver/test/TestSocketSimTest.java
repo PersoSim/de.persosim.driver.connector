@@ -34,13 +34,18 @@ public class TestSocketSimTest extends ConnectorTest {
 		sim.stop();
 	}
 	
+	/**
+	 * Positive test using 2 arbitrary strings.
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
 	@Test
 	public void testHandleApdu() throws UnknownHostException, IOException {
 		sim.setHandler(handler);
 		new Expectations() {
 			{
-				handler.processCommand(withEqual("TESTSTRING"));
-				result = "TESTRESULT";
+				handler.processCommand(withEqual("55667788"));
+				result = "11223344";
 			}
 		};
 		
@@ -48,13 +53,13 @@ public class TestSocketSimTest extends ConnectorTest {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		
-		writer.write("TESTSTRING");
+		writer.write("55667788");
 		writer.newLine();
 		writer.flush();
 		
 		String result = reader.readLine();
 		
-		assertEquals("TESTRESULT", result);
+		assertEquals("11223344", result);
 		socket.close();
 		
 	}

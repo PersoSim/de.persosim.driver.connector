@@ -25,6 +25,11 @@ import de.persosim.driver.test.TestDriver;
 import de.persosim.driver.test.TestSocketSim;
 import de.persosim.simulator.utils.HexString;
 
+/**
+ * This class tests the {@link NativeDriverConnector}.
+ * @author mboonk
+ *
+ */
 public class NativeDriverConnectorTest extends ConnectorTest{
 
 	private NativeDriverConnector nativeConnector;
@@ -55,7 +60,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		driver.stop();
 		sim.stop();
 	}
-
+	
 	private String checkPcscTag(UnsignedInteger tag, UnsignedInteger expectedResponseCode, UnsignedInteger expectedLength) throws Exception{
 		String result = driver.sendData(new UnsignedInteger(0),
 				NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES,
