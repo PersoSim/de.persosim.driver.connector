@@ -15,7 +15,6 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
-import de.persosim.simulator.utils.HexString;
 
 /**
  * This thread reads PCSC data from the native interface and delegates it to the @link
@@ -126,15 +125,17 @@ public class NativeDriverComm extends Thread {
 	}
 	
 	public void log(PcscCallResult data){
-		System.out.println("PCSC Out:\t" + data.getEncoded());
+		//TODO use proper logging mechanism
+		//System.out.println("PCSC Out:\t" + data.getEncoded());
 	}
 	
 	public void log(PcscCallData data) {
-		System.out.print("PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
+		//TODO use proper logging mechanism
+		/*System.out.print("PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
 		for (byte[] current : data.getParameters()) {
 			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current));
 		}
-		System.out.println();
+		System.out.println();*/
 	}
 	
 	String getStringRep(UnsignedInteger value){
