@@ -37,14 +37,16 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private Collection<PcscListener> listeners = new ArrayList<PcscListener>();
 	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
-	private NativeDriverComm comm;
+	private Thread communicationThread;
+	private NativeDriverComm communication;
+	
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
 	private byte[] cachedAtr = null;
 	private Socket simSocket;
 	private String simHostName;
 	private int simPort;
-	private int timeout = 2000;
+	private int timeout = 5000;
 
 	/**
 	 * Create a connector object using the connection data for the native driver
@@ -74,12 +76,13 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void connect() throws IOException {
 		addListener(this);
-		comm = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
-				listeners);
-		comm.start();
+		communication = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
+				listeners); 
+		communicationThread = new Thread(communication);
+		communicationThread.start();
 
 		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
-		while (!comm.isConnected()){
+		while (!communication.isConnected()){
 			if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
 				throw new IOException("The communication thread has run into a timeout");
 			}
@@ -98,8 +101,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws InterruptedException
 	 */
 	public void disconnect() throws IOException, InterruptedException {
-		comm.interrupt();
-		comm.join();
+		communication.disconnect();
+		communicationThread.join();
 	}
 
 	/**
@@ -164,13 +167,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private void closeSimSocket() throws IOException {
 		simSocket.close();
 		cachedAtr = null;
-	}
-
-	/**
-	 * @return true, iff the communication thread is alive and not interrupted
-	 */
-	public boolean isConnected() {
-		return comm.isAlive() && !comm.isInterrupted();
 	}
 
 	@Override

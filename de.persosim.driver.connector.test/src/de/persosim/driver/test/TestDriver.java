@@ -27,7 +27,8 @@ public class TestDriver {
 
 	private Collection<DriverEventListener> listeners = new HashSet<DriverEventListener>();
 
-	private TestDriverCommunicationThread communicationThread;
+	private TestDriverCommunication communication;
+	private Thread communicationThread;
 	private HashMap<Integer, Socket> lunMapping = new HashMap<>();
 	private int timeout = 2000;
 
@@ -51,8 +52,9 @@ public class TestDriver {
 	public void start(int port) throws IOException {
 		if (!running) {
 			System.out.println("Starting test driver on port " + port);
-			communicationThread = new TestDriverCommunicationThread(port,
+			communication = new TestDriverCommunication(port,
 					lunMapping, listeners);
+			communicationThread = new Thread(communication);
 			communicationThread.setDaemon(true);
 			communicationThread.start();
 			
@@ -60,7 +62,7 @@ public class TestDriver {
 
 			long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
 			
-			while (!communicationThread.isRunning()){
+			while (!communication.isRunning()){
 				if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
 					throw new IOException("The server thread has run into a timeout");
 				}
@@ -85,8 +87,8 @@ public class TestDriver {
 	public void stop() throws InterruptedException {
 		if (running) {
 			System.out.println("Stopping test driver on port "
-					+ communicationThread.getPort());
-			communicationThread.interrupt();
+					+ communication.getPort());
+			communication.stop();
 			communicationThread.join();
 			running = false;
 		} else {
