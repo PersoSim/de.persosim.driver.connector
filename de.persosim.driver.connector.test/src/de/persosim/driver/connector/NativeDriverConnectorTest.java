@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import mockit.NonStrictExpectations;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,36 +20,30 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.test.ConnectorTest;
+import de.persosim.driver.test.TestApduHandler;
 import de.persosim.driver.test.TestDriver;
-import de.persosim.simulator.SocketSimulator;
-import de.persosim.simulator.exception.CertificateNotParseableException;
-import de.persosim.simulator.perso.DefaultPersonalization;
-import de.persosim.simulator.platform.PersoSimKernel;
+import de.persosim.driver.test.TestSocketSim;
 import de.persosim.simulator.utils.HexString;
 
+/**
+ * This class tests the {@link NativeDriverConnector}.
+ * @author mboonk
+ *
+ */
 public class NativeDriverConnectorTest extends ConnectorTest{
 
 	private NativeDriverConnector nativeConnector;
 	private TestDriver driver;
-
+	TestSocketSim sim;
 	@Mocked
-	PersoSimKernel kernel;
-	SocketSimulator sim;
+	private TestApduHandler handler;
 	
 	//XXX use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
 	
 	@Before
 	public void setUp() throws Exception {
-		new NonStrictExpectations(PersoSimKernel.class){
-			{
-				kernel.init(); // TODO this method seems to be incorrectly mocked and executed
-			}
-		};
 		
-		sim = new SocketSimulator(new DefaultPersonalization() {
-			@Override
-			protected void addTaTrustPoints() throws CertificateNotParseableException {}
-		}, SIMULATOR_PORT);
+		sim = new TestSocketSim(SIMULATOR_PORT);
 		sim.start();
 		
 		driver = new TestDriver();
@@ -67,7 +60,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		driver.stop();
 		sim.stop();
 	}
-
+	
 	private String checkPcscTag(UnsignedInteger tag, UnsignedInteger expectedResponseCode, UnsignedInteger expectedLength) throws Exception{
 		String result = driver.sendData(new UnsignedInteger(0),
 				NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES,
@@ -118,13 +111,14 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	@Test
 	public void testPcscTransmitToIcc() throws IOException, InterruptedException{
 		final byte [] apdu = new byte []{0,0,0,0};
-
-		new Expectations(PersoSimKernel.class){
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
 			{
-				kernel.powerOn();
-				result = new byte [0];
-				kernel.process(apdu);
-				result = "RESPONSE".getBytes();
+				handler.processCommand(withPrefix("FF01"));
+				result = "11223344";
+				handler.processCommand(withEqual(HexString.encode(apdu)));
+				result = HexString.encode("RESPONSE".getBytes());
 			}
 		};
 		
@@ -137,11 +131,12 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscControl() throws IOException, InterruptedException{
-
-		new Expectations(PersoSimKernel.class){
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
 			{
-				kernel.powerOn();
-				result = new byte [0];
+				handler.processCommand(withPrefix("FF01"));
+				result = "11223344";
 			}
 		};
 		
@@ -175,13 +170,13 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 	@Test
 	public void testPcscPowerIccPowerOn() throws Exception{
-		//prepare the mock
 		final byte [] testAtr = "TESTATR".getBytes();
-		
-		new NonStrictExpectations(PersoSimKernel.class){
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
 			{
-				kernel.powerOn();
-				result = testAtr;
+				handler.processCommand(withPrefix("FF01"));
+				result = HexString.encode(testAtr);
 			}
 		};
 		
@@ -193,6 +188,14 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 	@Test
 	public void testPcscIsIccPresent() throws Exception{
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
+			{
+				handler.processCommand(withPrefix("FF90"));
+				result = "9000";
+			}
+		};
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT, UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -202,14 +205,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscPowerIccPowerDownWithoutPowerUp() throws Exception{
-		//prepare the mock
-		
-		new NonStrictExpectations(PersoSimKernel.class){
-			{
-				kernel.powerOff();
-				result = new byte [] {(byte) 0x90, 0};
-			}
-		};
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -219,15 +214,15 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscPowerIccPowerDown() throws Exception{
-		//prepare the mock
 		final byte [] testAtr = "TESTATR".getBytes();
-		
-		new NonStrictExpectations(PersoSimKernel.class){
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
 			{
-				kernel.powerOn();
-				result = testAtr;
-				kernel.powerOff();
-				result = new byte [] {(byte) 0x90, 0};
+				handler.processCommand(withPrefix("FF01"));
+				result = HexString.encode(testAtr);
+				handler.processCommand(withPrefix("FF00"));
+				result = "9000";
 			}
 		};
 		
@@ -241,16 +236,15 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	@Test
 	public void testPcscPowerIccReset() throws Exception{
-		
-		//prepare the mock
 		final byte [] testAtr = "TESTATR".getBytes();
-		
-		new NonStrictExpectations(PersoSimKernel.class){
+		//prepare the mock
+		sim.setHandler(handler);
+		new Expectations() {
 			{
-				kernel.powerOn();
-				result = testAtr;
-				kernel.reset();
-				result = testAtr;
+				handler.processCommand(withPrefix("FF01"));
+				result = HexString.encode(testAtr);
+				handler.processCommand(withPrefix("FFFF"));
+				result = HexString.encode(testAtr);
 			}
 		};
 
