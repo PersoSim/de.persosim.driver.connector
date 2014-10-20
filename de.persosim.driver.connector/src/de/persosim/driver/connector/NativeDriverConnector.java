@@ -64,6 +64,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		this.nativeDriverPort = nativeDriverPort;
 		this.simHostName = simHostName;
 		this.simPort = simPort;
+		listeners.add(this);
 	}
 
 	/**
@@ -73,7 +74,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws UnknownHostException
 	 */
 	public void connect() throws IOException {
-		addListener(this);
 		communication = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners); 
 		communicationThread = new Thread(communication);
@@ -109,7 +109,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @param listener
 	 */
 	public void addListener(PcscListener listener) {
-		listeners.add(listener);
+		//add the new listener behind the others but preserve the position of this object
+		listeners.add(listeners.size() - 1, listener);
 		if (listener instanceof UiEnabled){
 			((UiEnabled)listener).setUserInterfaces(userInterfaces);
 		}
