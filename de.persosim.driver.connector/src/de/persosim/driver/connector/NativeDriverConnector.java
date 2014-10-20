@@ -169,13 +169,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		cachedAtr = null;
 	}
 
-	/**
-	 * @return true, iff the communication thread is alive and not interrupted
-	 */
-	public boolean isConnected() {
-		return communicationThread.isAlive() && !communicationThread.isInterrupted();
-	}
-
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction().getAsInt()) {
