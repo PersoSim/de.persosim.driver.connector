@@ -37,7 +37,13 @@ public class NativeDriverCommTest extends ConnectorTest{
 		listeners = new HashSet<>();
 		nativeCommunication = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
 		nativeCommThread = new Thread(nativeCommunication);
+		
+		nativeCommThread.start();
+		
+		while (!nativeCommunication.isConnected()){
+			Thread.sleep(5);
 		}
+	}
 	
 	@After
 	public void tearDown() throws Exception {
@@ -61,12 +67,6 @@ public class NativeDriverCommTest extends ConnectorTest{
 			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
 		}};
 		
-		nativeCommThread.start();
-		
-		while (!nativeCommunication.isConnected()){
-			Thread.sleep(5);
-		}
-		
 		String data = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0), new byte [0]);
 		assertEquals(PcscConstants.IFD_SUCCESS, UnsignedInteger.parseUnsignedInteger(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
 	}
@@ -88,12 +88,6 @@ public class NativeDriverCommTest extends ConnectorTest{
 			times = 0;
 			result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
 		}};
-		
-		nativeCommThread.start();
-		
-		while (!nativeCommunication.isConnected()){
-			Thread.sleep(5);
-		}
 		
 		String data = driver.sendDataDirect(new UnsignedInteger(0), "j09uc540q93rufq09u,³48	q3m05ru");
 		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, UnsignedInteger.parseUnsignedInteger(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
