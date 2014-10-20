@@ -11,6 +11,10 @@ public class FakeInputStream extends InputStream{
 		this.data = data;
 	}
 	
+	public FakeInputStream(String string) {
+		this(string.getBytes());
+	}
+
 	@Override
 	public int read() throws IOException {
 		if (data.length > current) {

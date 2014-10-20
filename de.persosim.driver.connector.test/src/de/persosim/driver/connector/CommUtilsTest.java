@@ -38,9 +38,10 @@ public class CommUtilsTest extends ConnectorTest {
 	 */
 	@Test
 	public void testExchangeApdu() throws Exception {
-		final byte[] apduResponse = "00010203\n".getBytes();
+		String expectedResponse = "00010203";
+		byte[] expectedResponseBytes = HexString.toByteArray(expectedResponse);
 
-		final InputStream input = new FakeInputStream(apduResponse);
+		final InputStream input = new FakeInputStream(expectedResponse + "\n");
 
 		final FakeOutputStream output = new FakeOutputStream(true);
 
@@ -53,11 +54,12 @@ public class CommUtilsTest extends ConnectorTest {
 			}
 		};
 
-		assertArrayEquals(HexString.toByteArray("00010203"),
-				CommUtils.exchangeApdu(dataSocket, apduResponse));
-		byte [] expected = Utils.appendBytes(HexString.encode(apduResponse).getBytes(), (byte)'\n');
+		byte[] cmdApdu = HexString.toByteArray("00A4000000");
+		assertArrayEquals(expectedResponseBytes,
+				CommUtils.exchangeApdu(dataSocket, cmdApdu));
 		
-		assertArrayEquals(expected, output.getWrittenBytes());
+		byte [] expectedSocketMsg = Utils.appendBytes(HexString.encode(cmdApdu).getBytes(), (byte)'\n');
+		assertEquals(new String(expectedSocketMsg), new String(output.getWrittenBytes()));
 		input.close();
 		output.close();
 	}
