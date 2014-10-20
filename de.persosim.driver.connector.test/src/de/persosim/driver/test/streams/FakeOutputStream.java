@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FakeOutputStream extends OutputStream {
-	boolean ignoreNext = false;
+	boolean ignoreNextIfNewLine = false;
 	
 	List<Byte> received = new ArrayList<>();
 
@@ -19,11 +19,15 @@ public class FakeOutputStream extends OutputStream {
 	@Override
 	public void write(int b) throws IOException {
 		if (convertLinefeeds){
-			if (ignoreNext && (char) b == '\n') {
-				return;
+			if (ignoreNextIfNewLine) {
+				ignoreNextIfNewLine = false;
+				if ((char) b == '\n') {
+					return;
+				}
 			}
 			if ((char) b == '\r') {
-				ignoreNext = true;
+				ignoreNextIfNewLine = true;
+				received.add((byte) '\n');
 			} else {
 				received.add((byte)b);
 			}	
