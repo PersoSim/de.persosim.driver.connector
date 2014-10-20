@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
@@ -35,8 +33,8 @@ import de.persosim.simulator.utils.Utils;
 public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
-	private Collection<PcscListener> listeners = new ArrayList<PcscListener>();
-	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
+	private List<PcscListener> listeners = new ArrayList<PcscListener>();
+	private List<VirtualReaderUi> userInterfaces = new ArrayList<VirtualReaderUi>();
 	private Thread communicationThread;
 	private NativeDriverComm communication;
 	

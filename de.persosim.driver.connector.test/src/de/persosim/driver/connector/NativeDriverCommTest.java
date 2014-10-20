@@ -3,8 +3,8 @@ package de.persosim.driver.connector;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import mockit.Expectations;
@@ -28,13 +28,13 @@ public class NativeDriverCommTest extends ConnectorTest{
 	@Mocked
 	private PcscListener mockedListener;
 	private TestDriver driver;
-	private Collection<PcscListener> listeners;
+	private List<PcscListener> listeners;
 
 	@Before
 	public void setUp() throws Exception{
 		driver = new TestDriver();
 		driver.start(TESTDRIVER_PORT);
-		listeners = new HashSet<>();
+		listeners = new ArrayList<>();
 		nativeCommunication = new NativeDriverComm(TESTDRIVER_HOST, TESTDRIVER_PORT, listeners);
 		nativeCommThread = new Thread(nativeCommunication);
 		

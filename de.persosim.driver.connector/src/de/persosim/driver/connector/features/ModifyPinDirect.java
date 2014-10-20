@@ -3,7 +3,6 @@ package de.persosim.driver.connector.features;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import de.persosim.driver.connector.NativeDriverInterface;
@@ -22,7 +21,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 
 	public static final byte FEATURE_TAG = 0x07;
 	
-	private Collection<VirtualReaderUi> interfaces;
+	private List<VirtualReaderUi> interfaces;
 	
 	public ModifyPinDirect(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
@@ -99,7 +98,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 	}
 
 	@Override
-	public void setUserInterfaces(Collection<VirtualReaderUi> interfaces) {
+	public void setUserInterfaces(List<VirtualReaderUi> interfaces) {
 		this.interfaces = interfaces;
 	}
 

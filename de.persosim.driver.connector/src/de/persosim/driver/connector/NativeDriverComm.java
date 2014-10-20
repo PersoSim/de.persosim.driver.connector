@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
+import java.util.List;
 
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
 import de.persosim.driver.connector.pcsc.PcscCallData;
@@ -24,7 +25,7 @@ import de.persosim.driver.connector.pcsc.PcscListener;
  * 
  */
 public class NativeDriverComm implements Runnable {
-	private Collection<PcscListener> listeners;
+	private List<PcscListener> listeners;
 	private BufferedReader bufferedDataIn;
 	private BufferedWriter bufferedDataOut;
 	private Socket dataSocket;
@@ -47,7 +48,7 @@ public class NativeDriverComm implements Runnable {
 	 * @throws IOException
 	 */
 	public NativeDriverComm(String hostName, int dataPort,
-			Collection<PcscListener> listeners) throws IOException {
+			List<PcscListener> listeners) throws IOException {
 		this.listeners = listeners;
 		this.dataSocket = new Socket(hostName, dataPort);
 		this.hostName = hostName;
