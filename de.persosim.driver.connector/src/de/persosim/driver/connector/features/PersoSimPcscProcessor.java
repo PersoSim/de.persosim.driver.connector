@@ -437,8 +437,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 				pin));
 		// add chat
 		if (chat.length > 0) {
-			data.addTlvDataObject(new PrimitiveTlvDataObject(
-					TlvConstants.TAG_7F4C, chat));
+			data.addTlvDataObject(new TlvDataObjectContainer(chat).getTlvDataObject(TlvConstants.TAG_7F4C));
 		}
 		return data;
 	}
