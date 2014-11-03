@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -413,7 +414,7 @@ public class ReaderPart implements VirtualReaderUi{
 	 * @param readerType the reader type to use
 	 */
 	public void switchToReaderType(ReaderType readerType) {
-		if (connector != null) {
+		if ((connector != null) && (connector.isRunning())) {
 			try {
 				connector.disconnect();
 			} catch (IOException | InterruptedException e) {
@@ -446,13 +447,13 @@ public class ReaderPart implements VirtualReaderUi{
 			;
 			break;
 		}
+		
 		type = readerType;
 
 		try {
 			connector.connect();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nRe-Connect by selecting desired reader type from menu \"Reader Type\""); 
 		}
 		
 		// System.out.println("Exception type: " + e.getClass());

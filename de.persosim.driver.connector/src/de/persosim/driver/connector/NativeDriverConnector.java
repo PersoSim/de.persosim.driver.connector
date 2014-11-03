@@ -93,6 +93,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			}
 		}
 	}
+	
+	public boolean isRunning() {
+		return ((communicationThread != null) && communicationThread.isAlive());
+	}
 
 	/**
 	 * This method disconnects from the native driver part.
