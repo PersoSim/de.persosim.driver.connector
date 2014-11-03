@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
+import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
 
 public class StandardReaderHandler {
 	NativeDriverConnector connector;
@@ -24,7 +25,7 @@ public class StandardReaderHandler {
 
 		if (readerPart.getObject() instanceof ReaderPart) {
 
-			((ReaderPart) readerPart.getObject()).switchToStandard();
+			((ReaderPart) readerPart.getObject()).switchToReaderType(ReaderType.STANDARD);
 		}
 	}
 }

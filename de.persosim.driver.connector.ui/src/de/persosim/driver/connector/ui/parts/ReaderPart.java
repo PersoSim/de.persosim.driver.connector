@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.ui.parts;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,11 +174,10 @@ public class ReaderPart implements VirtualReaderUi{
 		parent.redraw();
 	}
 	
-	
 	@PostConstruct
 	public void createComposite(Composite parent) {
 		root = parent;
-		switchToStandard();
+		switchToReaderType(ReaderType.STANDARD);
 	}
 	
 	private Button createDefaultButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
@@ -407,14 +407,13 @@ public class ReaderPart implements VirtualReaderUi{
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
 				0x42000DCC)));
 	}
-
 	
 	/**
-	 * Switch the parts user interface and behavior to the basic reader state.
+	 * Switch the parts user interface and behavior to the reader type associated with the provided parameter.
+	 * @param readerType the reader type to use
 	 */
-	public void switchToBasic() {
-		if (connector != null){
-
+	public void switchToReaderType(ReaderType readerType) {
+		if (connector != null) {
 			try {
 				connector.disconnect();
 			} catch (IOException | InterruptedException e) {
@@ -422,48 +421,42 @@ public class ReaderPart implements VirtualReaderUi{
 				e.printStackTrace();
 			}
 		}
+		
 		try {
-			connector = new NativeDriverConnector("localhost", 5678,
-					"localhost", 9876);
-			connector.addUi(this);
-			connector.connect();
-			
+			connector = new NativeDriverConnector("localhost", 5678, "localhost", 9876);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		connector.addUi(this);
+
+		switch (readerType) {
+		case BASIC:
 			createBasicReader(root);
-			type = ReaderType.BASIC;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-	
-	/**
-	 * Switch the parts user interface and behavior to the standard reader state.
-	 */
-	public void switchToStandard(){
-
-		if (connector != null){
-
-			try {
-				connector.disconnect();
-			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		try {
-			connector = new NativeDriverConnector("localhost", 5678,
-					"localhost", 9876);
-			connector.addUi(this);
+			break;
+		case STANDARD:
 			addStandardListeners(connector);
-			connector.connect();
-
 			createStandardReader(root);
-			type = ReaderType.STANDARD;
+			break;
+		default:
+			;
+			break;
+		}
+		type = readerType;
+
+		try {
+			connector.connect();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// System.out.println("Exception type: " + e.getClass());
+
 	}
 	
 	/**

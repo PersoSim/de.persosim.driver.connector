@@ -8,6 +8,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
 import de.persosim.driver.connector.ui.parts.ReaderPart;
+import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
 
 public class BasicReaderHandler {
 
@@ -22,7 +23,7 @@ public class BasicReaderHandler {
 
 			if (readerPart.getObject() instanceof ReaderPart) {
 
-				((ReaderPart) readerPart.getObject()).switchToBasic();
+				((ReaderPart) readerPart.getObject()).switchToReaderType(ReaderType.BASIC);
 			}
 	}
 }
