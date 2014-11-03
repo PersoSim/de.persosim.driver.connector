@@ -3,7 +3,7 @@ package de.persosim.driver.connector.features;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
@@ -48,7 +48,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	Socket communicationSocket;
 
-	private Collection<VirtualReaderUi> interfaces;
+	private List<VirtualReaderUi> interfaces;
 
 	public static final byte FUNCTION_GET_READER_PACE_CAPABILITIES = 1;
 	public static final byte FUNCTION_ESTABLISH_PACE_CHANNEL = 2;
@@ -563,7 +563,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	}
 
 	@Override
-	public void setUserInterfaces(Collection<VirtualReaderUi> interfaces) {
+	public void setUserInterfaces(List<VirtualReaderUi> interfaces) {
 		this.interfaces = interfaces;
 	}
 }

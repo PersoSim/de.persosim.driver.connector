@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import de.persosim.driver.connector.pcsc.PcscCallData;
@@ -35,8 +33,8 @@ import de.persosim.simulator.utils.Utils;
 public class NativeDriverConnector implements PcscConstants, PcscListener {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
-	private Collection<PcscListener> listeners = new ArrayList<PcscListener>();
-	private Collection<VirtualReaderUi> userInterfaces = new HashSet<VirtualReaderUi>();
+	private List<PcscListener> listeners = new ArrayList<PcscListener>();
+	private List<VirtualReaderUi> userInterfaces = new ArrayList<VirtualReaderUi>();
 	private Thread communicationThread;
 	private NativeDriverComm communication;
 	
@@ -66,6 +64,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		this.nativeDriverPort = nativeDriverPort;
 		this.simHostName = simHostName;
 		this.simPort = simPort;
+		listeners.add(this);
 	}
 
 	/**
@@ -75,7 +74,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws UnknownHostException
 	 */
 	public void connect() throws IOException {
-		addListener(this);
 		communication = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
 				listeners); 
 		communicationThread = new Thread(communication);
@@ -111,7 +109,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @param listener
 	 */
 	public void addListener(PcscListener listener) {
-		listeners.add(listener);
+		//add the new listener behind the others but preserve the position of this object
+		listeners.add(listeners.size() - 1, listener);
 		if (listener instanceof UiEnabled){
 			((UiEnabled)listener).setUserInterfaces(userInterfaces);
 		}

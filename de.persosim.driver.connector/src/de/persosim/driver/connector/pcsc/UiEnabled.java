@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.pcsc;
 
 import java.util.Collection;
+import java.util.List;
 
 import de.persosim.driver.connector.VirtualReaderUi;
 
@@ -17,5 +18,5 @@ public interface UiEnabled {
 	 *            set a new {@link Collection} of user interfaces to use
 	 */
 	public abstract void setUserInterfaces(
-			Collection<VirtualReaderUi> interfaces);
+			List<VirtualReaderUi> interfaces);
 }

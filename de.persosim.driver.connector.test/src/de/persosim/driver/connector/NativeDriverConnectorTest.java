@@ -19,6 +19,8 @@ import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.driver.connector.pcsc.PcscListener;
+import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestApduHandler;
 import de.persosim.driver.test.TestDriver;
@@ -254,5 +256,56 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result);
+	}
+	
+	/**
+	 * Checks if the listeners are processed in the correct order
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testListenerProcessingOrder() throws IOException, InterruptedException{
+		
+		nativeConnector.addListener(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				assertEquals(0, data.getFunction().getAsSignedLong());
+				data.setFunction(new UnsignedInteger(1));
+				return null;
+			}
+		});
+		nativeConnector.addListener(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				assertEquals(1, data.getFunction().getAsSignedLong());
+				return null;
+			}
+		});
+		
+		String result = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0));
+		// this checks, if the native connector was the last listener to process because both listeners added in this testcase do not return an answer
+		assertEquals(result, PcscConstants.IFD_NOT_SUPPORTED.getAsHexString());
+	}
+	
+	/**
+	 * Checks if an answer by a listener stops processing
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testListenerProcessingOrderEarlyAnswer() throws IOException, InterruptedException{
+		
+		nativeConnector.addListener(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
+			}
+		});
+		
+		String result = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0));
+		assertEquals(result, PcscConstants.IFD_SUCCESS.getAsHexString());
 	}
 }
