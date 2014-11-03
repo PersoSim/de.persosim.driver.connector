@@ -464,7 +464,7 @@ public class ReaderPart implements VirtualReaderUi{
 	 * Switch the parts user interface and behavior to the off state.
 	 */
 	public void disconnectReader(){
-		if (connector != null){
+		if ((connector != null) && (connector.isRunning())) {
 
 			try {
 				connector.disconnect();
