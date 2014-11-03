@@ -130,6 +130,13 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		}
 	}
 
+	/**
+	 * Override the default behavior of by processing PACE related messages and
+	 * ignoring all others.
+	 * 
+	 * @param data
+	 * @return the PACE result data
+	 */
 	private PcscCallResult deviceControl(PcscCallData data) {
 		UnsignedInteger controlCode = new UnsignedInteger(data.getParameters()
 				.get(0));
@@ -227,6 +234,17 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return null;
 	}
 
+	/**
+	 * Extracts the value field from an arbitrary structure containing a length
+	 * field
+	 * 
+	 * @param data
+	 * @param offsetLengthField
+	 *            the offset to the length field
+	 * @param lengthFieldLength
+	 *            the length in bytes of the length field
+	 * @return the value part as byte array
+	 */
 	private byte[] getValue(byte[] data, int offsetLengthField,
 			int lengthFieldLength) {
 		int length = Utils.getIntFromUnsignedByteArray(Arrays.copyOfRange(data,
@@ -234,7 +252,12 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return Arrays.copyOfRange(data, offsetLengthField + lengthFieldLength,
 				offsetLengthField + lengthFieldLength + length);
 	}
-
+	
+	/**
+	 * Establish a pseudo PACE channel between the connector and the simulator
+	 * @param inputDataFromPpdu
+	 * @return
+	 */
 	private PcscCallResult establishPaceChannel(byte[] inputDataFromPpdu) {
 		System.out.println("PCSCPACE");
 		System.out.println(HexString.dump(inputDataFromPpdu));
@@ -295,8 +318,16 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	}
 
+	/**
+	 * Query all interfaces for a password and return it.
+	 * 
+	 * @param pin
+	 * @return the password
+	 * @throws IOException
+	 */
 	private byte[] getPinFromInterfaces(byte pinType) throws IOException {
 		byte [] pin = null;
+
 		if (interfaces != null) {
 			for (VirtualReaderUi current : interfaces) {
 				String toDisplay = "Enter ";
@@ -325,6 +356,14 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return null;
 	}
 
+	/**
+	 * Construct the PCSC response for an establish PACE command from the
+	 * previously read EF.CA and the response data of the pseudo PACE apdu.
+	 * 
+	 * @param efCardAccess
+	 * @param responseApdu
+	 * @return the response data to be wrapped into a PCSC-PACE answer
+	 */
 	private byte[] buildPcscResponseData(byte[] efCardAccess, byte[] responseApdu) throws PaceExecutionException {
 		TlvDataObjectContainer responseData = new TlvDataObjectContainer(
 				Arrays.copyOf(responseApdu, responseApdu.length - 2));
@@ -393,6 +432,11 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return pcscResponse;
 	}
 
+	/**
+	 * Reads the EF.CA from the simulator.
+	 * @return the file contents
+	 * @throws IOException
+	 */
 	private byte[] readCardAccess() throws PaceExecutionException, IOException {
 		byte[] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
 		byte[] readBinary = HexString.toByteArray("00 B0 00 00 00");
@@ -426,6 +470,15 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return Arrays.copyOf(response, response.length - 2);
 	}
 
+	/**
+	 * Builds the command APDU that is used to trigger the PACE initialization
+	 * in the simulator.
+	 * 
+	 * @param pinId
+	 * @param chat
+	 * @param pin
+	 * @return the command data
+	 */
 	private TlvDataObjectContainer buildPseudoApduData(byte pinId, byte[] chat,
 			byte[] pin) {
 		TlvDataObjectContainer data = new TlvDataObjectContainer();
@@ -442,12 +495,23 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return data;
 	}
 
+	/**
+	 * @return this features PACE-capabilities
+	 */
 	private PcscCallResult getReaderPaceCapabilities() {
 		byte[] bitMap = new byte[] { BITMAP_IFD_GENERIC_PACE_SUPPORT
 				| BITMAP_EID_APPLICATION_SUPPORT };
 		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, bitMap);
 	}
 
+	/**
+	 * Wraps arbitrary data into the PCSC-PACE-features response format.
+	 * 
+	 * @param pcscResponseCode
+	 * @param result
+	 * @param resultData
+	 * @return
+	 */
 	private PcscCallResult buildResponse(UnsignedInteger pcscResponseCode,
 			UnsignedInteger paceResponseCode, byte[] resultData) {
 		byte[] response = Utils.concatByteArrays(paceResponseCode
@@ -461,6 +525,12 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return new SimplePcscCallResult(pcscResponseCode, response);
 	}
 
+	/**
+	 * Extract the input data from a PCSC PPDU.
+	 * 
+	 * @param ppdu
+	 * @return the data field
+	 */
 	private byte[] getInputDataFromPpdu(byte[] ppdu) {
 		return Arrays.copyOfRange(ppdu, OFFSET_INPUT_DATA, Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(ppdu,
