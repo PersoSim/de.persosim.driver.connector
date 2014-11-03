@@ -36,6 +36,12 @@ import de.persosim.simulator.utils.Utils;
 public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		SocketCommunicator, PcscConstants, UiEnabled {
 
+	/**
+	 * This enum represents the different states of the PCSC pseudo PACE.
+	 * 
+	 * @author mboonk
+	 *
+	 */
 	public enum PaceState {
 		NO_SM, SM_ESTABLISHED;
 	}
@@ -112,6 +118,12 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	private PaceState currentState = PaceState.NO_SM;
 
+	/**
+	 * This creates a PACE-feature using the given control code.
+	 * 
+	 * @param controlCode
+	 *            the control code to use
+	 */
 	public PersoSimPcscProcessor(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_CONTROL_CODE);
 	}
@@ -163,6 +175,13 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		return null;
 	}
 
+	/**
+	 * Capture PSCS power events and set the pseudo secure messaging state
+	 * accordingly.
+	 * 
+	 * @param data
+	 * @return null, to allow further processing
+	 */
 	private PcscCallResult powerIcc(PcscCallData data) {
 		UnsignedInteger action = new UnsignedInteger(data.getParameters()
 				.get(0));
