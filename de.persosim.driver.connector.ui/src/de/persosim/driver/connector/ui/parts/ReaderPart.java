@@ -453,7 +453,7 @@ public class ReaderPart implements VirtualReaderUi{
 		try {
 			connector.connect();
 		} catch (IOException e) {
-			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nTry to restart driver, then re-Connect by selecting\ndesired reader type from menu \"Reader Type\"."); 
+			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\"."); 
 		}
 		
 		// System.out.println("Exception type: " + e.getClass());
