@@ -67,27 +67,23 @@ public class ReaderPart implements VirtualReaderUi{
 	
 	private void createBasicReader(Composite parent){
 		disposeReaders();
+		
 		basicReaderControls = new Composite(parent, SWT.NONE);
-		
-		
+				
 		GridData gridData;
 		basicReaderControls.setLayout(new GridLayout(1, false));
 		
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		
-		Text txtOutput = new Text(basicReaderControls, SWT.READ_ONLY | SWT.PASSWORD | SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
+		basicReaderControls.setLayoutData(gridData);
+		
+		Text txtOutput = new Text(basicReaderControls, SWT.READ_ONLY | SWT.CENTER);
 		txtOutput.setFont(new Font(basicReaderControls.getDisplay(), FONT_NAME, 24, SWT.BOLD));
-		txtOutput.setText("Basisleser");
+		txtOutput.setText("Basic Reader");
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
-
 		
-		gridData = new GridData();
-		gridData.horizontalAlignment = SWT.FILL;
-		gridData.verticalAlignment = SWT.FILL;
-		gridData.heightHint = 80;
-		txtOutput.setLayoutData(gridData);
 		parent.layout();
 		parent.redraw();
 	}
@@ -432,31 +428,29 @@ public class ReaderPart implements VirtualReaderUi{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		connector.addUi(this);
-
-		switch (readerType) {
-		case BASIC:
-			createBasicReader(root);
-			break;
-		case STANDARD:
-			addStandardListeners(connector);
-			createStandardReader(root);
-			break;
-		default:
-			;
-			break;
-		}
-		
-		type = readerType;
 
 		try {
 			connector.connect();
+			
+			connector.addUi(this);
+
+			switch (readerType) {
+			case BASIC:
+				createBasicReader(root);
+				break;
+			case STANDARD:
+				addStandardListeners(connector);
+				createStandardReader(root);
+				break;
+			default:
+				;
+				break;
+			}
+			
+			type = readerType;
 		} catch (IOException e) {
-			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\"."); 
+			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\".");
 		}
-		
-		// System.out.println("Exception type: " + e.getClass());
 
 	}
 	
