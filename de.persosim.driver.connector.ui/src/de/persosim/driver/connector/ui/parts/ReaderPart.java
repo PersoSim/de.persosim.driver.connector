@@ -201,10 +201,12 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		SelectionListener selectionListener = new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				widgetDefaultSelected(event);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				System.out.println("pin pad button pressed: " + text);
 				txtOutput.append(text);
@@ -220,10 +222,12 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		SelectionListener selectionListener = new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				widgetDefaultSelected(event);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				setButton(text);
 			}
@@ -240,10 +244,12 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		SelectionListener selectionListener = new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				widgetDefaultSelected(event);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				synchronized (pressedKeys) {
 					pressedKeys.clear();
@@ -263,10 +269,12 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		SelectionListener selectionListener = new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				widgetDefaultSelected(event);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				setButton(text);
 			}
@@ -449,6 +457,7 @@ public class ReaderPart implements VirtualReaderUi{
 			
 			type = readerType;
 		} catch (IOException e) {
+			disposeReaders();
 			MessageDialog.openWarning(root.getShell(), "Warning", "Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\".");
 		}
 
