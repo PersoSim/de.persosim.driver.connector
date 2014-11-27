@@ -402,15 +402,15 @@ public class ReaderPart implements VirtualReaderUi{
 
 	private void addStandardListeners(NativeDriverConnector connector){
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(
-				0x42000DB2)));
+				0x3136C8)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(
-				0x42000DB3)));
+				0x3136CC)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(
-				0x42000DB4)));
-		connector
-				.addListener(new MctUniversal(new UnsignedInteger(0x42000DB5)));
+				0x3136D0)));
+		connector.addListener(new MctUniversal(new UnsignedInteger(
+				0x3136D4)));
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
-				0x42000DCC)));
+				0x313730)));
 	}
 	
 	/**
