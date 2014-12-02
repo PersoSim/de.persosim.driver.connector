@@ -441,6 +441,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		} catch (IOException e) {
 			System.out.println("The socket communication with " + simHostName
 					+ ":" + simPort + " could not be established");
+			closeConnection = true;
 		} finally {
 			if (closeConnection){
 				try {
