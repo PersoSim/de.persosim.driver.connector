@@ -103,6 +103,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws InterruptedException
 	 */
 	public void disconnect() throws IOException, InterruptedException {
+		simSocket.close();
 		communication.disconnect();
 		communicationThread.join();
 	}
