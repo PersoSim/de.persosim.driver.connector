@@ -172,7 +172,6 @@ public class NativeDriverComm implements Runnable {
 
 		Socket temp = new Socket(hostName, dataPort);
 		CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
-		dataSocket.close();
 		temp.close();
 
 		// XXX Hack (wait for pcsc to poll and kill connections until the driver
