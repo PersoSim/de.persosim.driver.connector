@@ -338,10 +338,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 				}
 			}
-			return new SimplePcscCallResult(
-					PcscConstants.IFD_ERROR_POWER_ACTION);
+			return new SimplePcscCallResult(IFD_SUCCESS); //already powered down
 		} else {
 			if (IFD_POWER_UP.equals(action)) {
 				try {
