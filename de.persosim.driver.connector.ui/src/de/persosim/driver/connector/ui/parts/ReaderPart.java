@@ -65,6 +65,10 @@ public class ReaderPart implements VirtualReaderUi{
 	
 	private ReaderType type = ReaderType.NONE;
 	
+	/**
+	 * Defines the virtual basic reader. It no own input interface. 
+	 * @param parent
+	 */
 	private void createBasicReader(Composite parent){
 		disposeReaders();
 		
@@ -95,6 +99,12 @@ public class ReaderPart implements VirtualReaderUi{
 		standardReaderControls.dispose();
 	}
 	
+	/**
+	 * Defines the layout of the virtual standard reader. Unlike the basic reader
+	 * it contains a keypad.
+	 * 
+	 * @param parent
+	 */
 	private void createStandardReader(Composite parent){
 		disposeReaders();
 		standardReaderControls = new Composite(parent, SWT.NONE);
@@ -155,16 +165,12 @@ public class ReaderPart implements VirtualReaderUi{
 		gridData.verticalAlignment = SWT.BEGINNING;
 		controlComposite.setLayoutData(gridData);
 		
-		keysControl = new Button[3];
+		keysControl = new Button[4];
 		keysControl[0] = getCancelKey(controlComposite);
 		keysControl[1] = getCorrectionKey(controlComposite);
 		keysControl[2] = getConfirmationKey(controlComposite);
-		
-		button = createDefaultButton(controlComposite, "", null, 150, 100);
-		button.setEnabled(DISABLE);
-//		button.setVisible(false);
-		
-
+		keysControl[3] = getSavedPin(controlComposite);
+		keysControl[3].setFont(new Font(parent.getDisplay(), FONT_NAME, 32, SWT.BOLD));
 		setEnableKeySet(KEYS_ALL, false);
 		
 		parent.layout();
@@ -177,6 +183,16 @@ public class ReaderPart implements VirtualReaderUi{
 		switchToReaderType(ReaderType.STANDARD);
 	}
 	
+	/**
+	 * This method defines the Default Buttons
+	 * 
+	 * @param parent
+	 * @param text displayed on the button
+	 * @param selectionListener
+	 * @param width of the button
+	 * @param height of the button
+	 * @return button
+	 */
 	private Button createDefaultButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
 		final Button button = new Button(parent, SWT.PUSH);
 		button.setText(text);
@@ -196,6 +212,13 @@ public class ReaderPart implements VirtualReaderUi{
 		return button;
 	}
 	
+	/**
+	 * This method defines the Numeric Buttons.
+	 * 
+	 * @param parent 
+	 * @param number (0-9)
+	 * @return button
+	 */
 	private Button getNumericKey(Composite parent, int number) {
 		final String text = String.valueOf(number);
 		
@@ -216,7 +239,14 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		return createDefaultButton(parent, String.valueOf(number), selectionListener, 100, 100);
 	}
-	
+
+	/**
+	 * This method returns the cancel button. It is used to cancel the user
+	 * input. The virtual keypad will be disabled after pressing.
+	 * 
+	 * @param parent
+	 * @return button
+	 */
 	private Button getCancelKey(Composite parent) {
 		final String text = "C";
 		
@@ -239,6 +269,13 @@ public class ReaderPart implements VirtualReaderUi{
 		return button;
 	}
 	
+	/**
+	 * This method returns the Correction button. It is used to clear the
+	 * display. The user can retype the pin.
+	 * 
+	 * @param parent
+	 * @return button
+	 */
 	private Button getCorrectionKey(Composite parent) {
 		final String text = "CLR";
 		
@@ -264,6 +301,13 @@ public class ReaderPart implements VirtualReaderUi{
 		return button;
 	}
 	
+	/**
+	 * This method returns the Confirmation button.
+	 * It is used to send pins after their input.
+	 * 
+	 * @param parent
+	 * @return button
+	 */
 	private Button getConfirmationKey(Composite parent) {
 		final String text = "OK";
 		
@@ -284,6 +328,45 @@ public class ReaderPart implements VirtualReaderUi{
 		button.setBackground(new Color(parent.getDisplay(), 0, 255, 0));
 		
 		return button;
+	}
+	
+	/**
+	 * This Method returns a button that simulates the button clicks for the
+	 * 123456-Pin. Pressing OK is still required.
+	 * 
+	 * @param parent
+	 * @return button
+	 */
+	private Button getSavedPin(Composite parent){
+		final String text = "123456";
+	
+		SelectionListener selectionListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+				
+			}
+	
+			@Override
+			public void widgetDefaultSelected(SelectionEvent event) {
+								
+				String savedPin = "123456";
+				String[] parts = savedPin.split("");
+				for (int i = 0; i < parts.length; i++) {
+					keysNumeric[Integer.parseInt(parts[i])].notifyListeners(
+							SWT.Selection, null);
+				}
+
+			}
+			
+			
+			
+		};
+			Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+			button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
+			return button;
+	
 	}
 	
 	public void setText(final String text) {
