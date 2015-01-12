@@ -54,6 +54,7 @@ public class ReaderPart implements VirtualReaderUi{
 	public static final int KEYS_ALL         = -1;
 	
 	private Text txtOutput;
+	private String [] savedPins = new String[4];
 	
 	private Button[] keysNumeric;
 	private Button[] keysControl;
@@ -177,8 +178,8 @@ public class ReaderPart implements VirtualReaderUi{
 		keysControl[0] = getCancelKey(leftControlComposite);
 		keysControl[1] = getCorrectionKey(leftControlComposite);
 		keysControl[2] = getConfirmationKey(leftControlComposite);
-		keysControl[3] = getSavedPin(leftControlComposite);
-		keysControl[3].setFont(new Font(parent.getDisplay(), FONT_NAME, 32, SWT.BOLD));
+		keysControl[3] = createDefaultButton(leftControlComposite, "", null, 100, 100);
+		keysControl[3].setEnabled(DISABLE);
 		
 		
 //		button = createDefaultButton(numericComposite, "", null, 100, 100);
@@ -186,13 +187,16 @@ public class ReaderPart implements VirtualReaderUi{
 //		button.setVisible(false);
 		
 		//right control buttons
-		keysControl[4] = getCustomPinSaverKey(rightControlComposite);
-		keysControl[5] = createDefaultButton(rightControlComposite, "", null, 100, 100);
-		keysControl[5].setEnabled(DISABLE);
-		keysControl[6] = createDefaultButton(rightControlComposite, "", null, 100, 100);
-		keysControl[6].setEnabled(DISABLE);
-		keysControl[7] = createDefaultButton(rightControlComposite, "", null, 100, 100);
-		keysControl[7].setEnabled(DISABLE);
+		keysControl[4] = getCustomPinSaverKey(rightControlComposite, 0);
+		keysControl[5] = getCustomPinSaverKey(rightControlComposite, 1);
+		keysControl[6] = getCustomPinSaverKey(rightControlComposite, 2);
+		keysControl[7] = getCustomPinSaverKey(rightControlComposite, 3);
+		
+		for (int i = 4; i < 8; i++) {
+			keysControl[i].setFont(new Font(parent.getDisplay(), FONT_NAME, 30,
+					SWT.BOLD));
+		}
+
 		
 		setEnableKeySet(KEYS_ALL, false);
 		
@@ -354,54 +358,18 @@ public class ReaderPart implements VirtualReaderUi{
 	}
 	
 	/**
-	 * This Method returns a button that simulates the button clicks for the
-	 * 123456-Pin. Pressing OK is still required.
-	 * 
-	 * @param parent
-	 * @return button
-	 */
-	private Button getSavedPin(Composite parent){
-		final String text = "123456";
-	
-		SelectionListener selectionListener = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				widgetDefaultSelected(event);
-				
-			}
-	
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-								
-				String savedPin = "123456";
-				String[] parts = savedPin.split("");
-				for (int i = 0; i < parts.length; i++) {
-					keysNumeric[Integer.parseInt(parts[i])].notifyListeners(
-							SWT.Selection, null);
-				}
-
-			}
-			
-			
-			
-		};
-			Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
-			button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
-			return button;
-	
-	}
-	
-	/**
 	 * This Method returns a button that simulates the button clicks for a
-	 * custom Pin. Pressing OK is still required.
+	 * custom Pin. To save with a right click on the button a pin has to be
+	 * visible on the screen.
 	 * 
 	 * @param parent
+	 * @param number of the pin saver button
 	 * @return button
 	 */
-	private Button getCustomPinSaverKey(Composite parent) {
-		final String text = "Saved Pin";
-
+	private Button getCustomPinSaverKey(Composite parent, final int number) {
+		final String text = "Pin " + number;
+		savedPins[number] = "123456"; // default
+		// final String savedPin = "123456"; //123456=standard
 		SelectionListener selectionListener = new SelectionListener() {
 
 			@Override
@@ -412,9 +380,8 @@ public class ReaderPart implements VirtualReaderUi{
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				String savedPin = "123456";
-				String[] parts = savedPin.split("");
+
+				String[] parts = savedPins[number].split("");
 				for (int i = 0; i < parts.length; i++) {
 					keysNumeric[Integer.parseInt(parts[i])].notifyListeners(
 							SWT.Selection, null);
@@ -424,31 +391,35 @@ public class ReaderPart implements VirtualReaderUi{
 		};
 		Button button = createDefaultButton(parent, text, selectionListener,
 				150, 100);
-		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
-		
-		//add right click menu
+//		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
+
+		// add right click menu
 		Menu popupPinSaver = new Menu(button);
 		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
 		newPinSaverMenuItem.setText("Change saved pin");
-		
-		//Listener for right click menu
+
+		// Listener for right click menu
 		SelectionListener selectionListenerMenu = new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO get Pin from Display
-				
-				
+				try {
+					int pin = Integer.parseInt(txtOutput.getText().replaceAll(
+							"\\D+", ""));
+					savedPins[number] = "" + pin;
+					keysControl[number + 4].setText(savedPins[number]);
+				} catch (NumberFormatException a) {
+					System.err.println("No pin entered. You need to enter a pin on the keypad before saving.");
+				}
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				
+
 			}
 		};
-		newPinSaverMenuItem.addSelectionListener(selectionListenerMenu );
+		newPinSaverMenuItem.addSelectionListener(selectionListenerMenu);
 		button.setMenu(popupPinSaver);
-		
 		return button;
 
 	}
