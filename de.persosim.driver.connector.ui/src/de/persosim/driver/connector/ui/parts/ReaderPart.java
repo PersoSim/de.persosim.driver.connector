@@ -18,6 +18,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 
 import de.persosim.driver.connector.NativeDriverConnector;
@@ -159,18 +161,39 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		
 		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
-		controlComposite.setLayout(new GridLayout(1, false));
+		controlComposite.setLayout(new GridLayout(2, false));
+		
+		Composite leftControlComposite = new Composite(controlComposite, SWT.NONE);
+		leftControlComposite.setLayout(new GridLayout(1, false));
+		Composite rightControlComposite = new Composite(controlComposite, SWT.NONE);
+		rightControlComposite.setLayout(new GridLayout(1, false));
 		
 		gridData = new GridData();
 		gridData.verticalAlignment = SWT.BEGINNING;
 		controlComposite.setLayoutData(gridData);
-		
-		keysControl = new Button[4];
-		keysControl[0] = getCancelKey(controlComposite);
-		keysControl[1] = getCorrectionKey(controlComposite);
-		keysControl[2] = getConfirmationKey(controlComposite);
-		keysControl[3] = getSavedPin(controlComposite);
+
+		//left control buttons
+		keysControl = new Button[8];
+		keysControl[0] = getCancelKey(leftControlComposite);
+		keysControl[1] = getCorrectionKey(leftControlComposite);
+		keysControl[2] = getConfirmationKey(leftControlComposite);
+		keysControl[3] = getSavedPin(leftControlComposite);
 		keysControl[3].setFont(new Font(parent.getDisplay(), FONT_NAME, 32, SWT.BOLD));
+		
+		
+//		button = createDefaultButton(numericComposite, "", null, 100, 100);
+//		button.setEnabled(DISABLE);
+//		button.setVisible(false);
+		
+		//right control buttons
+		keysControl[4] = getCustomPinSaverKey(rightControlComposite);
+		keysControl[5] = createDefaultButton(rightControlComposite, "", null, 100, 100);
+		keysControl[5].setEnabled(DISABLE);
+		keysControl[6] = createDefaultButton(rightControlComposite, "", null, 100, 100);
+		keysControl[6].setEnabled(DISABLE);
+		keysControl[7] = createDefaultButton(rightControlComposite, "", null, 100, 100);
+		keysControl[7].setEnabled(DISABLE);
+		
 		setEnableKeySet(KEYS_ALL, false);
 		
 		parent.layout();
@@ -367,6 +390,67 @@ public class ReaderPart implements VirtualReaderUi{
 			button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
 			return button;
 	
+	}
+	
+	/**
+	 * This Method returns a button that simulates the button clicks for a
+	 * custom Pin. Pressing OK is still required.
+	 * 
+	 * @param parent
+	 * @return button
+	 */
+	private Button getCustomPinSaverKey(Composite parent) {
+		final String text = "Saved Pin";
+
+		SelectionListener selectionListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				widgetDefaultSelected(event);
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				String savedPin = "123456";
+				String[] parts = savedPin.split("");
+				for (int i = 0; i < parts.length; i++) {
+					keysNumeric[Integer.parseInt(parts[i])].notifyListeners(
+							SWT.Selection, null);
+				}
+			}
+
+		};
+		Button button = createDefaultButton(parent, text, selectionListener,
+				150, 100);
+		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
+		
+		//add right click menu
+		Menu popupPinSaver = new Menu(button);
+		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
+		newPinSaverMenuItem.setText("Change saved pin");
+		
+		//Listener for right click menu
+		SelectionListener selectionListenerMenu = new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO get Pin from Display
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		};
+		newPinSaverMenuItem.addSelectionListener(selectionListenerMenu );
+		button.setMenu(popupPinSaver);
+		
+		return button;
+
 	}
 	
 	public void setText(final String text) {
