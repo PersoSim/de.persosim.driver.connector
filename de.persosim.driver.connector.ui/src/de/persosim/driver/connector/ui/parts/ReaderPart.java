@@ -69,8 +69,8 @@ public class ReaderPart implements VirtualReaderUi{
 	private ReaderType type = ReaderType.NONE;
 	
 	/**
-	 * Defines the virtual basic reader. It no own input interface. 
-	 * @param parent
+	 * Defines the virtual basic reader. It has no own input interface. 
+	 * @param parent FIXME JKH describe parameter
 	 */
 	private void createBasicReader(Composite parent){
 		disposeReaders();
@@ -106,7 +106,7 @@ public class ReaderPart implements VirtualReaderUi{
 	 * Defines the layout of the virtual standard reader. Unlike the basic reader
 	 * it contains a keypad.
 	 * 
-	 * @param parent
+	 * @param parent //FIXME JKH
 	 */
 	private void createStandardReader(Composite parent){
 		disposeReaders();
@@ -182,11 +182,13 @@ public class ReaderPart implements VirtualReaderUi{
 		keysControl[3].setEnabled(DISABLE);
 		
 		
+//FIXME JKH remove outcommented code
 //		button = createDefaultButton(numericComposite, "", null, 100, 100);
 //		button.setEnabled(DISABLE);
 //		button.setVisible(false);
 		
 		//right control buttons
+		//FIXME JKH are these really controlKeys? Suggestion: separate them into a different array
 		keysControl[4] = getCustomPinSaverKey(rightControlComposite, 0);
 		keysControl[5] = getCustomPinSaverKey(rightControlComposite, 1);
 		keysControl[6] = getCustomPinSaverKey(rightControlComposite, 2);
@@ -211,9 +213,9 @@ public class ReaderPart implements VirtualReaderUi{
 	}
 	
 	/**
-	 * This method defines the Default Buttons
+	 * This method defines the Default Buttons FIXME JKH why "Default"
 	 * 
-	 * @param parent
+	 * @param parent FIXME JKH describe parameters
 	 * @param text displayed on the button
 	 * @param selectionListener
 	 * @param width of the button
@@ -242,7 +244,7 @@ public class ReaderPart implements VirtualReaderUi{
 	/**
 	 * This method defines the Numeric Buttons.
 	 * 
-	 * @param parent 
+	 * @param parent FIXME JKH
 	 * @param number (0-9)
 	 * @return button
 	 */
@@ -269,7 +271,8 @@ public class ReaderPart implements VirtualReaderUi{
 
 	/**
 	 * This method returns the cancel button. It is used to cancel the user
-	 * input. The virtual keypad will be disabled after pressing.
+	 * input and disables the virtual keypad, which will lead to an abort of the
+	 * authentication procedure.
 	 * 
 	 * @param parent
 	 * @return button
@@ -358,7 +361,7 @@ public class ReaderPart implements VirtualReaderUi{
 	}
 	
 	/**
-	 * This Method returns a button that simulates the button clicks for a
+	 * Returns a button that simulates the button clicks for a
 	 * custom Pin. To save with a right click on the button a pin has to be
 	 * visible on the screen.
 	 * 
@@ -367,9 +370,9 @@ public class ReaderPart implements VirtualReaderUi{
 	 * @return button
 	 */
 	private Button getCustomPinSaverKey(Composite parent, final int number) {
-		final String text = "Pin " + number;
+		final String text = "Pin " + number; //FIXME JKH variable name is useless
 		savedPins[number] = "123456"; // default
-		// final String savedPin = "123456"; //123456=standard
+		// final String savedPin = "123456"; //123456=standard FIXME JKH
 		SelectionListener selectionListener = new SelectionListener() {
 
 			@Override
@@ -391,7 +394,7 @@ public class ReaderPart implements VirtualReaderUi{
 		};
 		Button button = createDefaultButton(parent, text, selectionListener,
 				150, 100);
-//		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
+//		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255)); FIXME JKH
 
 		// add right click menu
 		Menu popupPinSaver = new Menu(button);
