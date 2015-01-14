@@ -49,6 +49,7 @@ public class ReaderPart implements VirtualReaderUi{
 	public static final boolean ENABLE = true;
 	public static final boolean DISABLE = false;
 	
+	public static final int KEYS_ALL_PINSAVER = -4;
 	public static final int KEYS_ALL_CONTROL = -3;
 	public static final int KEYS_ALL_NUMERIC = -2;
 	public static final int KEYS_ALL         = -1;
@@ -58,6 +59,7 @@ public class ReaderPart implements VirtualReaderUi{
 	
 	private Button[] keysNumeric;
 	private Button[] keysControl;
+	private Button[] keysPinSaver;
 	
 	private List<String> pressedKeys = new ArrayList<>();
 	private NativeDriverConnector connector;
@@ -70,7 +72,7 @@ public class ReaderPart implements VirtualReaderUi{
 	
 	/**
 	 * Defines the virtual basic reader. It has no own input interface. 
-	 * @param parent FIXME JKH describe parameter
+	 * @param parent composite where the reader will be placed
 	 */
 	private void createBasicReader(Composite parent){
 		disposeReaders();
@@ -106,7 +108,7 @@ public class ReaderPart implements VirtualReaderUi{
 	 * Defines the layout of the virtual standard reader. Unlike the basic reader
 	 * it contains a keypad.
 	 * 
-	 * @param parent //FIXME JKH
+	 * @param parent composite where the reader will be placed
 	 */
 	private void createStandardReader(Composite parent){
 		disposeReaders();
@@ -149,17 +151,14 @@ public class ReaderPart implements VirtualReaderUi{
 		
 		Button button;
 		
-		button = createDefaultButton(numericComposite, "", null, 100, 100);
+		button = createButton(numericComposite, "", null, 100, 100);
 		button.setEnabled(DISABLE);
-//		button.setVisible(false);
-		
+
 		keysNumeric[0] = getNumericKey(numericComposite, 0);
 		
-		button = createDefaultButton(numericComposite, "", null, 100, 100);
+		button = createButton(numericComposite, "", null, 100, 100);
 		button.setEnabled(DISABLE);
-//		button.setVisible(false);
-		
-		
+
 		
 		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
 		controlComposite.setLayout(new GridLayout(2, false));
@@ -173,32 +172,22 @@ public class ReaderPart implements VirtualReaderUi{
 		gridData.verticalAlignment = SWT.BEGINNING;
 		controlComposite.setLayoutData(gridData);
 
-		//left control buttons
-		keysControl = new Button[8];
+		//left control composite
+		keysControl = new Button[3];
 		keysControl[0] = getCancelKey(leftControlComposite);
 		keysControl[1] = getCorrectionKey(leftControlComposite);
 		keysControl[2] = getConfirmationKey(leftControlComposite);
-		keysControl[3] = createDefaultButton(leftControlComposite, "", null, 100, 100);
-		keysControl[3].setEnabled(DISABLE);
+
+		button = createButton(leftControlComposite, "", null, 150, 100);
+		button.setEnabled(DISABLE);
 		
-		
-//FIXME JKH remove outcommented code
-//		button = createDefaultButton(numericComposite, "", null, 100, 100);
-//		button.setEnabled(DISABLE);
-//		button.setVisible(false);
-		
-		//right control buttons
-		//FIXME JKH are these really controlKeys? Suggestion: separate them into a different array
-		keysControl[4] = getCustomPinSaverKey(rightControlComposite, 0);
-		keysControl[5] = getCustomPinSaverKey(rightControlComposite, 1);
-		keysControl[6] = getCustomPinSaverKey(rightControlComposite, 2);
-		keysControl[7] = getCustomPinSaverKey(rightControlComposite, 3);
-		
-		for (int i = 4; i < 8; i++) {
-			keysControl[i].setFont(new Font(parent.getDisplay(), FONT_NAME, 30,
+		//right control composite
+		keysPinSaver = new Button[4];
+		for (int i = 0; i < keysPinSaver.length; i++) {
+			keysPinSaver[i] = getCustomPinSaverKey(rightControlComposite, i);
+			keysPinSaver[i].setFont(new Font(parent.getDisplay(), FONT_NAME, 30,
 					SWT.BOLD));
 		}
-
 		
 		setEnableKeySet(KEYS_ALL, false);
 		
@@ -213,16 +202,17 @@ public class ReaderPart implements VirtualReaderUi{
 	}
 	
 	/**
-	 * This method defines the Default Buttons FIXME JKH why "Default"
+	 * This method defines the Buttons all getxxxKey-methods use it for
+	 * creating buttons.
 	 * 
-	 * @param parent FIXME JKH describe parameters
+	 * @param parent composite where the button will be placed
 	 * @param text displayed on the button
 	 * @param selectionListener
 	 * @param width of the button
 	 * @param height of the button
 	 * @return button
 	 */
-	private Button createDefaultButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
+	private Button createButton(Composite parent, String text, SelectionListener selectionListener, int width, int height) {
 		final Button button = new Button(parent, SWT.PUSH);
 		button.setText(text);
 		button.setFont(new Font(parent.getDisplay(), FONT_NAME, 36, SWT.BOLD));
@@ -244,8 +234,8 @@ public class ReaderPart implements VirtualReaderUi{
 	/**
 	 * This method defines the Numeric Buttons.
 	 * 
-	 * @param parent FIXME JKH
-	 * @param number (0-9)
+	 * @param parent composite where the numeric buttons will be placed
+	 * @param number on the button (0-9)
 	 * @return button
 	 */
 	private Button getNumericKey(Composite parent, int number) {
@@ -266,15 +256,15 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 		};
 		
-		return createDefaultButton(parent, String.valueOf(number), selectionListener, 100, 100);
+		return createButton(parent, String.valueOf(number), selectionListener, 100, 100);
 	}
 
 	/**
-	 * This method returns the cancel button. It is used to cancel the user
+	 * Returns the cancel button. It is used to cancel the user
 	 * input and disables the virtual keypad, which will lead to an abort of the
 	 * authentication procedure.
 	 * 
-	 * @param parent
+	 * @param parent composite where the cancel button will be placed
 	 * @return button
 	 */
 	private Button getCancelKey(Composite parent) {
@@ -293,7 +283,7 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 		};
 		
-		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener, 150, 100);
 		button.setBackground(new Color(parent.getDisplay(), 255, 0, 0));
 		
 		return button;
@@ -303,7 +293,7 @@ public class ReaderPart implements VirtualReaderUi{
 	 * This method returns the Correction button. It is used to clear the
 	 * display. The user can retype the pin.
 	 * 
-	 * @param parent
+	 * @param parent composite where the correction button will be placed
 	 * @return button
 	 */
 	private Button getCorrectionKey(Composite parent) {
@@ -325,17 +315,17 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 		};
 		
-		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener, 150, 100);
 		button.setBackground(new Color(parent.getDisplay(), 255, 255, 0));
 		
 		return button;
 	}
 	
 	/**
-	 * This method returns the Confirmation button.
-	 * It is used to send pins after their input.
+	 * This method returns the Confirmation button. It is used to send pins
+	 * after their input.
 	 * 
-	 * @param parent
+	 * @param parent composite where the confirmation button will be placed
 	 * @return button
 	 */
 	private Button getConfirmationKey(Composite parent) {
@@ -354,25 +344,24 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 		};
 		
-		Button button = createDefaultButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener, 150, 100);
 		button.setBackground(new Color(parent.getDisplay(), 0, 255, 0));
 		
 		return button;
 	}
 	
 	/**
-	 * Returns a button that simulates the button clicks for a
-	 * custom Pin. To save with a right click on the button a pin has to be
-	 * visible on the screen.
+	 * Returns a button that simulates the button clicks for a custom Pin. To
+	 * save with a right click on the button a pin has to be visible on the
+	 * screen.
 	 * 
-	 * @param parent
+	 * @param parent composite where the customPinSaver button will be placed
 	 * @param number of the pin saver button
 	 * @return button
 	 */
 	private Button getCustomPinSaverKey(Composite parent, final int number) {
-		final String text = "Pin " + number; //FIXME JKH variable name is useless
 		savedPins[number] = "123456"; // default
-		// final String savedPin = "123456"; //123456=standard FIXME JKH
+
 		SelectionListener selectionListener = new SelectionListener() {
 
 			@Override
@@ -392,9 +381,8 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 
 		};
-		Button button = createDefaultButton(parent, text, selectionListener,
-				150, 100);
-//		button.setBackground(new Color(parent.getDisplay(), 0, 0, 255)); FIXME JKH
+		Button button = createButton(parent, "Pin " + (number + 1),
+				selectionListener, 150, 100);
 
 		// add right click menu
 		Menu popupPinSaver = new Menu(button);
@@ -410,9 +398,10 @@ public class ReaderPart implements VirtualReaderUi{
 					int pin = Integer.parseInt(txtOutput.getText().replaceAll(
 							"\\D+", ""));
 					savedPins[number] = "" + pin;
-					keysControl[number + 4].setText(savedPins[number]);
+					keysPinSaver[number].setText(savedPins[number]);
 				} catch (NumberFormatException a) {
-					System.err.println("No pin entered. You need to enter a pin on the keypad before saving.");
+					throw new NumberFormatException(
+							"No pin entered. You need to enter a pin on the keypad before saving.");
 				}
 			}
 
@@ -437,6 +426,13 @@ public class ReaderPart implements VirtualReaderUi{
 		});
 	}
 	
+	/**
+	 * Controls the clickability of button groups (numeric buttons, control
+	 * buttons, pinsaver buttons or just all).
+	 * 
+	 * @param keySet is an array of buttons (numeric, control, pinSaver or all) 
+	 * @param enabled is a boolean value to enable or disable a keySet
+	 */
 	public void setEnableKeySet(int keySet, final boolean enabled) {
 		switch (keySet) {
         case KEYS_ALL_NUMERIC:
@@ -461,9 +457,21 @@ public class ReaderPart implements VirtualReaderUi{
 				});
         	}
         	break;
+        case KEYS_ALL_PINSAVER:
+        	for(final Button button : keysPinSaver) {
+        		Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+		        		button.setEnabled(enabled);
+					}
+				});
+        	}
+        	break;
         case KEYS_ALL:
         	setEnableKeySet(KEYS_ALL_NUMERIC, enabled);
         	setEnableKeySet(KEYS_ALL_CONTROL, enabled);
+        	setEnableKeySet(KEYS_ALL_PINSAVER, enabled);
         	break;
         default:
         	break;
