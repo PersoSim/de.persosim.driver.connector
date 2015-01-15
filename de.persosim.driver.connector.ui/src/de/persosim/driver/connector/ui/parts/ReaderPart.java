@@ -189,7 +189,7 @@ public class ReaderPart implements VirtualReaderUi{
 					SWT.BOLD));
 		}
 		
-		setEnableKeySet(KEYS_ALL, false);
+		setEnableKeySetController(KEYS_ALL, false);
 		
 		parent.layout();
 		parent.redraw();
@@ -424,57 +424,53 @@ public class ReaderPart implements VirtualReaderUi{
 				txtOutput.setText(text);
 			}
 		});
-	}
+	}	
 	
 	/**
 	 * Controls the clickability of button groups (numeric buttons, control
-	 * buttons, pinsaver buttons or just all).
+	 * buttons, pinsaver buttons or just all). The real setting is done by the
+	 * setEnableKeySet() method
 	 * 
-	 * @param keySet is an array of buttons (numeric, control, pinSaver or all) 
+	 * @param keySet is an array of buttons (numeric, control, pinSaver or all)
 	 * @param enabled is a boolean value to enable or disable a keySet
-	 */
-	public void setEnableKeySet(int keySet, final boolean enabled) {
+	 */	
+	public void setEnableKeySetController(int keySet, final boolean enabled) {
 		switch (keySet) {
-        case KEYS_ALL_NUMERIC:
-        	for(final Button button : keysNumeric) {
-        		Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-		        		button.setEnabled(enabled);
-					}
-				});
-        	}
-        	break;
-        case KEYS_ALL_CONTROL:
-        	for(final Button button : keysControl) {
-        		Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-		        		button.setEnabled(enabled);
-					}
-				});
-        	}
-        	break;
-        case KEYS_ALL_PINSAVER:
-        	for(final Button button : keysPinSaver) {
-        		Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-		        		button.setEnabled(enabled);
-					}
-				});
-        	}
-        	break;
-        case KEYS_ALL:
-        	setEnableKeySet(KEYS_ALL_NUMERIC, enabled);
-        	setEnableKeySet(KEYS_ALL_CONTROL, enabled);
-        	setEnableKeySet(KEYS_ALL_PINSAVER, enabled);
-        	break;
-        default:
-        	break;
+		case KEYS_ALL_NUMERIC:
+			setEnableKeySet(keysNumeric, enabled);
+			break;
+		case KEYS_ALL_CONTROL:
+			setEnableKeySet(keysControl, enabled);
+			break;
+		case KEYS_ALL_PINSAVER:
+			setEnableKeySet(keysPinSaver, enabled);
+			break;
+		case KEYS_ALL:
+			setEnableKeySetController(KEYS_ALL_NUMERIC, enabled);
+			setEnableKeySetController(KEYS_ALL_CONTROL, enabled);
+			setEnableKeySetController(KEYS_ALL_PINSAVER, enabled);
+			break;
+		}
+	}
+	
+	/**
+	 * Sets the clickability of button groups. The method is called by the
+	 * setEnableKeySetController.
+	 * 
+	 * @param buttonSet is button arrays which the setEnableKeySetController wants to
+	 *        			enable or disable
+	 * @param enabled is a boolean value to enable or disable a keySet
+	 * 
+	 */
+	public void setEnableKeySet(Button[] buttonSet, final boolean enabled) {
+		for (final Button button : buttonSet) {
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					button.setEnabled(enabled);
+				}
+			});
 		}
 	}
 	
@@ -495,7 +491,7 @@ public class ReaderPart implements VirtualReaderUi{
 	@Override
 	public byte[] getPin() throws IOException {
 		if (type.equals(ReaderType.STANDARD)) {
-			setEnableKeySet(KEYS_ALL, true);
+			setEnableKeySetController(KEYS_ALL, true);
 			pressedKeys.clear();
 			synchronized (pressedKeys) {
 				while (pressedKeys.size() == 0
@@ -511,7 +507,7 @@ public class ReaderPart implements VirtualReaderUi{
 			}
 			if (pressedKeys.get(pressedKeys.size() - 1).equals("C")){
 				setText("");
-				setEnableKeySet(KEYS_ALL, false);
+				setEnableKeySetController(KEYS_ALL, false);
 				return null;
 			}
 			
@@ -525,7 +521,7 @@ public class ReaderPart implements VirtualReaderUi{
 							"PIN containing non valid characters entered");
 				}
 			}
-			setEnableKeySet(KEYS_ALL, false);
+			setEnableKeySetController(KEYS_ALL, false);
 			return result;
 		}
 		return null;
