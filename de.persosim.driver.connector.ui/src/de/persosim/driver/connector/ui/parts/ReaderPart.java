@@ -457,8 +457,8 @@ public class ReaderPart implements VirtualReaderUi{
 	 * Sets the clickability of button groups. The method is called by the
 	 * setEnableKeySetController.
 	 * 
-	 * @param buttonSet is button arrays which the setEnableKeySetController wants to
-	 *        			enable or disable
+	 * @param buttonSet is the button array which the setEnableKeySetController wants to
+	 *        enable or disable
 	 * @param enabled is a boolean value to enable or disable a keySet
 	 * 
 	 */
