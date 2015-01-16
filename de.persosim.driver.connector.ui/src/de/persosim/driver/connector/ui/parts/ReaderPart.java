@@ -398,12 +398,12 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		
 		Button button;
-		if (Integer.parseInt(savedPins[number]) == 123456) {
-			button = createButton(parent, "Pin " + (number + 1),
-					selectionListener, 150, 100);
-			
-		} else {
+		if (!(Integer.parseInt(savedPins[number]) == 123456) || checkKey("b"+number)) {
+
 			button = createButton(parent, savedPins[number],
+					selectionListener, 150, 100);
+		} else {
+			button = createButton(parent, "Pin " + (number + 1),
 					selectionListener, 150, 100);
 		}
 
@@ -436,7 +436,6 @@ public class ReaderPart implements VirtualReaderUi {
 					throw new NumberFormatException(
 							"No pin entered. You need to enter a pin on the keypad before saving.");
 				} catch (BackingStoreException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
@@ -449,6 +448,26 @@ public class ReaderPart implements VirtualReaderUi {
 		button.setMenu(popupPinSaver);
 		return button;
 
+	}
+	
+	/**returns true if a key e.g. b1 exists in the preferences
+	 * 
+	 * @param the key to check
+	 * @return true/false
+	 */
+	public boolean checkKey(String key) {
+		try {
+			String[] keylist = nodePin.keys();
+			for (int i = 0; i < keylist.length; i++) {
+				if (keylist[i].equals(key)){
+					return true;
+				}					
+			}
+			return false;
+		} catch (BackingStoreException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public void setText(final String text) {
