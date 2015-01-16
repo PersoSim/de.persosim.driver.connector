@@ -375,8 +375,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 */
 	private Button getCustomPinSaverKey(Composite parent, final int number) {
 		
-		//number+1 because the button names start at 1 not 0
-		savedPins[number] = ""+nodePin.getInt("Button {Pin "+(number+1)+"}", 123456);
+		savedPins[number] = ""+nodePin.getInt("b"+number, 123456);
 
 		SelectionListener selectionListener = new SelectionListener() {
 
@@ -397,27 +396,41 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 
 		};
-		Button button = createButton(parent, "Pin " + (number+1),
-				selectionListener, 150, 100);
+		
+		Button button;
+		if (Integer.parseInt(savedPins[number]) == 123456) {
+			button = createButton(parent, "Pin " + (number + 1),
+					selectionListener, 150, 100);
+			
+		} else {
+			button = createButton(parent, savedPins[number],
+					selectionListener, 150, 100);
+		}
 
 		// add right click menu
 		Menu popupPinSaver = new Menu(button);
+		
 		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
 		newPinSaverMenuItem.setText("Change saved pin");
 
-		// Listener for right click menu
-		SelectionListener selectionListenerMenu = new SelectionListener() {
+		// Listener for new Pin
+		SelectionListener listenerNewPinMenu = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
+					//get pin from display and remove everything else
 					int pin = Integer.parseInt(txtOutput.getText().replaceAll(
 							"\\D+", ""));
 					savedPins[number] = "" + pin;
-					nodePin.putInt(keysPinSaver[number]+"", pin);
-//					nodePin.putInt("Pin"+number, pin);
+					
+					//save in prefs
+					nodePin.putInt("b"+number, pin);
 					prefsUi.flush();
+					
+					//rename Button
 					keysPinSaver[number].setText(savedPins[number]);
+
 
 				} catch (NumberFormatException a) {
 					throw new NumberFormatException(
@@ -429,11 +442,10 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
-		newPinSaverMenuItem.addSelectionListener(selectionListenerMenu);
+
+		newPinSaverMenuItem.addSelectionListener(listenerNewPinMenu);
 		button.setMenu(popupPinSaver);
 		return button;
 
