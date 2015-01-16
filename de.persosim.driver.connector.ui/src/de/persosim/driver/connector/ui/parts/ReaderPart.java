@@ -374,8 +374,8 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @return button
 	 */
 	private Button getCustomPinSaverKey(Composite parent, final int number) {
-		
-		savedPins[number] = ""+nodePin.getInt("b"+number, 123456);
+
+		savedPins[number] = "" + nodePin.getInt("b" + number, 123456);
 
 		SelectionListener selectionListener = new SelectionListener() {
 
@@ -396,12 +396,13 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 
 		};
-		
-		Button button;
-		if (!(Integer.parseInt(savedPins[number]) == 123456) || checkKey("b"+number)) {
 
-			button = createButton(parent, savedPins[number],
-					selectionListener, 150, 100);
+		Button button;
+		if (!(Integer.parseInt(savedPins[number]) == 123456)
+				|| checkKey("b" + number)) {
+
+			button = createButton(parent, savedPins[number], selectionListener,
+					150, 100);
 		} else {
 			button = createButton(parent, "Pin " + (number + 1),
 					selectionListener, 150, 100);
@@ -409,7 +410,8 @@ public class ReaderPart implements VirtualReaderUi {
 
 		// add right click menu
 		Menu popupPinSaver = new Menu(button);
-		
+
+		// add a menu entry for saving a displayed pin
 		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
 		newPinSaverMenuItem.setText("Change saved pin");
 
@@ -419,18 +421,17 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					//get pin from display and remove everything else
+					// get pin from display and remove everything else
 					int pin = Integer.parseInt(txtOutput.getText().replaceAll(
 							"\\D+", ""));
 					savedPins[number] = "" + pin;
-					
-					//save in prefs
-					nodePin.putInt("b"+number, pin);
-					prefsUi.flush();
-					
-					//rename Button
-					keysPinSaver[number].setText(savedPins[number]);
 
+					// save in prefs
+					nodePin.putInt("b" + number, pin);
+					prefsUi.flush();
+
+					// rename Button
+					keysPinSaver[number].setText(savedPins[number]);
 
 				} catch (NumberFormatException a) {
 					throw new NumberFormatException(
@@ -441,10 +442,44 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
 		};
 
 		newPinSaverMenuItem.addSelectionListener(listenerNewPinMenu);
+
+		// add a menu entry for reseting a pin button
+		MenuItem resetButtonMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
+		resetButtonMenuItem.setText("reset");
+
+		// Listener for reset Button
+		SelectionListener listenerResetButton = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					// get pin from display and remove everything else
+
+					savedPins[number] = "123456";
+
+					// remove key from prefs
+					nodePin.remove("b" + number);
+					prefsUi.flush();
+
+					// rename Button
+					keysPinSaver[number].setText("Pin " + number);
+				} catch (BackingStoreException e1) {
+					e1.printStackTrace();
+				}
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
+		resetButtonMenuItem.addSelectionListener(listenerResetButton);
+
 		button.setMenu(popupPinSaver);
 		return button;
 
