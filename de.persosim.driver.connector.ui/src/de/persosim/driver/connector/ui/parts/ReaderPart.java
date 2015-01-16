@@ -172,11 +172,10 @@ public class ReaderPart implements VirtualReaderUi {
 		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
 		controlComposite.setLayout(new GridLayout(2, false));
 
-		Composite leftControlComposite = new Composite(controlComposite,
-				SWT.NONE);
+		Composite leftControlComposite = new Composite(controlComposite, SWT.NONE);
 		leftControlComposite.setLayout(new GridLayout(1, false));
-		Composite rightControlComposite = new Composite(controlComposite,
-				SWT.NONE);
+		
+		Composite rightControlComposite = new Composite(controlComposite,SWT.NONE);
 		rightControlComposite.setLayout(new GridLayout(1, false));
 
 		gridData = new GridData();
@@ -196,8 +195,7 @@ public class ReaderPart implements VirtualReaderUi {
 		keysPinSaver = new Button[4];
 		for (int i = 0; i < keysPinSaver.length; i++) {
 			keysPinSaver[i] = getCustomPinSaverKey(rightControlComposite, i);
-			keysPinSaver[i].setFont(new Font(parent.getDisplay(), FONT_NAME,
-					30, SWT.BOLD));
+			keysPinSaver[i].setFont(new Font(parent.getDisplay(), FONT_NAME, 30, SWT.BOLD));
 		}
 
 		setEnabledKeySetController(KEYS_ALL, false);
@@ -216,8 +214,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * This method defines the Buttons all getxxxKey-methods use it for creating
 	 * buttons.
 	 * 
-	 * @param parent
-	 *            composite where the button will be placed
+	 * @param parent composite where the button will be placed
 	 * @param text displayed on the button
 	 * @param selectionListener
 	 * @param width of the button
@@ -448,11 +445,11 @@ public class ReaderPart implements VirtualReaderUi {
 
 		newPinSaverMenuItem.addSelectionListener(listenerNewPinMenu);
 
-		// add a menu entry for reseting a pin button
+		// add a menu entry for resetting a pin button
 		MenuItem resetButtonMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
 		resetButtonMenuItem.setText("reset");
 
-		// Listener for reset Button
+		// Listener for resetting a Button
 		SelectionListener listenerResetButton = new SelectionListener() {
 
 			@Override
@@ -479,7 +476,6 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 		resetButtonMenuItem.addSelectionListener(listenerResetButton);
-
 		button.setMenu(popupPinSaver);
 		return button;
 
@@ -520,10 +516,9 @@ public class ReaderPart implements VirtualReaderUi {
 	 * buttons, pinsaver buttons or just all). The real setting is done by the
 	 * {@link #setEnabledKeySet(Button[], boolean)} method
 	 * 
-	 * @param keySet
-	 *            is an array of buttons (numeric, control, pinSaver or all)
-	 * @param enabled
-	 *            is a boolean value to enable or disable a keySet
+	 * @param keySet is an array of buttons (numeric, control, pinSaver or all)
+	 * @param enabled is a boolean value to enable or disable a keySet
+	 * 
 	 */
 	public void setEnabledKeySetController(int keySet, final boolean enabled) {
 		switch (keySet) {
@@ -548,11 +543,9 @@ public class ReaderPart implements VirtualReaderUi {
 	 * Sets the clickability of button groups. The method is called by the
 	 * {@link #setEnabledKeySetController(int, boolean)}.
 	 * 
-	 * @param buttonSet
-	 *            is the button array which the setEnableKeySetController wants
-	 *            to enable or disable
-	 * @param enabled
-	 *            is a boolean value to enable or disable a keySet
+	 * @param buttonSet is the button array which the setEnableKeySetController wants
+	 *        to enable or disable
+	 * @param enabled is a boolean value to enable or disable a keySet
 	 * 
 	 */
 	public void setEnabledKeySet(Button[] buttonSet, final boolean enabled) {
@@ -641,23 +634,18 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	private void addStandardListeners(NativeDriverConnector connector) {
-		connector
-				.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
-		connector
-				.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
-		connector
-				.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
+		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
+		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
+		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
 		connector.addListener(new MctUniversal(new UnsignedInteger(0x3136D4)));
-		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(
-				0x313730)));
+		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
 
 	/**
 	 * Switch the parts user interface and behavior to the reader type
 	 * associated with the provided parameter.
 	 * 
-	 * @param readerType
-	 *            the reader type to use
+	 * @param readerType the reader type to use
 	 */
 	public void switchToReaderType(ReaderType readerType) {
 		if ((connector != null) && (connector.isRunning())) {
