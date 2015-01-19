@@ -399,7 +399,7 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 
 		Button button;
-		if (!(savedPins[number].equals(defaultPin))
+		if (!(savedPins[number].equals(defaultPin)) //FIXME JKH this condition part is unclear to me???
 				|| checkKeyFromPreferences(key)) {
 
 			button = createButton(parent, savedPins[number], selectionListener,
@@ -425,7 +425,7 @@ public class ReaderPart implements VirtualReaderUi {
 					// get pin from display and remove everything else
 					String pin = txtOutput.getText().replaceAll("\\D+", "");
 					
-					if (!pin.equals("")) {
+					if (!pin.equals("")) { //FIXME JKH why build a complicated negative condition here?
 						savedPins[number] = pin;
 						// save in prefs
 						nodePin.put(key, pin);
@@ -435,12 +435,12 @@ public class ReaderPart implements VirtualReaderUi {
 						keysPinSaver[number].setText(savedPins[number]);
 					} else {
 						//Do nothing no pin is entered
-						throw new NullPointerException("No Pin entered. Please enter a pin before saving");
+						throw new NullPointerException("No Pin entered. Please enter a pin before saving"); //FIXME JKH what is null here? i Think a NPE is the wrong choice
 					}
 					
 
 				}catch (BackingStoreException e1) {
-					e1.printStackTrace();
+					e1.printStackTrace(); //FIXME JKH this should be handled properly
 				} 
 			}
 
@@ -472,7 +472,7 @@ public class ReaderPart implements VirtualReaderUi {
 					// rename Button
 					keysPinSaver[number].setText("Pin " + number);
 				} catch (BackingStoreException e1) {
-					e1.printStackTrace();
+					e1.printStackTrace(); //FIXME JKH once again, handle this properly
 				}
 
 			}
@@ -491,12 +491,12 @@ public class ReaderPart implements VirtualReaderUi {
 	 * checks the existence of a key in the preferences. A key is created when a
 	 * pin is saved in {@link #getCustomPinSaverKey(Composite, int)}. It can be
 	 * removed by resetting a pin saver button. This is necessary to display the
-	 * default Pin after it is saved intentionally.
+	 * default Pin after it is saved intentionally. FIXME JKH this last sentence sounds wired, maybe this indicates bad design, why use a perfectly valid value as magic default value???
 	 * 
 	 * @param the key to check
 	 * @return true/false
 	 */
-	public boolean checkKeyFromPreferences(String key) {
+	public boolean checkKeyFromPreferences(String key) { //FIXME JKH this name still doesn't reflect the first sentence of the JavaDoc...
 		try {
 			String[] keylist = nodePin.keys();
 			for (int i = 0; i < keylist.length; i++) {
