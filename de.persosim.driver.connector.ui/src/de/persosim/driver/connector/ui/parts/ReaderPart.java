@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -376,7 +375,7 @@ public class ReaderPart implements VirtualReaderUi {
 		final String key = "b" + number;
 		final String defaultPin = "123456";
 		
-		savedPins[number] = "" + nodePin.get(key, defaultPin);
+		savedPins[number] = nodePin.get(key, defaultPin);
 
 		SelectionListener selectionListener = new SelectionListener() {
 
@@ -389,11 +388,12 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 
-				String[] parts = savedPins[number].split("");
-				for (int i = 0; i < parts.length; i++) {
-					keysNumeric[Integer.parseInt(parts[i])].notifyListeners(
+				for (int i = 0; i < savedPins[number].length(); i++) {
+					keysNumeric[Integer.parseInt(""
+							+ savedPins[number].charAt(i))].notifyListeners(
 							SWT.Selection, null);
 				}
+
 			}
 
 		};
