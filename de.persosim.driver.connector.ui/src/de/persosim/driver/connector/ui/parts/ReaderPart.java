@@ -371,8 +371,12 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @return button
 	 */
 	private Button getCustomPinSaverKey(Composite parent, final int number) {
-
-		savedPins[number] = "" + nodePin.getInt("b" + number, 123456);
+		
+		//key to identify the pin in the preferences for button x
+		final String key = "b" + number;
+		final String defaultPin = "123456";
+		
+		savedPins[number] = "" + nodePin.get(key, defaultPin);
 
 		SelectionListener selectionListener = new SelectionListener() {
 
@@ -395,8 +399,8 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 
 		Button button;
-		if (!(Integer.parseInt(savedPins[number]) == 123456)
-				|| checkKey("b" + number)) {
+		if (!(savedPins[number].equals(defaultPin))
+				|| checkKeyFromPreferences(key)) {
 
 			button = createButton(parent, savedPins[number], selectionListener,
 					150, 100);
@@ -419,12 +423,11 @@ public class ReaderPart implements VirtualReaderUi {
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					// get pin from display and remove everything else
-					int pin = Integer.parseInt(txtOutput.getText().replaceAll(
-							"\\D+", ""));
-					savedPins[number] = "" + pin;
+					String pin = txtOutput.getText().replaceAll("\\D+", "");
+					savedPins[number] = pin;
 
 					// save in prefs
-					nodePin.putInt("b" + number, pin);
+					nodePin.put(key, pin);
 					prefsUi.flush();
 
 					// rename Button
@@ -457,7 +460,7 @@ public class ReaderPart implements VirtualReaderUi {
 				try {
 					// get pin from display and remove everything else
 
-					savedPins[number] = "123456";
+					savedPins[number] = defaultPin;
 
 					// remove key from prefs
 					nodePin.remove("b" + number);
@@ -481,12 +484,16 @@ public class ReaderPart implements VirtualReaderUi {
 
 	}
 	
-	/**returns true if a key e.g. b1 exists in the preferences
+	/**
+	 * checks the existence of a key in the preferences. A key is created when a
+	 * pin is saved in {@link #getCustomPinSaverKey(Composite, int)}. It can be
+	 * removed by resetting a pin saver button. This is necessary to display the
+	 * default Pin after it is saved intentionally.
 	 * 
 	 * @param the key to check
 	 * @return true/false
 	 */
-	public boolean checkKey(String key) {
+	public boolean checkKeyFromPreferences(String key) {
 		try {
 			String[] keylist = nodePin.keys();
 			for (int i = 0; i < keylist.length; i++) {
