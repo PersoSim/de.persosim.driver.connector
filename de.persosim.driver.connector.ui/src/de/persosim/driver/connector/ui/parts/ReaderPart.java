@@ -470,7 +470,7 @@ public class ReaderPart implements VirtualReaderUi {
 					prefsUi.flush();
 
 					// rename Button
-					keysPinSaver[number].setText("Pin " + number);
+					keysPinSaver[number].setText("Pin " + (number+1));
 				} catch (BackingStoreException e1) {
 					e1.printStackTrace(); //FIXME JKH once again, handle this properly
 				}
