@@ -399,8 +399,10 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 
 		Button button;
+		
+		//checks 
 		if (!(savedPins[number].equals(defaultPin)) //FIXME JKH this condition part is unclear to me???
-				|| checkKeyFromPreferences(key)) {
+				|| checkExistenceOfKey(key)) {
 
 			button = createButton(parent, savedPins[number], selectionListener,
 					150, 100);
@@ -420,13 +422,13 @@ public class ReaderPart implements VirtualReaderUi {
 		SelectionListener listenerNewPinMenu = new SelectionListener() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e) { 
 				try {
 					// get pin from display and remove everything else
 					String pin = txtOutput.getText().replaceAll("\\D+", "");
 					
 					if (pin.equals("")) { 
-						throw new NullPointerException("No Pin entered. Please enter a pin before saving");
+						throw new IllegalArgumentException("No Pin entered. Please enter a pin before saving");
 					}
 					
 					savedPins[number] = pin;
@@ -439,6 +441,7 @@ public class ReaderPart implements VirtualReaderUi {
 					
 
 				}catch (BackingStoreException e1) {
+					
 					e1.printStackTrace(); //FIXME JKH this should be handled properly
 				} 
 			}
@@ -495,7 +498,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param the key to check
 	 * @return true/false
 	 */
-	public boolean checkKeyFromPreferences(String key) { //FIXME JKH this name still doesn't reflect the first sentence of the JavaDoc...
+	public boolean checkExistenceOfKey(String key) {
 		try {
 			String[] keylist = nodePin.keys();
 			for (int i = 0; i < keylist.length; i++) {
