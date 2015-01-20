@@ -425,18 +425,17 @@ public class ReaderPart implements VirtualReaderUi {
 					// get pin from display and remove everything else
 					String pin = txtOutput.getText().replaceAll("\\D+", "");
 					
-					if (!pin.equals("")) { //FIXME JKH why build a complicated negative condition here?
-						savedPins[number] = pin;
-						// save in prefs
-						nodePin.put(key, pin);
-						prefsUi.flush();
-
-						// rename Button
-						keysPinSaver[number].setText(savedPins[number]);
-					} else {
-						//Do nothing no pin is entered
-						throw new NullPointerException("No Pin entered. Please enter a pin before saving"); //FIXME JKH what is null here? i Think a NPE is the wrong choice
+					if (pin.equals("")) { 
+						throw new NullPointerException("No Pin entered. Please enter a pin before saving");
 					}
+					
+					savedPins[number] = pin;
+					// save in prefs
+					nodePin.put(key, pin);
+					prefsUi.flush();
+
+					// rename Button
+					keysPinSaver[number].setText(savedPins[number]);
 					
 
 				}catch (BackingStoreException e1) {
