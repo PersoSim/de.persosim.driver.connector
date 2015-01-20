@@ -373,7 +373,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		//key to identify the pin in the preferences for button x
 		final String key = "b" + number;
-		final String defaultPin = "123456";
+		final String defaultPin = "";
 		
 		savedPins[number] = nodePin.get(key, defaultPin);
 
@@ -400,13 +400,12 @@ public class ReaderPart implements VirtualReaderUi {
 
 		Button button;
 		
-		//checks 
-		if (!(savedPins[number].equals(defaultPin)) //FIXME JKH this condition part is unclear to me???
-				|| checkExistenceOfKey(key)) {
-
+		if (checkExistenceOfKey(key)){
+			//Show the saved pin on the button
 			button = createButton(parent, savedPins[number], selectionListener,
 					150, 100);
 		} else {
+			//This is a default button that has no connection to a saved pin
 			button = createButton(parent, "Pin " + (number + 1),
 					selectionListener, 150, 100);
 		}
@@ -468,8 +467,8 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					// get pin from display and remove everything else
-
+					
+					//put the default value at the position of the old key
 					savedPins[number] = defaultPin;
 
 					// remove key from prefs
@@ -502,8 +501,7 @@ public class ReaderPart implements VirtualReaderUi {
 	/**
 	 * checks the existence of a key in the preferences. A key is created when a
 	 * pin is saved in {@link #getCustomPinSaverKey(Composite, int)}. It can be
-	 * removed by resetting a pin saver button. This is necessary to display the
-	 * default Pin after it is saved intentionally. FIXME JKH this last sentence sounds wired, maybe this indicates bad design, why use a perfectly valid value as magic default value???
+	 * removed by resetting a pin saver button.
 	 * 
 	 * @param the key to check
 	 * @return true/false
