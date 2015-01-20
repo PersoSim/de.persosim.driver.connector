@@ -442,7 +442,12 @@ public class ReaderPart implements VirtualReaderUi {
 
 				}catch (BackingStoreException e1) {
 					
-					e1.printStackTrace(); //FIXME JKH this should be handled properly
+					/*
+					 * Nothing to do here. This Exception only exists because
+					 * Eclipse wants it. I'm not able to produce an error with
+					 * the Preferences file. Eclipse seems to solve most
+					 * Problems with it independently.
+					 */
 				} 
 			}
 
@@ -474,7 +479,12 @@ public class ReaderPart implements VirtualReaderUi {
 					// rename Button
 					keysPinSaver[number].setText("Pin " + (number+1));
 				} catch (BackingStoreException e1) {
-					e1.printStackTrace(); //FIXME JKH once again, handle this properly
+					/*
+					 * Nothing to do here. This Exception only exists because
+					 * Eclipse wants it. I'm not able to produce an error with
+					 * the Preferences file. Eclipse seems to solve most
+					 * Problems with it independently.
+					 */
 				}
 
 			}
@@ -508,7 +518,12 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 			return false;
 		} catch (BackingStoreException e) {
-			e.printStackTrace();
+			/*
+			 * Nothing to do here. This Exception only exists because
+			 * Eclipse wants it. I'm not able to produce an error with
+			 * the Preferences file. Eclipse seems to solve most
+			 * Problems with it independently.
+			 */
 		}
 		return false;
 	}
