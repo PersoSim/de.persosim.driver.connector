@@ -518,7 +518,9 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	 * @return this features PACE-capabilities
 	 */
 	private PcscCallResult getReaderPaceCapabilities() {
-		byte[] bitMap = new byte[] { BITMAP_IFD_GENERIC_PACE_SUPPORT
+		// The PACE capabilities are stored in a byte array preceded by a
+		// singular length byte and wrapped into the standard pace feature response
+		byte[] bitMap = new byte[] {1, BITMAP_IFD_GENERIC_PACE_SUPPORT
 				| BITMAP_EID_APPLICATION_SUPPORT };
 		return buildResponse(PcscConstants.IFD_SUCCESS, RESULT_NO_ERROR, bitMap);
 	}
