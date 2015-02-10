@@ -494,6 +494,11 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		resetButtonMenuItem.addSelectionListener(listenerResetButton);
 		button.setMenu(popupPinSaver);
+		
+		button.setToolTipText("How to use:\n"
+				+ "1. activate the pinpad\n"
+				+ "2. insert a Pin\n"
+				+ "3. rightclick on the button and save");
 		return button;
 
 	}
