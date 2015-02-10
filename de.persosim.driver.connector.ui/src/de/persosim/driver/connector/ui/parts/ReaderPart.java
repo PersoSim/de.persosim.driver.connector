@@ -476,7 +476,7 @@ public class ReaderPart implements VirtualReaderUi {
 					prefsUi.flush();
 
 					// rename Button
-					keysPinSaver[number].setText("Pin " + (number+1));
+					keysPinSaver[number].setText("PIN " + (number+1));
 				} catch (BackingStoreException e1) {
 					/*
 					 * Nothing to do here. This Exception only exists because
