@@ -497,8 +497,8 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		button.setToolTipText("How to use:\n"
 				+ "1. activate the pinpad\n"
-				+ "2. insert a Pin\n"
-				+ "3. rightclick on the button and save");
+				+ "2. insert a Pin with it\n"
+				+ "3. right click on the button and save");
 		return button;
 
 	}
