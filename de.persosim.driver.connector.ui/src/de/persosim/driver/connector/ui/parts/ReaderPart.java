@@ -476,7 +476,7 @@ public class ReaderPart implements VirtualReaderUi {
 					prefsUi.flush();
 
 					// rename Button
-					keysPinSaver[number].setText("Pin " + (number+1));
+					keysPinSaver[number].setText("PIN " + (number+1));
 				} catch (BackingStoreException e1) {
 					/*
 					 * Nothing to do here. This Exception only exists because
@@ -494,6 +494,11 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		resetButtonMenuItem.addSelectionListener(listenerResetButton);
 		button.setMenu(popupPinSaver);
+		
+		button.setToolTipText("How to use:\n"
+				+ "1. activate the pinpad\n"
+				+ "2. insert a Pin with it\n"
+				+ "3. right click on the button and save");
 		return button;
 
 	}
