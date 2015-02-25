@@ -2,10 +2,8 @@ package de.persosim.driver.test;
 
 import java.io.IOException;
 
-import de.persosim.simulator.SocketSimulator;
-
 /**
- * This class provides a simulation of the PersoSim {@link SocketSimulator} by
+ * This class provides a simulation of the PersoSim socket simulator adaptor by
  * opening a server socket on the given port. The answering behavior is defined
  * by setting a {@link TestApduHandler}.
  * 
