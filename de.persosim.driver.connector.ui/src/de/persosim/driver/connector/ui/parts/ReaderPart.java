@@ -406,7 +406,7 @@ public class ReaderPart implements VirtualReaderUi {
 					150, 100);
 		} else {
 			//This is a default button that has no connection to a saved pin
-			button = createButton(parent, "Pin " + (number + 1),
+			button = createButton(parent, "PIN " + (number + 1),
 					selectionListener, 150, 100);
 		}
 
@@ -415,7 +415,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		// add a menu entry for saving a displayed pin
 		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
-		newPinSaverMenuItem.setText("Change saved pin");
+		newPinSaverMenuItem.setText("Change saved PIN");
 
 		// Listener for new Pin
 		SelectionListener listenerNewPinMenu = new SelectionListener() {
