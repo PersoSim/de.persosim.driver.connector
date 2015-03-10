@@ -377,8 +377,8 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		savedPins[number] = nodePin.get(key, defaultPin);
 		
-		// remove letters with a regex
-		savedPins[number] = savedPins[number].replaceAll("[^-?0-9]*", "");
+		// remove all non digits with a regex
+		savedPins[number] = savedPins[number].replaceAll("\\D", "");
 
 		SelectionListener selectionListener = new SelectionListener() {
 
