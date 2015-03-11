@@ -3,27 +3,38 @@ package de.persosim.driver.connector.ui.parts;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
 
 import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -51,19 +62,32 @@ public class ReaderPart implements VirtualReaderUi {
 
 	public static final boolean ENABLE = true;
 	public static final boolean DISABLE = false;
+	public static boolean AUTOLOGIN = false;
+	public static byte[] autologinpassword = null;
 
 	public static final int KEYS_ALL_PINSAVER = -4;
 	public static final int KEYS_ALL_CONTROL = -3;
 	public static final int KEYS_ALL_NUMERIC = -2;
 	public static final int KEYS_ALL = -1;
 
-	private Text txtOutput;
-	private String[] savedPins = new String[4];
+	private MenuItem removeTableItem;
+	private MenuItem editTableItem;
+	private boolean sortPwdTable = false;
 
+	private Text txtOutput;
 	private Button[] keysNumeric;
 	private Button[] keysControl;
-	private Button[] keysPinSaver;
+	private TableViewer viewer;
+	private Table tbl;
+	private Button checkAL;
+	private boolean flag;
+	private boolean toolOn;
+	private IStructuredSelection selectedRow;
+	private int selectedIndex = -1;
 
+	
+
+	public static TableViewerColumn columnPin;
 	private List<String> pressedKeys = new ArrayList<>();
 	private NativeDriverConnector connector;
 
@@ -71,17 +95,16 @@ public class ReaderPart implements VirtualReaderUi {
 	private Composite basicReaderControls;
 	private Composite standardReaderControls;
 
-	private Preferences prefsUi = InstanceScope.INSTANCE
-			.getNode("de.persosim.driver.connector.ui");
-	private Preferences nodePin = prefsUi.node("nodePin");
-
 	private ReaderType type = ReaderType.NONE;
+
+
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
 	 * 
 	 * @param parent composite where the reader will be placed
 	 */
+	
 	private void createBasicReader(Composite parent) {
 		disposeReaders();
 
@@ -167,6 +190,9 @@ public class ReaderPart implements VirtualReaderUi {
 
 		button = createButton(numericComposite, "", null, 100, 100);
 		button.setEnabled(DISABLE);
+		
+		
+		
 
 		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
 		controlComposite.setLayout(new GridLayout(2, false));
@@ -174,31 +200,597 @@ public class ReaderPart implements VirtualReaderUi {
 		Composite leftControlComposite = new Composite(controlComposite, SWT.NONE);
 		leftControlComposite.setLayout(new GridLayout(1, false));
 		
-		Composite rightControlComposite = new Composite(controlComposite,SWT.NONE);
-		rightControlComposite.setLayout(new GridLayout(1, false));
+		final Composite rightinsideControlComposite = new Composite(controlComposite,SWT.NONE | SWT.TOP);
+		rightinsideControlComposite.setLayout(new GridLayout(1, true));
+	
+//		final GridData grid2 = new GridData(SWT.FILL, SWT.FILL, true, true,1,1);
+//		grid2.heightHint = 50;
+//		grid2.widthHint = 155;
+		
+	
+		
+//		final Composite passwordComposite = new Composite(rightinsideControlComposite,SWT.NONE);
+//		passwordComposite.setLayout(new GridLayout(1, false));
+//		passwordComposite.setLayoutData(grid2);
+//		passwordComposite.setLayout(new FillLayout());
+		
+		
+	
+		final Composite rightControlComposite = new Composite(rightinsideControlComposite,SWT.NONE);
+		
+		
+		final GridData grid1 = new GridData(SWT.FILL, SWT.FILL, true, true,1,1);
+		grid1.heightHint = 390;
+		grid1.widthHint = 155;
+		rightControlComposite.setLayoutData(grid1);
+		rightControlComposite.setLayout(new FillLayout());
+		
+		
 
 		gridData = new GridData();
-		gridData.verticalAlignment = SWT.BEGINNING;
+		gridData.verticalAlignment = SWT.FILL;
+		gridData.horizontalAlignment = SWT.BEGINNING;
 		controlComposite.setLayoutData(gridData);
+		
+		final Composite tableControlComposite = new Composite(rightinsideControlComposite,SWT.NONE);
+		tableControlComposite.setLayout(new GridLayout(1, false));
+		
+		
 
 		// left control composite
 		keysControl = new Button[3];
 		keysControl[0] = getCancelKey(leftControlComposite);
 		keysControl[1] = getCorrectionKey(leftControlComposite);
 		keysControl[2] = getConfirmationKey(leftControlComposite);
-
+		
+		
 		button = createButton(leftControlComposite, "", null, 150, 100);
 		button.setEnabled(DISABLE);
+		
+		//managementButton = new Button(passwordComposite, SWT.PUSH);
+//		managementButton.setText("Password Management");
+//		managementButton.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
+		
+		
+		
 
-		// right control composite
-		keysPinSaver = new Button[4];
-		for (int i = 0; i < keysPinSaver.length; i++) {
-			keysPinSaver[i] = getCustomPinSaverKey(rightControlComposite, i);
-			keysPinSaver[i].setFont(new Font(parent.getDisplay(), FONT_NAME, 30, SWT.BOLD));
-		}
+		checkAL = new Button(tableControlComposite, SWT.CHECK);
+		checkAL.setText("AutoLogin "+ "                       ");
 
+		checkAL.setEnabled(false);
+
+		// define the TableViewer
+		viewer = new TableViewer(rightControlComposite, SWT.H_SCROLL
+				| SWT.V_SCROLL | SWT.BORDER);
+
+		tbl = viewer.getTable();
+		tbl.setHeaderVisible(true);
+		tbl.setLinesVisible(true);
+//		root.addKeyListener(new KeyAdapter()
+//		{	
+//			public void keyPressed(KeyEvent e)
+//			{
+//				String string = "";
+// 
+//				//check click together?
+//				
+//				if ((e.stateMask & SWT.CTRL) != 0) 
+//				
+// 
+//				string = "2";
+// 
+//				
+//			}
+//		});
+ 
+		
+		// It's not possible to force the Table to always show scroll bars, the OS decides when to show them.
+		//tbl.getHorizontalBar().setVisible(true);
+		
+		
+//		SelectionListener managementButtonListener = new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				
+//				if(tbl.isVisible())
+//				{
+//					tbl.setVisible(false);	
+//					checkAL.setVisible(false);
+//					toolOn = false;
+//				}
+//				else
+//				{
+//					tbl.setVisible(true);	
+//					checkAL.setVisible(true);
+//					toolOn = true;
+//				}
+//				
+//				
+//				
+//				
+//				
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		};
+//		
+//		managementButton.addSelectionListener(managementButtonListener);
+		
+		
+		SelectionListener columnPinHeaderListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				Collections.sort(PinModelProvider.INSTANCE.pins,
+						new PasswordComparatorClass(sortPwdTable, "Password"));
+
+				if (sortPwdTable)
+					sortPwdTable = false;
+				else
+					sortPwdTable = true;
+
+				viewer.refresh();
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		};
+		
+
+		columnPin = new TableViewerColumn(viewer, SWT.NONE);
+		columnPin.getColumn().setWidth(155);
+		columnPin.getColumn().setText("Password Management");
+		columnPin.getColumn().setResizable(false);
+		columnPin.getColumn().addSelectionListener(columnPinHeaderListener);
+		
+
+		columnPin.setLabelProvider(new ColumnLabelProvider() {
+		      @Override
+		      public String getText(Object element) {
+		        Pin p = (Pin) element;
+		        return p.getPassword();
+		      }
+		    });
+		
+
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setInput(PinModelProvider.INSTANCE.getPins());
+		final Menu popupTable = new Menu(viewer.getTable());
+		
+		
+		viewer.getTable().addListener(SWT.MenuDetect, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+
+			}
+		});
+		
+		
+		
+		viewer.getTable().setMenu(popupTable);
+		MenuItem addTableItem = new MenuItem(popupTable, SWT.CASCADE);
+		addTableItem.setText("Add new Password");
+		editTableItem = new MenuItem(popupTable, SWT.CASCADE);
+		editTableItem.setText("Edit Password");
+		editTableItem.setEnabled(false);
+		removeTableItem = new MenuItem(popupTable, SWT.CASCADE);
+		removeTableItem.setText("Remove Password");
+		removeTableItem.setEnabled(false);
+		
+		/**
+		 * This is the listener for "New Password" in the context menu of the
+		 * list. This method created a input dialog box, where u can enter the
+		 * new password. If the password meets all requirements the password
+		 * will be saved in the list and in preferences.
+		 */
+
+	       
+		SelectionListener addNewPinListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				String inputvalue = "";
+				boolean passcontrol = true;
+
+				do {
+					InputDialog messageBox = new InputDialog(root.getShell(),
+							"Password", "Enter your Password", inputvalue, null);
+
+					if (messageBox.open() == org.eclipse.jface.window.Window.OK) {
+
+						String cleanStr;
+
+						if (messageBox.getValue() != null) {
+							flag = messageBox.getValue().matches(
+									".*[a-zA-Z]+.*");
+							inputvalue = messageBox.getValue();
+							cleanStr = messageBox.getValue()
+									.replaceAll(" ", "");
+							cleanStr = cleanStr.replaceAll("\\D+", "");
+
+						} else {
+							cleanStr = "";
+							break;
+
+						}
+
+						if (cleanStr.length() > 0) {
+
+							if (flag == false) {
+
+								if (!PinModelProvider.INSTANCE
+										.checkExistence(cleanStr)) {
+
+									Pin pin = new Pin(cleanStr);
+									PinModelProvider.INSTANCE.save(pin, "save",
+											"-1");
+									viewer.refresh();
+									int temp = PinModelProvider.INSTANCE.pins
+											.size() - 1;
+									viewer.setSelection(
+											new StructuredSelection(viewer
+													.getElementAt(temp)), true);
+
+									passcontrol = false;
+									break;
+
+								} else {
+
+									MessageDialog dialog = new MessageDialog(
+											root.getShell(),
+											"Warnung",
+											null,
+											"This Password is already in the list.",
+											MessageDialog.INFORMATION,
+											new String[] { "OK" }, 0);
+									dialog.open();
+
+								}
+							} else {
+
+								MessageDialog dialog = new MessageDialog(
+										root.getShell(),
+										"Warnung",
+										null,
+										"Warning!. Your input includes letters.",
+										MessageDialog.INFORMATION,
+										new String[] { "OK" }, 0);
+								dialog.open();
+
+							}
+						} else {
+
+							MessageDialog dialog = new MessageDialog(
+									root.getShell(), "Warnung", null,
+									"Please enter a valid password!.",
+									MessageDialog.INFORMATION,
+									new String[] { "OK" }, 0);
+							dialog.open();
+
+						}
+
+					} else {
+						break;
+					}
+
+				} while (passcontrol == true);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		};
+		
+		addTableItem.addSelectionListener(addNewPinListener);
+		
+		
+		
+		/**
+		 * This is the listener for "Remove Password" in the context menu of the list. The
+		 * listener removes the Password from the list and preferences.
+		 */
+		
+		SelectionListener removePinListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+
+				int index = viewer.getTable().getSelectionIndex();
+				
+				PinModelProvider.INSTANCE.pins.remove(index);
+				PinModelProvider.INSTANCE.deletePinsFromPrefs(index);
+
+				viewer.refresh();
+				
+				int listempty = PinModelProvider.INSTANCE.pins.size();
+				if(listempty == 0)
+				{
+					checkAL.setEnabled(false);
+				}
+				removeTableItem.setEnabled(false);
+				editTableItem.setEnabled(false);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		};
+		
+		removeTableItem.addSelectionListener(removePinListener);
+		
+		/**
+		 * This is the listener for the double click in the list. This method
+		 * simulates the entry of the password entered and confirms with the
+		 * "OK" button.
+		 */
+		
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				pressedKeys.clear();
+				char[] entries = viewer.getSelection().toString()
+						.replaceAll("\\D+", "").toCharArray();
+				for (int i = 0; i < entries.length; i++) {
+					char entry = entries[i];
+					setButton(String.valueOf(entry));
+				}
+
+				setButton("OK");
+
+			}
+
+		});
+		
+		
+		/**
+		 * This is the listener for "Edit Password" in the context menu of the
+		 * list. This method created a input dialog box, where u can edit the
+		 * previous password. If the password meets all requirements the
+		 * password will be saved in the list and in preferences.
+		 */
+		
+		SelectionListener editPinListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				int index = viewer.getTable().getSelectionIndex();
+				Pin p = (Pin) viewer.getElementAt(index);
+
+				boolean passcontrol = true;
+
+				do {
+
+					InputDialog messageBox = new InputDialog(root.getShell(),
+							"Password", "Enter your Password", p.getPassword(),
+							null);
+
+					if (messageBox.open() == org.eclipse.jface.window.Window.OK) {
+
+						String cleanStr;
+
+						if (messageBox.getValue() != null) {
+							flag = messageBox.getValue().matches(
+									".*[a-zA-Z]+.*");
+							cleanStr = messageBox.getValue()
+									.replaceAll(" ", "");
+							cleanStr = cleanStr.replaceAll("\\D+", "");
+
+						} else {
+							cleanStr = "";
+							break;
+						}
+
+						if (cleanStr.length() > 0) {
+							if (flag == false) {
+								if (!PinModelProvider.INSTANCE
+										.checkExistence(cleanStr)) {
+
+									index = viewer.getTable()
+											.getSelectionIndex();
+									p = PinModelProvider.INSTANCE.pins
+											.get(index);
+
+									p.setPassword(cleanStr);
+									PinModelProvider.INSTANCE.save(p, "edit",
+											index + "");
+									viewer.refresh();
+									passcontrol = false;
+									break;
+
+								} else {
+
+									MessageDialog dialog = new MessageDialog(
+											root.getShell(),
+											"Warnung",
+											null,
+											"This Password is already in the list.",
+											MessageDialog.INFORMATION,
+											new String[] { "OK" }, 0);
+									dialog.open();
+								}
+							} else {
+
+								MessageDialog dialog = new MessageDialog(
+										root.getShell(),
+										"Warnung",
+										null,
+										"Warning!. Your input includes letters.",
+										MessageDialog.INFORMATION,
+										new String[] { "OK" }, 0);
+								dialog.open();
+							}
+
+						} else {
+
+							MessageDialog dialog = new MessageDialog(
+									root.getShell(), "Warnung", null,
+									"Please enter a valid password!.",
+									MessageDialog.INFORMATION,
+									new String[] { "OK" }, 0);
+							dialog.open();
+						}
+
+					} else {
+						break;
+					}
+
+				} while (passcontrol == true);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		};
+		
+		editTableItem.addSelectionListener(editPinListener);
+		
+		/**
+		 * This is the listener for the single click in the list. The listener
+		 * makes it possible to select a password and highlight the choice.
+		 * This listener also triggers the "AutoLogin" function to be enables and visible.
+		 */
+		
+		SelectionListener oneClickListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+//				IStructuredSelection selection = (IStructuredSelection) viewer
+//						.getSelection();
+//
+//				Object firstElement = selection.getFirstElement();
+//
+//				if (firstElement != null) {
+				 selectedRow = (IStructuredSelection) viewer
+						.getSelection();
+				 
+				 
+				 selectedIndex = viewer.getTable().getSelectionIndex();
+				 
+
+				Object firstElement = selectedRow.getFirstElement();
+
+				if (firstElement != null) {
+					removeTableItem.setEnabled(true);
+					editTableItem.setEnabled(true);
+				}
+
+				checkAL.setEnabled(true);
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		};
+		
+		tbl.addSelectionListener(oneClickListener);
+		
+		/**
+		 * This is the listener for the AutoLogin function. When checked, the
+		 * selected password from the list will be used over and over again,
+		 * when a request comes from outside. Also the list with passwords is
+		 * disabled and cant be changed until unchecking the "AutoLogin" button.
+		 * Next to the AutoLogin button u can see the password, which u
+		 * selected, when checked.
+		 */
+
+		SelectionListener checkListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				
+				
+				/// DOUBLE CLICK ///
+				
+//				@Override
+//				public void doubleClick(DoubleClickEvent event) {
+//					pressedKeys.clear();
+//					char[] entries = viewer.getSelection().toString()
+//							.replaceAll("\\D+", "").toCharArray();
+//					for (int i = 0; i < entries.length; i++) {
+//						char entry = entries[i];
+//						setButton(String.valueOf(entry));
+//					}
+//
+//					setButton("OK");
+//
+//				}
+				
+				
+				//////////////////////////
+				
+				
+
+				checkAL.setText("AutoLogin: "
+						+ viewer.getSelection().toString());
+
+				if (checkAL.getSelection()) {
+					
+					
+					tbl.setEnabled(false);
+					AUTOLOGIN = true;
+					pressedKeys.clear();
+					char[] entries = viewer.getSelection().toString()
+							.replaceAll("\\D+", "").toCharArray();
+					for (int i = 0; i < entries.length; i++) {
+						char entry = entries[i];
+						setButton(String.valueOf(entry));
+
+					}
+
+					setButton("OK");
+					
+					
+					
+
+				}
+				
+
+				else {
+					
+					tbl.setEnabled(true);
+					AUTOLOGIN = false;
+					txtOutput.setText("");
+					checkAL.setText("AutoLogin");
+				}
+				
+				
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+
+		};
+
+		checkAL.addSelectionListener(checkListener);
+		
+		//TEst
+		tbl.setVisible(true);
+		checkAL.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
-
 		parent.layout();
 		parent.redraw();
 	}
@@ -208,6 +800,10 @@ public class ReaderPart implements VirtualReaderUi {
 		root = parent;
 		switchToReaderType(ReaderType.STANDARD);
 	}
+	
+	
+	
+	 
 
 	/**
 	 * This method defines the Buttons all getxxxKey-methods use it for creating
@@ -239,6 +835,11 @@ public class ReaderPart implements VirtualReaderUi {
 
 		return button;
 	}
+	
+	public void setFocus() {
+	    viewer.getControl().setFocus();
+	  }
+	
 
 	/**
 	 * This method defines the Numeric Buttons.
@@ -351,6 +952,8 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				setButton(text);
+				
+				
 			}
 		};
 
@@ -359,178 +962,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		return button;
 	}
-
-	/**
-	 * Returns a button that simulates the button clicks for a custom Pin. To
-	 * save with a right click on the button a pin has to be visible on the
-	 * screen.
-	 * 
-	 * @param parent composite where the customPinSaver button will be placed
-	 * @param number of the pin saver button
-	 * @return button
-	 */
-	private Button getCustomPinSaverKey(Composite parent, final int number) {
-		
-		//key to identify the pin in the preferences for button x
-		final String key = "b" + number;
-		final String defaultPin = "";
-		
-		savedPins[number] = nodePin.get(key, defaultPin);
-
-		SelectionListener selectionListener = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				widgetDefaultSelected(event);
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-				for (int i = 0; i < savedPins[number].length(); i++) {
-					keysNumeric[Integer.parseInt(""
-							+ savedPins[number].charAt(i))].notifyListeners(
-							SWT.Selection, null);
-				}
-
-			}
-
-		};
-
-		Button button;
-		
-		if (checkExistenceOfKey(key)){
-			//Show the saved pin on the button
-			button = createButton(parent, savedPins[number], selectionListener,
-					150, 100);
-		} else {
-			//This is a default button that has no connection to a saved pin
-			button = createButton(parent, "PIN " + (number + 1),
-					selectionListener, 150, 100);
-		}
-
-		// add right click menu
-		Menu popupPinSaver = new Menu(button);
-
-		// add a menu entry for saving a displayed pin
-		MenuItem newPinSaverMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
-		newPinSaverMenuItem.setText("Change saved PIN");
-
-		// Listener for new Pin
-		SelectionListener listenerNewPinMenu = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) { 
-				try {
-					// get pin from display and remove everything else
-					String pin = txtOutput.getText().replaceAll("\\D+", "");
-					
-					if (pin.equals("")) { 
-						throw new IllegalArgumentException("No Pin entered. Please enter a pin before saving");
-					}
-					
-					savedPins[number] = pin;
-					// save in prefs
-					nodePin.put(key, pin);
-					prefsUi.flush();
-
-					// rename Button
-					keysPinSaver[number].setText(savedPins[number]);
-					
-
-				}catch (BackingStoreException e1) {
-					
-					/*
-					 * Nothing to do here. This Exception only exists because
-					 * Eclipse wants it. I'm not able to produce an error with
-					 * the Preferences file. Eclipse seems to solve most
-					 * Problems with it independently.
-					 */
-				} 
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		};
-
-		newPinSaverMenuItem.addSelectionListener(listenerNewPinMenu);
-
-		// add a menu entry for resetting a pin button
-		MenuItem resetButtonMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
-		resetButtonMenuItem.setText("reset");
-
-		// Listener for resetting a Button
-		SelectionListener listenerResetButton = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				try {
-					
-					//put the default value at the position of the old key
-					savedPins[number] = defaultPin;
-
-					// remove key from prefs
-					nodePin.remove("b" + number);
-					prefsUi.flush();
-
-					// rename Button
-					keysPinSaver[number].setText("PIN " + (number+1));
-				} catch (BackingStoreException e1) {
-					/*
-					 * Nothing to do here. This Exception only exists because
-					 * Eclipse wants it. I'm not able to produce an error with
-					 * the Preferences file. Eclipse seems to solve most
-					 * Problems with it independently.
-					 */
-				}
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		};
-		resetButtonMenuItem.addSelectionListener(listenerResetButton);
-		button.setMenu(popupPinSaver);
-		
-		button.setToolTipText("How to use:\n"
-				+ "1. activate the pinpad\n"
-				+ "2. insert a Pin with it\n"
-				+ "3. right click on the button and save");
-		return button;
-
-	}
 	
-	/**
-	 * checks the existence of a key in the preferences. A key is created when a
-	 * pin is saved in {@link #getCustomPinSaverKey(Composite, int)}. It can be
-	 * removed by resetting a pin saver button.
-	 * 
-	 * @param the key to check
-	 * @return true/false
-	 */
-	public boolean checkExistenceOfKey(String key) {
-		try {
-			String[] keylist = nodePin.keys();
-			for (int i = 0; i < keylist.length; i++) {
-				if (keylist[i].equals(key)){
-					return true;
-				}					
-			}
-			return false;
-		} catch (BackingStoreException e) {
-			/*
-			 * Nothing to do here. This Exception only exists because
-			 * Eclipse wants it. I'm not able to produce an error with
-			 * the Preferences file. Eclipse seems to solve most
-			 * Problems with it independently.
-			 */
-		}
-		return false;
-	}
-
 	public void setText(final String text) {
 		Display.getDefault().syncExec(new Runnable() {
 
@@ -558,13 +990,9 @@ public class ReaderPart implements VirtualReaderUi {
 		case KEYS_ALL_CONTROL:
 			setEnabledKeySet(keysControl, enabled);
 			break;
-		case KEYS_ALL_PINSAVER:
-			setEnabledKeySet(keysPinSaver, enabled);
-			break;
 		case KEYS_ALL:
 			setEnabledKeySetController(KEYS_ALL_NUMERIC, enabled);
 			setEnabledKeySetController(KEYS_ALL_CONTROL, enabled);
-			setEnabledKeySetController(KEYS_ALL_PINSAVER, enabled);
 			break;
 		}
 	}
@@ -580,6 +1008,9 @@ public class ReaderPart implements VirtualReaderUi {
 	 */
 	public void setEnabledKeySet(Button[] buttonSet, final boolean enabled) {
 		for (final Button button : buttonSet) {
+			
+			if (button == null) continue;
+			
 			Display.getDefault().syncExec(new Runnable() {
 
 				@Override
@@ -589,7 +1020,7 @@ public class ReaderPart implements VirtualReaderUi {
 			});
 		}
 	}
-
+	
 	private void setButton(String value) {
 		pressedKeys.add(value);
 		notifyIfReady();
@@ -607,42 +1038,68 @@ public class ReaderPart implements VirtualReaderUi {
 
 	@Override
 	public byte[] getPin() throws IOException {
-		if (type.equals(ReaderType.STANDARD)) {
-			setEnabledKeySetController(KEYS_ALL, true);
-			pressedKeys.clear();
-			synchronized (pressedKeys) {
-				while (pressedKeys.size() == 0
-						|| (!pressedKeys.get(pressedKeys.size() - 1).equals(
-								"OK") && !pressedKeys.get(
-								pressedKeys.size() - 1).equals("C"))) {
-					try {
-						pressedKeys.wait();
-					} catch (InterruptedException e) {
-						throw new IOException(
-								"The reading of the PIN could not be completed");
+		if (AUTOLOGIN == false) {
+			if (type.equals(ReaderType.STANDARD)) {
+				
+					setEnabledKeySetController(KEYS_ALL, true);
+					
+					
+					pressedKeys.clear();
+					synchronized (pressedKeys) {
+						while (pressedKeys.size() == 0
+								|| (!pressedKeys.get(pressedKeys.size() - 1)
+										.equals("OK") && !pressedKeys.get(
+										pressedKeys.size() - 1).equals("C"))) {
+							try {
+								pressedKeys.wait();
+							} catch (InterruptedException e) {
+								throw new IOException(
+										"The reading of the PIN could not be completed");
+							}
+						}
 					}
+					if (pressedKeys.get(pressedKeys.size() - 1).equals("C")) {
+						setText("");
+						setEnabledKeySetController(KEYS_ALL, false);
+						return null;
+					}
+	
+					byte[] result = new byte[pressedKeys.size() - 1];
+					for (int i = 0; i < result.length; i++) {
+						try {
+							byte currentNumber = (byte) pressedKeys.get(i)
+									.charAt(0);
+							result[i] = currentNumber;
+						} catch (NumberFormatException e) {
+							throw new IOException(
+									"PIN containing non valid characters entered");
+						}
+					}
+	 
+					setEnabledKeySetController(KEYS_ALL, false);
+				
+					return result;
+					
 				}
-			}
-			if (pressedKeys.get(pressedKeys.size() - 1).equals("C")) {
-				setText("");
-				setEnabledKeySetController(KEYS_ALL, false);
-				return null;
-			}
-
+			return null;
+			
+		} else {
 			byte[] result = new byte[pressedKeys.size() - 1];
 			for (int i = 0; i < result.length; i++) {
 				try {
-					byte currentNumber = (byte) pressedKeys.get(i).charAt(0);
+					byte currentNumber = (byte) pressedKeys.get(i)
+							.charAt(0);
 					result[i] = currentNumber;
 				} catch (NumberFormatException e) {
 					throw new IOException(
 							"PIN containing non valid characters entered");
 				}
 			}
-			setEnabledKeySetController(KEYS_ALL, false);
+			setText("");
 			return result;
+			
 		}
-		return null;
+		
 	}
 
 	@Override
@@ -670,6 +1127,20 @@ public class ReaderPart implements VirtualReaderUi {
 		connector.addListener(new MctUniversal(new UnsignedInteger(0x3136D4)));
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
+	
+//	public void switchtoExpertView()
+//	{
+//		if(tbl.isVisible())
+//		{
+//			tbl.setVisible(false);	
+//			checkAL.setVisible(false);
+//		}
+//		else
+//		{
+//			tbl.setVisible(true);	
+//			checkAL.setVisible(true);
+//		}
+//	}
 
 	/**
 	 * Switch the parts user interface and behavior to the reader type
@@ -706,11 +1177,25 @@ public class ReaderPart implements VirtualReaderUi {
 			switch (readerType) {
 			case BASIC:
 				createBasicReader(root);
+				AUTOLOGIN = false;
+				
 				break;
 			case STANDARD:
+				
 				addStandardListeners(connector);
 				createStandardReader(root);
+//				if(toolOn == true)
+//				{
+//					tbl.setVisible(true);
+//					checkAL.setVisible(true);
+//				}
+				viewer.getTable().setSelection(selectedIndex);
+				if(selectedIndex != -1)
+				{
+					checkAL.setEnabled(true);
+				}
 				break;
+				
 			default:
 				;
 				break;
