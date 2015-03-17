@@ -59,6 +59,9 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private Text txtOutput;
 	private String[] savedPins = new String[4];
+	
+	// regular Expression to remove non digits from PINS
+	private String pinRegex = "\\D";
 
 	private Button[] keysNumeric;
 	private Button[] keysControl;
@@ -376,6 +379,9 @@ public class ReaderPart implements VirtualReaderUi {
 		final String defaultPin = "";
 		
 		savedPins[number] = nodePin.get(key, defaultPin);
+		
+		// remove all non digits with a regex
+		savedPins[number] = savedPins[number].replaceAll(pinRegex, "");
 
 		SelectionListener selectionListener = new SelectionListener() {
 
@@ -424,7 +430,7 @@ public class ReaderPart implements VirtualReaderUi {
 			public void widgetSelected(SelectionEvent e) { 
 				try {
 					// get pin from display and remove everything else
-					String pin = txtOutput.getText().replaceAll("\\D+", "");
+					String pin = txtOutput.getText().replaceAll(pinRegex, "");
 					
 					if (pin.equals("")) {
 						
