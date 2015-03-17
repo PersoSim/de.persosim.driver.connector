@@ -426,18 +426,21 @@ public class ReaderPart implements VirtualReaderUi {
 					// get pin from display and remove everything else
 					String pin = txtOutput.getText().replaceAll("\\D+", "");
 					
-					if (pin.equals("")) { 
-						throw new IllegalArgumentException("No Pin entered. Please enter a pin before saving");
-					}
-					
-					savedPins[number] = pin;
-					// save in prefs
-					nodePin.put(key, pin);
-					prefsUi.flush();
+					if (pin.equals("")) {
+						
+						MessageDialog.openInformation(root.getShell(),
+								"No Pin entered",
+								"Please enter a Pin before saving");
+					} else {
 
-					// rename Button
-					keysPinSaver[number].setText(savedPins[number]);
-					
+						savedPins[number] = pin;
+						// save in prefs
+						nodePin.put(key, pin);
+						prefsUi.flush();
+
+						// rename Button
+						keysPinSaver[number].setText(savedPins[number]);
+					}
 
 				}catch (BackingStoreException e1) {
 					
