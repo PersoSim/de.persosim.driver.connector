@@ -262,7 +262,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
-				System.out.println("pin pad button pressed: " + text);
+				System.out.println("PIN pad button pressed: " + text);
 				txtOutput.append(text);
 				setButton(text);
 			}
@@ -435,8 +435,8 @@ public class ReaderPart implements VirtualReaderUi {
 					if (pin.equals("")) {
 						
 						MessageDialog.openInformation(root.getShell(),
-								"No Pin entered",
-								"Please enter a Pin before saving");
+								"No PIN entered",
+								"Please enter a PIN before saving");
 					} else {
 
 						savedPins[number] = pin;
@@ -468,7 +468,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		// add a menu entry for resetting a pin button
 		MenuItem resetButtonMenuItem = new MenuItem(popupPinSaver, SWT.CASCADE);
-		resetButtonMenuItem.setText("reset");
+		resetButtonMenuItem.setText("Reset");
 
 		// Listener for resetting a Button
 		SelectionListener listenerResetButton = new SelectionListener() {
@@ -505,9 +505,9 @@ public class ReaderPart implements VirtualReaderUi {
 		button.setMenu(popupPinSaver);
 		
 		button.setToolTipText("How to use:\n"
-				+ "1. activate the pinpad\n"
-				+ "2. insert a Pin with it\n"
-				+ "3. right click on the button and save");
+				+ "1. Activate the PIN pad\n"
+				+ "2. Enter a PIN with it\n"
+				+ "3. Right click on the button and save");
 		return button;
 
 	}
