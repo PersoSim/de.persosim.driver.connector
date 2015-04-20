@@ -81,7 +81,6 @@ public class ReaderPart implements VirtualReaderUi {
 	private Table tbl;
 	private Button checkAL;
 	private boolean flag;
-	private boolean toolOn;
 	private IStructuredSelection selectedRow;
 	private int selectedIndex = -1;
 
@@ -191,8 +190,6 @@ public class ReaderPart implements VirtualReaderUi {
 		button = createButton(numericComposite, "", null, 100, 100);
 		button.setEnabled(DISABLE);
 		
-		
-		
 
 		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
 		controlComposite.setLayout(new GridLayout(2, false));
@@ -203,19 +200,7 @@ public class ReaderPart implements VirtualReaderUi {
 		final Composite rightinsideControlComposite = new Composite(controlComposite,SWT.NONE | SWT.TOP);
 		rightinsideControlComposite.setLayout(new GridLayout(1, true));
 	
-//		final GridData grid2 = new GridData(SWT.FILL, SWT.FILL, true, true,1,1);
-//		grid2.heightHint = 50;
-//		grid2.widthHint = 155;
-		
-	
-		
-//		final Composite passwordComposite = new Composite(rightinsideControlComposite,SWT.NONE);
-//		passwordComposite.setLayout(new GridLayout(1, false));
-//		passwordComposite.setLayoutData(grid2);
-//		passwordComposite.setLayout(new FillLayout());
-		
-		
-	
+
 		final Composite rightControlComposite = new Composite(rightinsideControlComposite,SWT.NONE);
 		
 		
@@ -247,13 +232,6 @@ public class ReaderPart implements VirtualReaderUi {
 		button = createButton(leftControlComposite, "", null, 150, 100);
 		button.setEnabled(DISABLE);
 		
-		//managementButton = new Button(passwordComposite, SWT.PUSH);
-//		managementButton.setText("Password Management");
-//		managementButton.setBackground(new Color(parent.getDisplay(), 0, 0, 255));
-		
-		
-		
-
 		checkAL = new Button(tableControlComposite, SWT.CHECK);
 		checkAL.setText("AutoLogin "+ "                       ");
 
@@ -266,61 +244,7 @@ public class ReaderPart implements VirtualReaderUi {
 		tbl = viewer.getTable();
 		tbl.setHeaderVisible(true);
 		tbl.setLinesVisible(true);
-//		root.addKeyListener(new KeyAdapter()
-//		{	
-//			public void keyPressed(KeyEvent e)
-//			{
-//				String string = "";
-// 
-//				//check click together?
-//				
-//				if ((e.stateMask & SWT.CTRL) != 0) 
-//				
-// 
-//				string = "2";
-// 
-//				
-//			}
-//		});
- 
-		
-		// It's not possible to force the Table to always show scroll bars, the OS decides when to show them.
-		//tbl.getHorizontalBar().setVisible(true);
-		
-		
-//		SelectionListener managementButtonListener = new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				if(tbl.isVisible())
-//				{
-//					tbl.setVisible(false);	
-//					checkAL.setVisible(false);
-//					toolOn = false;
-//				}
-//				else
-//				{
-//					tbl.setVisible(true);	
-//					checkAL.setVisible(true);
-//					toolOn = true;
-//				}
-//				
-//				
-//				
-//				
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		};
-//		
-//		managementButton.addSelectionListener(managementButtonListener);
-		
+
 		
 		SelectionListener columnPinHeaderListener = new SelectionListener() {
 
@@ -672,12 +596,6 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-//				IStructuredSelection selection = (IStructuredSelection) viewer
-//						.getSelection();
-//
-//				Object firstElement = selection.getFirstElement();
-//
-//				if (firstElement != null) {
 				 selectedRow = (IStructuredSelection) viewer
 						.getSelection();
 				 
@@ -717,36 +635,12 @@ public class ReaderPart implements VirtualReaderUi {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				
-				
-				/// DOUBLE CLICK ///
-				
-//				@Override
-//				public void doubleClick(DoubleClickEvent event) {
-//					pressedKeys.clear();
-//					char[] entries = viewer.getSelection().toString()
-//							.replaceAll("\\D+", "").toCharArray();
-//					for (int i = 0; i < entries.length; i++) {
-//						char entry = entries[i];
-//						setButton(String.valueOf(entry));
-//					}
-//
-//					setButton("OK");
-//
-//				}
-				
-				
-				//////////////////////////
-				
-				
 
 				checkAL.setText("AutoLogin: "
 						+ viewer.getSelection().toString());
 
 				if (checkAL.getSelection()) {
-					
-					
+
 					tbl.setEnabled(false);
 					AUTOLOGIN = true;
 					pressedKeys.clear();
@@ -759,22 +653,16 @@ public class ReaderPart implements VirtualReaderUi {
 					}
 
 					setButton("OK");
-					
-					
-					
 
 				}
-				
 
 				else {
-					
+
 					tbl.setEnabled(true);
 					AUTOLOGIN = false;
 					txtOutput.setText("");
 					checkAL.setText("AutoLogin");
 				}
-				
-				
 
 			}
 
@@ -787,7 +675,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		checkAL.addSelectionListener(checkListener);
 		
-		//TEst
+		
 		tbl.setVisible(true);
 		checkAL.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
