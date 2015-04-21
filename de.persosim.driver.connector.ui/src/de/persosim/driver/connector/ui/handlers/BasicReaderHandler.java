@@ -21,7 +21,6 @@ public class BasicReaderHandler {
 			MPart readerPart = partService
 					.findPart("de.persosim.driver.connector.ui.parts.reader");
 
-			System.out.println("!!!" + readerPart.getClass().getName());
 			if (readerPart.getObject() instanceof ReaderPart) {
 
 				((ReaderPart) readerPart.getObject()).switchToReaderType(ReaderType.BASIC);

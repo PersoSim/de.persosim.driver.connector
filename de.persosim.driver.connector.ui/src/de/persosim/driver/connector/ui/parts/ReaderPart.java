@@ -336,11 +336,9 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							flag = messageBox.getValue().matches(
-									".*[a-zA-Z]+.*");
+							flag = messageBox.getValue().matches(".*[a-zA-Z]+.*");
 							inputvalue = messageBox.getValue();
-							cleanStr = messageBox.getValue()
-									.replaceAll(" ", "");
+							cleanStr = messageBox.getValue().replaceAll(" ", "");
 							cleanStr = cleanStr.replaceAll("\\D+", "");
 
 						} else {
@@ -353,53 +351,35 @@ public class ReaderPart implements VirtualReaderUi {
 
 							if (flag == false) {
 
-								if (!PinModelProvider.INSTANCE
-										.checkExistence(cleanStr)) {
+								if (!PinModelProvider.INSTANCE.checkExistence(cleanStr)) {
 
 									Pin pin = new Pin(cleanStr);
-									PinModelProvider.INSTANCE.save(pin, "save",
-											"-1");
+									PinModelProvider.INSTANCE.save(pin, "save", "-1");
 									viewer.refresh();
-									int temp = PinModelProvider.INSTANCE.pins
-											.size() - 1;
-									viewer.setSelection(
-											new StructuredSelection(viewer
-													.getElementAt(temp)), true);
+									int temp = PinModelProvider.INSTANCE.pins.size() - 1;
+									viewer.setSelection(new StructuredSelection(viewer.getElementAt(temp)), true);
 
 									passcontrol = false;
 									break;
 
 								} else {
 
-									MessageDialog dialog = new MessageDialog(
-											root.getShell(),
-											"Warnung",
-											null,
-											"This Password is already in the list.",
-											MessageDialog.INFORMATION,
-											new String[] { "OK" }, 0);
+									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+									"This Password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 									dialog.open();
 
 								}
 							} else {
 
-								MessageDialog dialog = new MessageDialog(
-										root.getShell(),
-										"Warnung",
-										null,
-										"Warning!. Your input includes letters.",
-										MessageDialog.INFORMATION,
-										new String[] { "OK" }, 0);
+								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+								"Warning!. Your input includes letters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 								dialog.open();
 
 							}
 						} else {
 
-							MessageDialog dialog = new MessageDialog(
-									root.getShell(), "Warnung", null,
-									"Please enter a valid password!.",
-									MessageDialog.INFORMATION,
-									new String[] { "OK" }, 0);
+							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+							"Please enter a valid password!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 
 						}
@@ -509,10 +489,8 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							flag = messageBox.getValue().matches(
-									".*[a-zA-Z]+.*");
-							cleanStr = messageBox.getValue()
-									.replaceAll(" ", "");
+							flag = messageBox.getValue().matches(".*[a-zA-Z]+.*");
+							cleanStr = messageBox.getValue().replaceAll(" ", "");
 							cleanStr = cleanStr.replaceAll("\\D+", "");
 
 						} else {
@@ -522,51 +500,34 @@ public class ReaderPart implements VirtualReaderUi {
 
 						if (cleanStr.length() > 0) {
 							if (flag == false) {
-								if (!PinModelProvider.INSTANCE
-										.checkExistence(cleanStr)) {
+								if (!PinModelProvider.INSTANCE.checkExistence(cleanStr)) {
 
-									index = viewer.getTable()
-											.getSelectionIndex();
-									p = PinModelProvider.INSTANCE.pins
-											.get(index);
+									index = viewer.getTable().getSelectionIndex();
+									p = PinModelProvider.INSTANCE.pins.get(index);
 
 									p.setPassword(cleanStr);
-									PinModelProvider.INSTANCE.save(p, "edit",
-											index + "");
+									PinModelProvider.INSTANCE.save(p, "edit", index + "");
 									viewer.refresh();
 									passcontrol = false;
 									break;
 
 								} else {
 
-									MessageDialog dialog = new MessageDialog(
-											root.getShell(),
-											"Warnung",
-											null,
-											"This Password is already in the list.",
-											MessageDialog.INFORMATION,
-											new String[] { "OK" }, 0);
+									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+									"This Password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 									dialog.open();
 								}
 							} else {
 
-								MessageDialog dialog = new MessageDialog(
-										root.getShell(),
-										"Warnung",
-										null,
-										"Warning!. Your input includes letters.",
-										MessageDialog.INFORMATION,
-										new String[] { "OK" }, 0);
+								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+								"Warning!. Your input includes letters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 								dialog.open();
 							}
 
 						} else {
 
-							MessageDialog dialog = new MessageDialog(
-									root.getShell(), "Warnung", null,
-									"Please enter a valid password!.",
-									MessageDialog.INFORMATION,
-									new String[] { "OK" }, 0);
+							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+							"Please enter a valid password!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 						}
 
@@ -596,9 +557,7 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				 selectedRow = (IStructuredSelection) viewer
-						.getSelection();
-				 
+				 selectedRow = (IStructuredSelection) viewer.getSelection();
 				 
 				 selectedIndex = viewer.getTable().getSelectionIndex();
 				 
@@ -636,16 +595,14 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				checkAL.setText("AutoLogin: "
-						+ viewer.getSelection().toString());
+				checkAL.setText("AutoLogin: " + viewer.getSelection().toString());
 
 				if (checkAL.getSelection()) {
 
 					tbl.setEnabled(false);
 					AUTOLOGIN = true;
 					pressedKeys.clear();
-					char[] entries = viewer.getSelection().toString()
-							.replaceAll("\\D+", "").toCharArray();
+					char[] entries = viewer.getSelection().toString().replaceAll("\\D+", "").toCharArray();
 					for (int i = 0; i < entries.length; i++) {
 						char entry = entries[i];
 						setButton(String.valueOf(entry));
@@ -1016,20 +973,6 @@ public class ReaderPart implements VirtualReaderUi {
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
 	
-//	public void switchtoExpertView()
-//	{
-//		if(tbl.isVisible())
-//		{
-//			tbl.setVisible(false);	
-//			checkAL.setVisible(false);
-//		}
-//		else
-//		{
-//			tbl.setVisible(true);	
-//			checkAL.setVisible(true);
-//		}
-//	}
-
 	/**
 	 * Switch the parts user interface and behavior to the reader type
 	 * associated with the provided parameter.
@@ -1072,11 +1015,6 @@ public class ReaderPart implements VirtualReaderUi {
 				
 				addStandardListeners(connector);
 				createStandardReader(root);
-//				if(toolOn == true)
-//				{
-//					tbl.setVisible(true);
-//					checkAL.setVisible(true);
-//				}
 				viewer.getTable().setSelection(selectedIndex);
 				if(selectedIndex != -1)
 				{
