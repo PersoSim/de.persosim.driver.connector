@@ -210,7 +210,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
-		String expected = PcscConstants.IFD_ERROR_POWER_ACTION.getAsHexString();
+		String expected = PcscConstants.IFD_SUCCESS.getAsHexString();
 		assertEquals(expected, result);
 	}
 	
