@@ -954,8 +954,7 @@ public class ReaderPart implements VirtualReaderUi {
 		}
 
 		try {
-			connector = new NativeDriverConnector("localhost", 5678,
-					"localhost", 9876);
+			connector = new NativeDriverConnector("localhost", 5678);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,10 +1,10 @@
 package de.persosim.driver.connector.features;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 
+import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -15,7 +15,6 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.platform.Iso7816Lib;
 import de.persosim.simulator.protocols.Tr03110;
@@ -34,7 +33,7 @@ import de.persosim.simulator.utils.Utils;
  *
  */
 public class PersoSimPcscProcessor extends AbstractPcscFeature implements
-		SocketCommunicator, PcscConstants, UiEnabled {
+		PcscConstants, UiEnabled {
 
 	/**
 	 * This enum represents the different states of the PCSC pseudo PACE.
@@ -45,8 +44,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	public enum PaceState {
 		NO_SM, SM_ESTABLISHED;
 	}
-
-	Socket communicationSocket;
 
 	private List<VirtualReaderUi> interfaces;
 
@@ -313,12 +310,10 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 			byte[] pseudoApduHeader = new byte[] { (byte) 0xff, (byte) 0x86, 0,
 					0, (byte) (0xFF & data.toByteArray().length) };
-			byte[] responseApdu = CommUtils
-					.exchangeApdu(
-							communicationSocket,
+			byte[] responseApdu = Activator.getSim()
+					.processCommand(
 							Utils.concatByteArrays(pseudoApduHeader,
 									data.toByteArray()));
-
 
 			byte[] pcscResponse = buildPcscResponseData(efCardAccess,
 					responseApdu);
@@ -460,7 +455,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		byte[] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
 		byte[] readBinary = HexString.toByteArray("00 B0 00 00 00");
 
-		byte[] response = CommUtils.exchangeApdu(communicationSocket, select);
+		byte[] response = Activator.getSim().processCommand(select);
 		
 		short statusWord = Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(response,
@@ -473,7 +468,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);
 		}
 		
-		response = CommUtils.exchangeApdu(communicationSocket, readBinary);
+		response = Activator.getSim().processCommand(readBinary);
 
 		statusWord = Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(response,
@@ -557,11 +552,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(ppdu,
 						OFFSET_DATA_LENGTH, OFFSET_INPUT_DATA
 								+ OFFSET_COMMAND_DATA)));
-	}
-
-	@Override
-	public void setCommunicationSocket(Socket socket) {
-		this.communicationSocket = socket;
 	}
 
 	@Override

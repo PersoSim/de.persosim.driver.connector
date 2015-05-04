@@ -1,7 +1,6 @@
 package de.persosim.driver.connector;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -15,10 +14,9 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.pcsc.SocketCommunicator;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.simulator.platform.Iso7816;
-import de.persosim.simulator.utils.HexString;
+import de.persosim.simulator.utils.PersoSimLogger;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -41,9 +39,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private String nativeDriverHostName;
 	private int nativeDriverPort;
 	private byte[] cachedAtr = null;
-	private Socket simSocket;
-	private String simHostName;
-	private int simPort;
 	private int timeout = 5000;
 
 	/**
@@ -52,18 +47,14 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * 
 	 * @param nativeDriverHostName
 	 * @param nativeDriverPort
-	 * @param simHostName
-	 * @param simPort
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
 	public NativeDriverConnector(String nativeDriverHostName,
-			int nativeDriverPort, String simHostName, int simPort)
+			int nativeDriverPort)
 			throws UnknownHostException, IOException {
 		this.nativeDriverHostName = nativeDriverHostName;
 		this.nativeDriverPort = nativeDriverPort;
-		this.simHostName = simHostName;
-		this.simPort = simPort;
 		listeners.add(this);
 	}
 
@@ -104,8 +95,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void disconnect() throws IOException, InterruptedException {
 		//close dangling connections if any
-		if (simSocket != null) {
-			simSocket.close();
+		if (Activator.getSim() != null) {
+			Activator.getSim().stopSimulator();
 		}
 		
 		communication.disconnect();
@@ -150,33 +141,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 */
 	public void removeUi(VirtualReaderUi ui) {
 		this.userInterfaces.remove(ui);
-	}
-
-	private void powerUp() throws UnknownHostException, IOException {
-		openSimSocket();
-		cachedAtr = CommUtils.exchangeApdu(simSocket,
-				HexString.toByteArray("FF010000"));
-
-		for (PcscListener listener : listeners) {
-			if (listener instanceof SocketCommunicator) {
-				((SocketCommunicator) listener)
-						.setCommunicationSocket(simSocket);
-			}
-		}
-	}
-
-	private void openSimSocket() throws UnknownHostException, IOException {
-		if (simSocket == null || simSocket.isClosed()) {
-			simSocket = new Socket(simHostName, simPort);
-			simSocket.setSoTimeout(2000);
-		}
-	}
-
-	private void closeSimSocket() throws IOException {
-		if (simSocket != null){
-			simSocket.close();	
-		}
-		cachedAtr = null;
 	}
 
 	@Override
@@ -320,46 +284,36 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
 		}
 		
+		if (Activator.getSim() == null){
+			PersoSimLogger.log(getClass(), "The simulator service is not available", PersoSimLogger.WARN);
+			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
+		}
+				
 		if (IFD_POWER_DOWN.equals(
 				action)) {
-			if (simSocket != null && !simSocket.isClosed()) {
+			if (Activator.getSim().isRunning()) {
 				byte[] result;
-				try {
-					result = CommUtils.exchangeApdu(simSocket,
-							HexString.toByteArray("FF000000"));
-				} catch (IOException e) {
-					return new SimplePcscCallResult(IFD_COMMUNICATION_ERROR);
+				
+				result = Activator.getSim().cardPowerDown();
+				
+				if (Arrays.equals(result,
+						Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))
+						&& Activator.getSim().stopSimulator()) {
+					return new SimplePcscCallResult(IFD_SUCCESS);
 				}
-				try {
-					closeSimSocket();
-					if (Arrays
-							.equals(result,
-									Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
-						return new SimplePcscCallResult(IFD_SUCCESS);
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
-				}
+				return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 			}
 			return new SimplePcscCallResult(IFD_SUCCESS); //already powered down
 		} else {
 			if (IFD_POWER_UP.equals(action)) {
-				try {
-					powerUp();
-				} catch (IOException e) {
-					return new SimplePcscCallResult(
-							PcscConstants.IFD_ERROR_POWER_ACTION);
-				}
+				
+				Activator.getSim().startSimulator();
+				cachedAtr = Activator.getSim().cardPowerUp();
+				
 			} else if (IFD_RESET.equals(
 					action)) {
-				try {
-					cachedAtr = CommUtils.exchangeApdu(simSocket,
-							HexString.toByteArray("FFFF0000"));
-				} catch (IOException e) {
-					return new SimplePcscCallResult(IFD_COMMUNICATION_ERROR);
-				}
+				
+				cachedAtr = Activator.getSim().cardReset();
 			}
 			if (cachedAtr.length <= expectedLength.getAsSignedLong()){
 				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);	
@@ -394,11 +348,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
 			result = getOnlyTagsFromFeatureList(getFeatures());
 		} else {
-			try {
-				result = CommUtils.exchangeApdu(simSocket, commandApdu);
-			} catch (IOException e) {
-				return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR);
-			}
+			result = Activator.getSim().processCommand(commandApdu);
 		}
 
 		if (result.length > expectedLength.getAsSignedLong()){
@@ -431,34 +381,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {
-		boolean closeConnection = false;
-		try {
-			if (simSocket == null || simSocket.isClosed()){
-				openSimSocket();	
-				closeConnection = true;
-			}
-
-			byte[] response = CommUtils.exchangeApdu(simSocket, new byte[] {
-					(byte) 0xff, (byte) 0x90, 0, 0 });
-
-			if (Arrays.equals(response,
-					Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
-				return new SimplePcscCallResult(IFD_ICC_PRESENT);
-			}
-		} catch (IOException e) {
-			System.out.println("The socket communication with " + simHostName
-					+ ":" + simPort + " could not be established");
-			closeConnection = true;
-		} finally {
-			if (closeConnection){
-				try {
-					closeSimSocket();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+		if (Activator.getSim() != null){
+			return new SimplePcscCallResult(IFD_ICC_PRESENT);
 		}
+		PersoSimLogger.log(getClass(), "The simulator service is not availiable");
 		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);
 	}
 

@@ -23,7 +23,7 @@ public class NativeDriverConnectorConsole {
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
 		NativeDriverConnector connector = new NativeDriverConnector(
-				"localhost", 5678, "localhost", 9876);
+				"localhost", 5678);
 		connector.addUi(new ConsoleUi());
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x42000DB2)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x42000DB3)));

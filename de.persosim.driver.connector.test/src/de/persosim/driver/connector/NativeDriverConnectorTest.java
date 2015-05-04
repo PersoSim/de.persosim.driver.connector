@@ -52,7 +52,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		driver.start(TESTDRIVER_PORT);
 				
 		nativeConnector = new NativeDriverConnector(TESTDRIVER_HOST,
-				TESTDRIVER_PORT, SIMULATOR_HOST, SIMULATOR_PORT);
+				TESTDRIVER_PORT);
 		nativeConnector.connect();
 	}
 
