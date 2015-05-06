@@ -306,16 +306,15 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			return new SimplePcscCallResult(IFD_SUCCESS); //already powered down
 		} else {
 			if (IFD_POWER_UP.equals(action)) {
-				
-				Activator.getSim().startSimulator();
-				cachedAtr = Activator.getSim().cardPowerUp();
+				if (Activator.getSim().isRunning())
+					cachedAtr = Activator.getSim().cardPowerUp();
 				
 			} else if (IFD_RESET.equals(
 					action)) {
 				
 				cachedAtr = Activator.getSim().cardReset();
 			}
-			if (cachedAtr.length <= expectedLength.getAsSignedLong()){
+			if (cachedAtr != null && cachedAtr.length <= expectedLength.getAsSignedLong()){
 				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);	
 			}
 			return new SimplePcscCallResult(IFD_ERROR_INSUFFICIENT_BUFFER);
