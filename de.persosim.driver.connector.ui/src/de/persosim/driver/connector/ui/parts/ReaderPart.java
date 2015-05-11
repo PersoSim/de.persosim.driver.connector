@@ -3,7 +3,6 @@ package de.persosim.driver.connector.ui.parts;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -72,7 +71,6 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private MenuItem removeTableItem;
 	private MenuItem editTableItem;
-	private boolean sortPwdTable = false;
 
 	private Text txtOutput;
 	private Button[] keysNumeric;
@@ -80,7 +78,6 @@ public class ReaderPart implements VirtualReaderUi {
 	private TableViewer viewer;
 	private Table tbl;
 	private Button checkAL;
-	private boolean flag;
 	private IStructuredSelection selectedRow;
 	private int selectedIndex = -1;
 
@@ -96,7 +93,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private ReaderType type = ReaderType.NONE;
 
-
+	private PinModelProvider pinModelProvider = PinModelProvider.getInstance();
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
@@ -250,16 +247,15 @@ public class ReaderPart implements VirtualReaderUi {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
-				Collections.sort(PinModelProvider.INSTANCE.pins,
-						new PasswordComparatorClass(sortPwdTable, "Password"));
-
-				if (sortPwdTable)
-					sortPwdTable = false;
-				else
-					sortPwdTable = true;
-
-				viewer.refresh();
+				
+				List<String> sortedPins = pinModelProvider.getPins();
+				sortedPins.sort(new PinComperator(pinModelProvider.getSort()));
+				if (pinModelProvider.getSort()){
+					pinModelProvider.setSort(false);
+				} else {
+					pinModelProvider.setSort(true);
+				}
+				viewer.setInput(sortedPins);
 
 			}
 
@@ -280,14 +276,14 @@ public class ReaderPart implements VirtualReaderUi {
 		columnPin.setLabelProvider(new ColumnLabelProvider() {
 		      @Override
 		      public String getText(Object element) {
-		        Pin p = (Pin) element;
-		        return p.getPassword();
+		        
+		        return (String) element;
 		      }
 		    });
 		
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(PinModelProvider.INSTANCE.getPins());
+		viewer.setInput(pinModelProvider.getPins());
 		final Menu popupTable = new Menu(viewer.getTable());
 		
 		
@@ -326,6 +322,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 				String inputvalue = "";
 				boolean passcontrol = true;
+				boolean inputContainsLetters = false;
 
 				do {
 					InputDialog messageBox = new InputDialog(root.getShell(),
@@ -336,7 +333,7 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							flag = messageBox.getValue().matches(".*[a-zA-Z]+.*");
+							inputContainsLetters = messageBox.getValue().matches(".*[a-zA-Z]+.*");
 							inputvalue = messageBox.getValue();
 							cleanStr = messageBox.getValue().replaceAll(" ", "");
 							cleanStr = cleanStr.replaceAll("\\D+", "");
@@ -349,14 +346,13 @@ public class ReaderPart implements VirtualReaderUi {
 
 						if (cleanStr.length() > 0) {
 
-							if (flag == false) {
+							if (inputContainsLetters == false) {
 
-								if (!PinModelProvider.INSTANCE.checkExistence(cleanStr)) {
+								if (!pinModelProvider.checkExistence(cleanStr)) {
 
-									Pin pin = new Pin(cleanStr);
-									PinModelProvider.INSTANCE.save(pin, "save", "-1");
-									viewer.refresh();
-									int temp = PinModelProvider.INSTANCE.pins.size() - 1;
+									pinModelProvider.save(cleanStr, "save", -1);
+									viewer.setInput(pinModelProvider.getPins());
+									int temp = pinModelProvider.getPins().size() - 1;
 									viewer.setSelection(new StructuredSelection(viewer.getElementAt(temp)), true);
 
 									passcontrol = false;
@@ -414,12 +410,15 @@ public class ReaderPart implements VirtualReaderUi {
 
 				int index = viewer.getTable().getSelectionIndex();
 				
-				PinModelProvider.INSTANCE.pins.remove(index);
-				PinModelProvider.INSTANCE.deletePinsFromPrefs(index);
-
+				
+				List<String> pinList = pinModelProvider.getPins();
+				pinList.remove(index);
+				pinModelProvider.setPins(pinList);
+				pinModelProvider.deletePinsFromPrefs(index);
+				viewer.setInput(pinModelProvider.getPins());
 				viewer.refresh();
 				
-				int listempty = PinModelProvider.INSTANCE.pins.size();
+				int listempty = pinModelProvider.getPins().size();
 				if(listempty == 0)
 				{
 					checkAL.setEnabled(false);
@@ -474,14 +473,14 @@ public class ReaderPart implements VirtualReaderUi {
 			public void widgetSelected(SelectionEvent e) {
 
 				int index = viewer.getTable().getSelectionIndex();
-				Pin p = (Pin) viewer.getElementAt(index);
-
+				String p =  pinModelProvider.getPins().get(index);
 				boolean passcontrol = true;
+				boolean inputContainsLetters = false;
 
 				do {
 
 					InputDialog messageBox = new InputDialog(root.getShell(),
-							"Password", "Enter your Password", p.getPassword(),
+							"Password", "Enter your Password", p,
 							null);
 
 					if (messageBox.open() == org.eclipse.jface.window.Window.OK) {
@@ -489,7 +488,7 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							flag = messageBox.getValue().matches(".*[a-zA-Z]+.*");
+							inputContainsLetters = messageBox.getValue().matches(".*[a-zA-Z]+.*");
 							cleanStr = messageBox.getValue().replaceAll(" ", "");
 							cleanStr = cleanStr.replaceAll("\\D+", "");
 
@@ -499,15 +498,11 @@ public class ReaderPart implements VirtualReaderUi {
 						}
 
 						if (cleanStr.length() > 0) {
-							if (flag == false) {
-								if (!PinModelProvider.INSTANCE.checkExistence(cleanStr)) {
+							if (inputContainsLetters == false) {
+								if (!pinModelProvider.checkExistence(cleanStr)) {
 
-									index = viewer.getTable().getSelectionIndex();
-									p = PinModelProvider.INSTANCE.pins.get(index);
-
-									p.setPassword(cleanStr);
-									PinModelProvider.INSTANCE.save(p, "edit", index + "");
-									viewer.refresh();
+									pinModelProvider.save(cleanStr, "edit", index);
+									viewer.setInput(pinModelProvider.getPins());
 									passcontrol = false;
 									break;
 
