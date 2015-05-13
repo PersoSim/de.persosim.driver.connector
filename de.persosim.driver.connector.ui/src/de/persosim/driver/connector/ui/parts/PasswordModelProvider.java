@@ -7,12 +7,12 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
-public class PinModelProvider {
-	private static PinModelProvider pinModelProvider = null;
+public class PasswordModelProvider {
+	private static PasswordModelProvider pinModelProvider = null;
 
 	private static Preferences prefsUi = InstanceScope.INSTANCE
 			.getNode("de.persosim.driver.connector.ui");
-	static Preferences nodePin = prefsUi.node("nodePwd");
+	private static Preferences nodePassword = prefsUi.node("nodePwd");
 
 	private List<String> pins;
 	private boolean sort = true;
@@ -25,15 +25,15 @@ public class PinModelProvider {
 		this.sort = sort;
 	}
 
-	private PinModelProvider() {
+	private PasswordModelProvider() {
 		pins = getPinsFromPrefs();
 	}
 
-	public static PinModelProvider getInstance() {
+	public static PasswordModelProvider getInstance() {
 		if (pinModelProvider != null)
 			return pinModelProvider;
 		else
-			return pinModelProvider = new PinModelProvider();
+			return pinModelProvider = new PasswordModelProvider();
 	}
 
 	public void setPins(List<String> pins) {
@@ -48,8 +48,8 @@ public class PinModelProvider {
 		pins = new ArrayList<String>();
 
 		try {
-			for (int i = 0; i < nodePin.keys().length; i++) {
-				pins.add(nodePin.get(i + "", null));
+			for (int i = 0; i < nodePassword.keys().length; i++) {
+				pins.add(nodePassword.get(i + "", null));
 			}
 		} catch (BackingStoreException e) {
 			e.printStackTrace();
@@ -68,7 +68,7 @@ public class PinModelProvider {
 			String pin = pins.get(i);
 
 			if (userInput.equalsIgnoreCase(pin)) {
-				ReaderPart.columnPin.setEditingSupport(null);
+				ReaderPart.columnPassword.setEditingSupport(null);
 
 				found = true;
 				break;
@@ -84,10 +84,10 @@ public class PinModelProvider {
 		if (type.equals("save")) {
 			if (!checkExistence(userPin)) {
 				pins.add(userPin);
-				nodePin.put(Integer.toString(pins.size() - 1), userPin);
+				nodePassword.put(Integer.toString(pins.size() - 1), userPin);
 			}
 		} else if (type.equals("edit")) {
-			nodePin.put(index + "", userInput);
+			nodePassword.put(index + "", userInput);
 			pins.remove(index);
 			pins.add(index, userInput);
 
@@ -104,15 +104,15 @@ public class PinModelProvider {
 	public void deletePinsFromPrefs(int index) {
 
 		try {
-			nodePin.clear();
-			nodePin.flush();
+			nodePassword.clear();
+			nodePassword.flush();
 
 		} catch (BackingStoreException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		for (int i = 0; i < pins.size(); i++) {
-			nodePin.put(Integer.toString(i), pins.get(i));
+			nodePassword.put(Integer.toString(i), pins.get(i));
 			try {
 				prefsUi.flush();
 			} catch (BackingStoreException e) {

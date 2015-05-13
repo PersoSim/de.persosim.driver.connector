@@ -61,8 +61,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 	public static final boolean ENABLE = true;
 	public static final boolean DISABLE = false;
-	public static boolean AUTOLOGIN = false;
-	public static byte[] autologinpassword = null;
+	public static boolean autologin = false;
 
 	public static final int KEYS_ALL_PINSAVER = -4;
 	public static final int KEYS_ALL_CONTROL = -3;
@@ -76,14 +75,14 @@ public class ReaderPart implements VirtualReaderUi {
 	private Button[] keysNumeric;
 	private Button[] keysControl;
 	private TableViewer viewer;
-	private Table tbl;
-	private Button checkAL;
+	private Table tablePwdManagement;
+	private Button checkAutoLogin;
 	private IStructuredSelection selectedRow;
 	private int selectedIndex = -1;
 
 	
 
-	public static TableViewerColumn columnPin;
+	public static TableViewerColumn columnPassword;
 	private List<String> pressedKeys = new ArrayList<>();
 	private NativeDriverConnector connector;
 
@@ -93,7 +92,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private ReaderType type = ReaderType.NONE;
 
-	private PinModelProvider pinModelProvider = PinModelProvider.getInstance();
+	private PasswordModelProvider passwordModelProvider = PasswordModelProvider.getInstance();
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
@@ -229,18 +228,18 @@ public class ReaderPart implements VirtualReaderUi {
 		button = createButton(leftControlComposite, "", null, 150, 100);
 		button.setEnabled(DISABLE);
 		
-		checkAL = new Button(tableControlComposite, SWT.CHECK);
-		checkAL.setText("AutoLogin "+ "                       ");
+		checkAutoLogin = new Button(tableControlComposite, SWT.CHECK);
+		checkAutoLogin.setText("AutoLogin "+ "                       ");
 
-		checkAL.setEnabled(false);
+		checkAutoLogin.setEnabled(false);
 
 		// define the TableViewer
 		viewer = new TableViewer(rightControlComposite, SWT.H_SCROLL
 				| SWT.V_SCROLL | SWT.BORDER);
 
-		tbl = viewer.getTable();
-		tbl.setHeaderVisible(true);
-		tbl.setLinesVisible(true);
+		tablePwdManagement = viewer.getTable();
+		tablePwdManagement.setHeaderVisible(true);
+		tablePwdManagement.setLinesVisible(true);
 
 		
 		SelectionListener columnPinHeaderListener = new SelectionListener() {
@@ -248,12 +247,12 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				List<String> sortedPins = pinModelProvider.getPins();
-				sortedPins.sort(new PinComperator(pinModelProvider.getSort()));
-				if (pinModelProvider.getSort()){
-					pinModelProvider.setSort(false);
+				List<String> sortedPins = passwordModelProvider.getPins();
+				sortedPins.sort(new PasswordComparator(passwordModelProvider.getSort()));
+				if (passwordModelProvider.getSort()){
+					passwordModelProvider.setSort(false);
 				} else {
-					pinModelProvider.setSort(true);
+					passwordModelProvider.setSort(true);
 				}
 				viewer.setInput(sortedPins);
 
@@ -266,14 +265,14 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		
 
-		columnPin = new TableViewerColumn(viewer, SWT.NONE);
-		columnPin.getColumn().setWidth(155);
-		columnPin.getColumn().setText("Password Management");
-		columnPin.getColumn().setResizable(false);
-		columnPin.getColumn().addSelectionListener(columnPinHeaderListener);
+		columnPassword = new TableViewerColumn(viewer, SWT.NONE);
+		columnPassword.getColumn().setWidth(155);
+		columnPassword.getColumn().setText("Password Management");
+		columnPassword.getColumn().setResizable(false);
+		columnPassword.getColumn().addSelectionListener(columnPinHeaderListener);
 		
 
-		columnPin.setLabelProvider(new ColumnLabelProvider() {
+		columnPassword.setLabelProvider(new ColumnLabelProvider() {
 		      @Override
 		      public String getText(Object element) {
 		        
@@ -283,7 +282,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(pinModelProvider.getPins());
+		viewer.setInput(passwordModelProvider.getPins());
 		final Menu popupTable = new Menu(viewer.getTable());
 		
 		
@@ -348,11 +347,11 @@ public class ReaderPart implements VirtualReaderUi {
 
 							if (inputContainsLetters == false) {
 
-								if (!pinModelProvider.checkExistence(cleanStr)) {
+								if (!passwordModelProvider.checkExistence(cleanStr)) {
 
-									pinModelProvider.save(cleanStr, "save", -1);
-									viewer.setInput(pinModelProvider.getPins());
-									int temp = pinModelProvider.getPins().size() - 1;
+									passwordModelProvider.save(cleanStr, "save", -1);
+									viewer.setInput(passwordModelProvider.getPins());
+									int temp = passwordModelProvider.getPins().size() - 1;
 									viewer.setSelection(new StructuredSelection(viewer.getElementAt(temp)), true);
 
 									passcontrol = false;
@@ -411,17 +410,17 @@ public class ReaderPart implements VirtualReaderUi {
 				int index = viewer.getTable().getSelectionIndex();
 				
 				
-				List<String> pinList = pinModelProvider.getPins();
+				List<String> pinList = passwordModelProvider.getPins();
 				pinList.remove(index);
-				pinModelProvider.setPins(pinList);
-				pinModelProvider.deletePinsFromPrefs(index);
-				viewer.setInput(pinModelProvider.getPins());
+				passwordModelProvider.setPins(pinList);
+				passwordModelProvider.deletePinsFromPrefs(index);
+				viewer.setInput(passwordModelProvider.getPins());
 				viewer.refresh();
 				
-				int listempty = pinModelProvider.getPins().size();
+				int listempty = passwordModelProvider.getPins().size();
 				if(listempty == 0)
 				{
-					checkAL.setEnabled(false);
+					checkAutoLogin.setEnabled(false);
 				}
 				removeTableItem.setEnabled(false);
 				editTableItem.setEnabled(false);
@@ -473,7 +472,7 @@ public class ReaderPart implements VirtualReaderUi {
 			public void widgetSelected(SelectionEvent e) {
 
 				int index = viewer.getTable().getSelectionIndex();
-				String p =  pinModelProvider.getPins().get(index);
+				String p =  passwordModelProvider.getPins().get(index);
 				boolean passcontrol = true;
 				boolean inputContainsLetters = false;
 
@@ -499,10 +498,10 @@ public class ReaderPart implements VirtualReaderUi {
 
 						if (cleanStr.length() > 0) {
 							if (inputContainsLetters == false) {
-								if (!pinModelProvider.checkExistence(cleanStr)) {
+								if (!passwordModelProvider.checkExistence(cleanStr)) {
 
-									pinModelProvider.save(cleanStr, "edit", index);
-									viewer.setInput(pinModelProvider.getPins());
+									passwordModelProvider.save(cleanStr, "edit", index);
+									viewer.setInput(passwordModelProvider.getPins());
 									passcontrol = false;
 									break;
 
@@ -564,7 +563,7 @@ public class ReaderPart implements VirtualReaderUi {
 					editTableItem.setEnabled(true);
 				}
 
-				checkAL.setEnabled(true);
+				checkAutoLogin.setEnabled(true);
 
 			}
 
@@ -574,7 +573,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 		
-		tbl.addSelectionListener(oneClickListener);
+		tablePwdManagement.addSelectionListener(oneClickListener);
 		
 		/**
 		 * This is the listener for the AutoLogin function. When checked, the
@@ -590,12 +589,12 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				checkAL.setText("AutoLogin: " + viewer.getSelection().toString());
+				checkAutoLogin.setText("AutoLogin: " + viewer.getSelection().toString());
 
-				if (checkAL.getSelection()) {
+				if (checkAutoLogin.getSelection()) {
 
-					tbl.setEnabled(false);
-					AUTOLOGIN = true;
+					tablePwdManagement.setEnabled(false);
+					autologin = true;
 					pressedKeys.clear();
 					char[] entries = viewer.getSelection().toString().replaceAll("\\D+", "").toCharArray();
 					for (int i = 0; i < entries.length; i++) {
@@ -610,10 +609,10 @@ public class ReaderPart implements VirtualReaderUi {
 
 				else {
 
-					tbl.setEnabled(true);
-					AUTOLOGIN = false;
+					tablePwdManagement.setEnabled(true);
+					autologin = false;
 					txtOutput.setText("");
-					checkAL.setText("AutoLogin");
+					checkAutoLogin.setText("AutoLogin");
 				}
 
 			}
@@ -625,11 +624,11 @@ public class ReaderPart implements VirtualReaderUi {
 
 		};
 
-		checkAL.addSelectionListener(checkListener);
+		checkAutoLogin.addSelectionListener(checkListener);
 		
 		
-		tbl.setVisible(true);
-		checkAL.setVisible(true);
+		tablePwdManagement.setVisible(true);
+		checkAutoLogin.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
 		parent.layout();
 		parent.redraw();
@@ -877,8 +876,9 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	@Override
+	//TODO must be renamed in getPassword, but then all classes which implement the interface must also be adapted.
 	public byte[] getPin() throws IOException {
-		if (AUTOLOGIN == false) {
+		if (autologin == false) {
 			if (type.equals(ReaderType.STANDARD)) {
 				
 					setEnabledKeySetController(KEYS_ALL, true);
@@ -1003,7 +1003,7 @@ public class ReaderPart implements VirtualReaderUi {
 			switch (readerType) {
 			case BASIC:
 				createBasicReader(root);
-				AUTOLOGIN = false;
+				autologin = false;
 				
 				break;
 			case STANDARD:
@@ -1013,7 +1013,7 @@ public class ReaderPart implements VirtualReaderUi {
 				viewer.getTable().setSelection(selectedIndex);
 				if(selectedIndex != -1)
 				{
-					checkAL.setEnabled(true);
+					checkAutoLogin.setEnabled(true);
 				}
 				break;
 				

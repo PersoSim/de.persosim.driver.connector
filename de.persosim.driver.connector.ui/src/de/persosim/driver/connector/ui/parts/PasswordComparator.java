@@ -2,10 +2,11 @@ package de.persosim.driver.connector.ui.parts;
 
 import java.util.Comparator;
 
-public class PinComperator implements Comparator<String> {
+
+public class PasswordComparator implements Comparator<String> {
 	private boolean sort;
 
-	public PinComperator(boolean sort) {
+	public PasswordComparator(boolean sort) {
 		this.sort = sort;
 	}
 
