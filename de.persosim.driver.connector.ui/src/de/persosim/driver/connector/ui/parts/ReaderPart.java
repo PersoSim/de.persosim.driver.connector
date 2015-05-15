@@ -245,7 +245,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		columnPassword = new TableViewerColumn(viewer, SWT.NONE);
 		columnPassword.getColumn().setWidth(155);
-		columnPassword.getColumn().setText("Password Management");
+		columnPassword.getColumn().setText("Passwords");
 		columnPassword.getColumn().setResizable(false);
 		
 		
