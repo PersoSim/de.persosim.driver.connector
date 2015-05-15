@@ -23,6 +23,7 @@ public class StandardReaderHandler {
 		MPart readerPart = partService
 				.findPart("de.persosim.driver.connector.ui.parts.reader");
 
+		
 		if (readerPart.getObject() instanceof ReaderPart) {
 
 			((ReaderPart) readerPart.getObject()).switchToReaderType(ReaderType.STANDARD);
