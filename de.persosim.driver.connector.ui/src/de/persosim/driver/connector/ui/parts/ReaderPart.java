@@ -316,10 +316,9 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							inputContainsLetters = messageBox.getValue().matches(".*[a-zA-Z]+.*");
-							inputvalue = messageBox.getValue();
-							cleanStr = messageBox.getValue().replaceAll(" ", "");
-							cleanStr = cleanStr.replaceAll("\\D+", "");
+							inputContainsLetters = messageBox.getValue().matches(".*\\D.*");
+							cleanStr = messageBox.getValue();
+							
 
 						} else {
 							cleanStr = "";
@@ -353,14 +352,14 @@ public class ReaderPart implements VirtualReaderUi {
 							} else {
 
 								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-								"Warning!. Your input includes letters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+								"Warning your input contains invalid characters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 								dialog.open();
 
 							}
 						} else {
 
 							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"The passoword length is not valid!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+							"The passoword length is not valid!. The maximum length is 10", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 
 						}
@@ -473,9 +472,8 @@ public class ReaderPart implements VirtualReaderUi {
 						String cleanStr;
 
 						if (messageBox.getValue() != null) {
-							inputContainsLetters = messageBox.getValue().matches(".*[a-zA-Z]+.*");
+							inputContainsLetters = messageBox.getValue().matches(".*\\D.*");
 							cleanStr = messageBox.getValue().replaceAll(" ", "");
-							cleanStr = cleanStr.replaceAll("\\D+", "");
 
 						} else {
 							cleanStr = "";
@@ -504,14 +502,14 @@ public class ReaderPart implements VirtualReaderUi {
 							} else {
 
 								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-								"Warning!. Your input includes letters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+								"Warning your input is invalid.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 								dialog.open();
 							}
 
 						} else {
 
 							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"The passoword length is not valid!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+							"The passoword length is not valid!. The maximum length is 10", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 						}
 
@@ -529,6 +527,8 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		
 		editTableItem.addSelectionListener(editPasswordListener);
+		
+		
 		
 		/**
 		 * This is the listener for the single click in the list. The listener
@@ -853,6 +853,11 @@ public class ReaderPart implements VirtualReaderUi {
 	private void setButton(String value) {
 		pressedKeys.add(value);
 		notifyIfReady();
+	}
+	
+	public void CheckInput(String password)
+	{
+		
 	}
 
 	private void notifyIfReady() {
