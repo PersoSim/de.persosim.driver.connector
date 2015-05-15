@@ -346,7 +346,7 @@ public class ReaderPart implements VirtualReaderUi {
 								} else {
 
 									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-									"This Password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+									"This password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 									dialog.open();
 
 								}
@@ -360,7 +360,7 @@ public class ReaderPart implements VirtualReaderUi {
 						} else {
 
 							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"Please enter a valid password!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+							"The passoword length is not valid!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 
 						}
@@ -490,14 +490,15 @@ public class ReaderPart implements VirtualReaderUi {
 									Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
 									passwordModelProvider.deletePinsFromPrefs();
 									viewer.setInput(passwordModelProvider.getPins());
-									//int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
+									int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
+									viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
 									passcontrol = false;
 									break;
 
 								} else {
 
 									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-									"This Password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+									"This password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 									dialog.open();
 								}
 							} else {
@@ -510,7 +511,7 @@ public class ReaderPart implements VirtualReaderUi {
 						} else {
 
 							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"Please enter a valid password!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+							"The passoword length is not valid!.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
 							dialog.open();
 						}
 
