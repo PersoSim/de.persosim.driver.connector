@@ -54,8 +54,18 @@ public class PasswordModelProvider {
 		} catch (BackingStoreException e) {
 			e.printStackTrace();
 		}
-
+		
 		return pins;
+	}
+	
+	public void setPinsToPrefs(List<String> pins) {
+		deletePinsFromPrefs();
+		for (int i = 0; i < pins.size(); i++) {
+			nodePassword.put(i+"", pins.get(i));
+		}
+	
+
+
 	}
 
 	public boolean checkExistence(String userInput) {
@@ -96,19 +106,17 @@ public class PasswordModelProvider {
 		try {
 			prefsUi.flush();
 		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void deletePinsFromPrefs(int index) {
+	public void deletePinsFromPrefs() {
 
 		try {
 			nodePassword.clear();
 			nodePassword.flush();
 
 		} catch (BackingStoreException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		for (int i = 0; i < pins.size(); i++) {
@@ -116,7 +124,6 @@ public class PasswordModelProvider {
 			try {
 				prefsUi.flush();
 			} catch (BackingStoreException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

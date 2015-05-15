@@ -3,6 +3,7 @@ package de.persosim.driver.connector.ui.parts;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -241,35 +242,12 @@ public class ReaderPart implements VirtualReaderUi {
 		tablePwdManagement.setHeaderVisible(true);
 		tablePwdManagement.setLinesVisible(true);
 
-		
-		SelectionListener columnPinHeaderListener = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				List<String> sortedPins = passwordModelProvider.getPins();
-				sortedPins.sort(new PasswordComparator(passwordModelProvider.getSort()));
-				if (passwordModelProvider.getSort()){
-					passwordModelProvider.setSort(false);
-				} else {
-					passwordModelProvider.setSort(true);
-				}
-				viewer.setInput(sortedPins);
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-		};
-		
 
 		columnPassword = new TableViewerColumn(viewer, SWT.NONE);
 		columnPassword.getColumn().setWidth(155);
 		columnPassword.getColumn().setText("Password Management");
 		columnPassword.getColumn().setResizable(false);
-		columnPassword.getColumn().addSelectionListener(columnPinHeaderListener);
+		
 		
 
 		columnPassword.setLabelProvider(new ColumnLabelProvider() {
@@ -282,6 +260,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 
 		viewer.setContentProvider(new ArrayContentProvider());
+		
 		viewer.setInput(passwordModelProvider.getPins());
 		final Menu popupTable = new Menu(viewer.getTable());
 		
@@ -306,6 +285,11 @@ public class ReaderPart implements VirtualReaderUi {
 		removeTableItem.setText("Remove Password");
 		removeTableItem.setEnabled(false);
 		
+		
+		
+		
+		
+		
 		/**
 		 * This is the listener for "New Password" in the context menu of the
 		 * list. This method created a input dialog box, where u can enter the
@@ -314,7 +298,7 @@ public class ReaderPart implements VirtualReaderUi {
 		 */
 
 	       
-		SelectionListener addNewPinListener = new SelectionListener() {
+		SelectionListener addNewPasswordListener = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -343,16 +327,18 @@ public class ReaderPart implements VirtualReaderUi {
 
 						}
 
-						if (cleanStr.length() > 0) {
+						if (cleanStr.length() > 0 && cleanStr.length() < 11) {
 
 							if (inputContainsLetters == false) {
 
 								if (!passwordModelProvider.checkExistence(cleanStr)) {
 
 									passwordModelProvider.save(cleanStr, "save", -1);
+									Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
+									passwordModelProvider.deletePinsFromPrefs();
 									viewer.setInput(passwordModelProvider.getPins());
-									int temp = passwordModelProvider.getPins().size() - 1;
-									viewer.setSelection(new StructuredSelection(viewer.getElementAt(temp)), true);
+									int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
+									viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
 
 									passcontrol = false;
 									break;
@@ -392,7 +378,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 		
-		addTableItem.addSelectionListener(addNewPinListener);
+		addTableItem.addSelectionListener(addNewPasswordListener);
 		
 		
 		
@@ -401,7 +387,7 @@ public class ReaderPart implements VirtualReaderUi {
 		 * listener removes the Password from the list and preferences.
 		 */
 		
-		SelectionListener removePinListener = new SelectionListener() {
+		SelectionListener removePasswordListener = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -413,7 +399,7 @@ public class ReaderPart implements VirtualReaderUi {
 				List<String> pinList = passwordModelProvider.getPins();
 				pinList.remove(index);
 				passwordModelProvider.setPins(pinList);
-				passwordModelProvider.deletePinsFromPrefs(index);
+				passwordModelProvider.deletePinsFromPrefs();
 				viewer.setInput(passwordModelProvider.getPins());
 				viewer.refresh();
 				
@@ -432,7 +418,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 		
-		removeTableItem.addSelectionListener(removePinListener);
+		removeTableItem.addSelectionListener(removePasswordListener);
 		
 		/**
 		 * This is the listener for the double click in the list. This method
@@ -466,7 +452,7 @@ public class ReaderPart implements VirtualReaderUi {
 		 * password will be saved in the list and in preferences.
 		 */
 		
-		SelectionListener editPinListener = new SelectionListener() {
+		SelectionListener editPasswordListener = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -496,12 +482,15 @@ public class ReaderPart implements VirtualReaderUi {
 							break;
 						}
 
-						if (cleanStr.length() > 0) {
+						if (cleanStr.length() > 0 && cleanStr.length() < 11) {
 							if (inputContainsLetters == false) {
 								if (!passwordModelProvider.checkExistence(cleanStr)) {
 
 									passwordModelProvider.save(cleanStr, "edit", index);
+									Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
+									passwordModelProvider.deletePinsFromPrefs();
 									viewer.setInput(passwordModelProvider.getPins());
+									//int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
 									passcontrol = false;
 									break;
 
@@ -538,7 +527,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 		
-		editTableItem.addSelectionListener(editPinListener);
+		editTableItem.addSelectionListener(editPasswordListener);
 		
 		/**
 		 * This is the listener for the single click in the list. The listener
@@ -876,7 +865,8 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	@Override
-	//TODO must be renamed in getPassword, but then all classes which implement the interface must also be adapted.
+	//TODO the method should be renamed to getPassword(), but first its needed to check to which classes 
+	//the method relies and in which other classes the method is beeing used.
 	public byte[] getPin() throws IOException {
 		if (autologin == false) {
 			if (type.equals(ReaderType.STANDARD)) {
