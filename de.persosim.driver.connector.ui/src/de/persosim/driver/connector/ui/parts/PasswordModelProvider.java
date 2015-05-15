@@ -1,11 +1,22 @@
 package de.persosim.driver.connector.ui.parts;
 
+import static de.persosim.simulator.utils.PersoSimLogger.ERROR;
+import static de.persosim.simulator.utils.PersoSimLogger.log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+
+
+/**
+ * The PasswordModelProvider is responsible for dealing with the passwords in
+ * the list. This class manages the passwords in the list and in the
+ * preferences. This includes loading the list from the preferences and deleting
+ * the files from preferences
+ */
 
 public class PasswordModelProvider {
 	private static PasswordModelProvider pinModelProvider = null;
@@ -106,6 +117,7 @@ public class PasswordModelProvider {
 		try {
 			prefsUi.flush();
 		} catch (BackingStoreException e) {
+			log(getClass(), "could not save the password in the preferences file", ERROR);
 			e.printStackTrace();
 		}
 	}
@@ -117,6 +129,7 @@ public class PasswordModelProvider {
 			nodePassword.flush();
 
 		} catch (BackingStoreException e1) {
+			log(getClass(), "could not save the password in the preferences file", ERROR);
 			e1.printStackTrace();
 		}
 		for (int i = 0; i < pins.size(); i++) {
@@ -124,6 +137,7 @@ public class PasswordModelProvider {
 			try {
 				prefsUi.flush();
 			} catch (BackingStoreException e) {
+				log(getClass(), "could not save the password in the preferences file", ERROR);
 				e.printStackTrace();
 			}
 
