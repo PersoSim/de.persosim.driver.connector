@@ -303,72 +303,19 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				String inputvalue = "";
-				boolean passcontrol = true;
-				boolean inputContainsLetters = false;
+				String newPassword = querryUserForNewPassword(null);
+				
+				if(newPassword != null){
+					//input operation has been canceled by user, nothing to do
+					passwordModelProvider.save(newPassword, "save", -1);
+					Collections.sort(passwordModelProvider.getPins(),new PasswordComparator());
+					passwordModelProvider.deletePinsFromPrefs();
+					viewer.setInput(passwordModelProvider.getPins());
+					int selectionIndex = passwordModelProvider.getPins().lastIndexOf(newPassword);
+					viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
+				}
 
-				do {
-					InputDialog messageBox = new InputDialog(root.getShell(),
-							"Password", "Enter your Password", inputvalue, null);
-
-					if (messageBox.open() == org.eclipse.jface.window.Window.OK) {
-
-						String cleanStr;
-
-						if (messageBox.getValue() != null) {
-							inputContainsLetters = messageBox.getValue().matches(".*\\D.*");
-							cleanStr = messageBox.getValue();
-							
-
-						} else {
-							cleanStr = "";
-							break;
-
-						}
-
-						if (cleanStr.length() > 0 && cleanStr.length() < 11) {
-
-							if (inputContainsLetters == false) {
-
-								if (!passwordModelProvider.checkExistence(cleanStr)) {
-
-									passwordModelProvider.save(cleanStr, "save", -1);
-									Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
-									passwordModelProvider.deletePinsFromPrefs();
-									viewer.setInput(passwordModelProvider.getPins());
-									int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
-									viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
-
-									passcontrol = false;
-									break;
-
-								} else {
-
-									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-									"This password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-									dialog.open();
-
-								}
-							} else {
-
-								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-								"Warning your input contains invalid characters.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-								dialog.open();
-
-							}
-						} else {
-
-							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"The passoword length is not valid!. The maximum length is 10", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-							dialog.open();
-
-						}
-
-					} else {
-						break;
-					}
-
-				} while (passcontrol == true);
+									
 			}
 
 			@Override
@@ -458,66 +405,19 @@ public class ReaderPart implements VirtualReaderUi {
 
 				int index = viewer.getTable().getSelectionIndex();
 				String p =  passwordModelProvider.getPins().get(index);
-				boolean passcontrol = true;
-				boolean inputContainsLetters = false;
+				String newPassword = querryUserForNewPassword(p);
+				
 
-				do {
-
-					InputDialog messageBox = new InputDialog(root.getShell(),
-							"Password", "Enter your Password", p,
-							null);
-
-					if (messageBox.open() == org.eclipse.jface.window.Window.OK) {
-
-						String cleanStr;
-
-						if (messageBox.getValue() != null) {
-							inputContainsLetters = messageBox.getValue().matches(".*\\D.*");
-							cleanStr = messageBox.getValue().replaceAll(" ", "");
-
-						} else {
-							cleanStr = "";
-							break;
-						}
-
-						if (cleanStr.length() > 0 && cleanStr.length() < 11) {
-							if (inputContainsLetters == false) {
-								if (!passwordModelProvider.checkExistence(cleanStr)) {
-
-									passwordModelProvider.save(cleanStr, "edit", index);
-									Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
-									passwordModelProvider.deletePinsFromPrefs();
-									viewer.setInput(passwordModelProvider.getPins());
-									int selectionIndex = passwordModelProvider.getPins().lastIndexOf(cleanStr);
-									viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
-									passcontrol = false;
-									break;
-
-								} else {
-
-									MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-									"This password is already in the list.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-									dialog.open();
-								}
-							} else {
-
-								MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-								"Warning your input is invalid.", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-								dialog.open();
-							}
-
-						} else {
-
-							MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
-							"The passoword length is not valid!. The maximum length is 10", MessageDialog.INFORMATION, new String[] { "OK" }, 0);
-							dialog.open();
-						}
-
-					} else {
-						break;
-					}
-
-				} while (passcontrol == true);
+				if(newPassword != null){
+					//input operation has been canceled by user, nothing to do
+					passwordModelProvider.save(newPassword, "edit", index);
+					Collections.sort(passwordModelProvider.getPins(), new PasswordComparator());
+					passwordModelProvider.deletePinsFromPrefs();
+					viewer.setInput(passwordModelProvider.getPins());
+					int selectionIndex = passwordModelProvider.getPins().lastIndexOf(newPassword);
+					viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
+				}
+									
 			}
 
 			@Override
@@ -728,6 +628,82 @@ public class ReaderPart implements VirtualReaderUi {
 
 		return button;
 	}
+	
+	/**
+	 * Queries the user for a password (either to modify an existing on or to
+	 * add a anew one). If the user is intended to modify an existing password
+	 * the old value is provided in the parameter to be shown to user.
+	 * 
+	 * @param previousValue
+	 * @return new password or null if user canceled the operation
+	 */
+	public String querryUserForNewPassword(String previousValue)
+	{
+		
+		String retVal = null;
+		
+		do {
+			// query user for password
+			InputDialog messageBox = new InputDialog(root.getShell(),
+					"Password", "Enter your Password", previousValue, null);
+
+			if (messageBox.open() != org.eclipse.jface.window.Window.OK) {
+				// user aborted
+				break;
+			}
+
+			// blank characters are beeing removed
+			String currentValue = messageBox.getValue().replaceAll(" ", "");
+
+
+			// null check
+			if (currentValue == null) {
+				MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null, 
+						"Warning! Input invalid.",
+						MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+				dialog.open();
+				continue;
+			}
+
+			// check that new value is a number
+			if (currentValue.matches(".*\\D.*")) {
+				MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+						"Warning your input contains invalid characters.",
+						MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+				dialog.open();
+				continue;
+
+			}
+
+			// check length of new value
+			if (currentValue.length() < 1 || currentValue.length() > 11) {
+				MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+						"The passoword length is not valid!. The maximum length is 10",
+						MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+				dialog.open();
+				continue;
+			}
+
+			// check if entered password already in the list
+			if (passwordModelProvider.Contains(currentValue)) {
+				MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
+						"This password is already in the list.",
+						MessageDialog.INFORMATION, new String[] { "OK" }, 0);
+				dialog.open();
+
+				continue;
+			}
+
+			retVal = currentValue;
+
+		} while (retVal == null);
+		
+		return retVal;
+		
+	}
+	
+		
+	
 
 	/**
 	 * This method returns the Correction button. It is used to clear the
@@ -855,10 +831,7 @@ public class ReaderPart implements VirtualReaderUi {
 		notifyIfReady();
 	}
 	
-	public void CheckInput(String password)
-	{
-		
-	}
+	
 
 	private void notifyIfReady() {
 		synchronized (pressedKeys) {
