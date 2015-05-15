@@ -79,7 +79,7 @@ public class PasswordModelProvider {
 
 	}
 
-	public boolean Contains(String userInput) {
+	public boolean contains(String userInput) {
 
 		boolean found = false;
 		int numberOfPins = pins.size();
@@ -103,7 +103,7 @@ public class PasswordModelProvider {
 		String userInput = userPin;
 
 		if (type.equals("save")) {
-			if (!Contains(userPin)) {
+			if (!contains(userPin)) {
 				pins.add(userPin);
 				nodePassword.put(Integer.toString(pins.size() - 1), userPin);
 			}
