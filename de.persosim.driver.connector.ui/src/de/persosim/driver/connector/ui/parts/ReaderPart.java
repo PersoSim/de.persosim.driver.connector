@@ -685,7 +685,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 
 			// check if entered password already in the list
-			if (passwordModelProvider.Contains(currentValue)) {
+			if (passwordModelProvider.contains(currentValue)) {
 				MessageDialog dialog = new MessageDialog(root.getShell(), "Warnung", null,
 						"This password is already in the list.",
 						MessageDialog.INFORMATION, new String[] { "OK" }, 0);
