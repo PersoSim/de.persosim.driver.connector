@@ -173,7 +173,9 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	}
 
 	private void closeSimSocket() throws IOException {
-		simSocket.close();
+		if (simSocket != null){
+			simSocket.close();	
+		}
 		cachedAtr = null;
 	}
 
