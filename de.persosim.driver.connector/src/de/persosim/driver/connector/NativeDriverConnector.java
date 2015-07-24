@@ -297,8 +297,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				result = Activator.getSim().cardPowerDown();
 				
 				if (Arrays.equals(result,
-						Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))
-						&& Activator.getSim().stopSimulator()) {
+						Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
 					return new SimplePcscCallResult(IFD_SUCCESS);
 				}
 				return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
@@ -308,7 +307,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 			if (IFD_POWER_UP.equals(action)) {
 				if (Activator.getSim().isRunning())
 					cachedAtr = Activator.getSim().cardPowerUp();
-				
+				else 
+					PersoSimLogger.log(getClass(), "The simulator is not running, card was not powered up", PersoSimLogger.WARN);
 			} else if (IFD_RESET.equals(
 					action)) {
 				
