@@ -1,7 +1,6 @@
 package de.persosim.driver.connector;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -48,7 +47,6 @@ public class Activator implements BundleActivator {
 			}
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
