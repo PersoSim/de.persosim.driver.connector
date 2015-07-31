@@ -1,7 +1,5 @@
 package de.persosim.driver.connector;
 
-import java.io.IOException;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -17,7 +15,6 @@ public class Activator implements BundleActivator {
 
 	private static BundleContext context;
 	private static ServiceTracker<Simulator, Simulator> simulatorServiceTracker;
-	private static NativeDriverConnector connector;
 
 	static BundleContext getContext() {
 		return context;
@@ -40,16 +37,7 @@ public class Activator implements BundleActivator {
 	 */
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
-		try {
-			if (connector == null) {
-				connector = new NativeDriverConnector("localhost", 5678);
-				connector.connect();
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+
 		Activator.context = bundleContext;
 		
 		simulatorServiceTracker = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
@@ -63,9 +51,6 @@ public class Activator implements BundleActivator {
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
-		if (connector != null) {
-			connector.disconnect();
-		}
 		simulatorServiceTracker.close();
 	}
 
