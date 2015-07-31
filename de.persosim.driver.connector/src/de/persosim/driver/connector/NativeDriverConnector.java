@@ -314,6 +314,11 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 				
 				cachedAtr = Activator.getSim().cardReset();
 			}
+			
+			if (cachedAtr == null) {
+				return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
+			}
+			
 			if (cachedAtr != null && cachedAtr.length <= expectedLength.getAsSignedLong()){
 				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);	
 			}
