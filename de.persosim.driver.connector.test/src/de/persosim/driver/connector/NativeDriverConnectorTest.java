@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
+import mockit.NonStrictExpectations;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.util.tracker.ServiceTracker;
 
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
@@ -25,7 +28,11 @@ import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestApduHandler;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.driver.test.TestSocketSim;
+import de.persosim.simulator.Simulator;
+import de.persosim.simulator.perso.Personalization;
+import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
+import de.persosim.simulator.utils.Utils;
 
 /**
  * This class tests the {@link NativeDriverConnector}.
@@ -36,9 +43,12 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 	private NativeDriverConnector nativeConnector;
 	private TestDriver driver;
+	private final byte [] testAtr = "TESTATR".getBytes();
 	TestSocketSim sim;
 	@Mocked
 	private TestApduHandler handler;
+	
+	private Simulator simulator;
 	
 	//XXX use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
 	
@@ -54,6 +64,76 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		nativeConnector = new NativeDriverConnector(TESTDRIVER_HOST,
 				TESTDRIVER_PORT);
 		nativeConnector.connect();
+		
+		simulator = new Simulator() {
+			
+			@Override
+			public boolean stopSimulator() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public boolean startSimulator() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public boolean restartSimulator() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public byte[] processCommand(byte[] apdu) {
+				// TODO Auto-generated method stub
+				if(Arrays.equals(apdu, HexString.toByteArray("FF01"))) {
+					return testAtr;
+				}
+				
+				if (Arrays.equals(apdu, HexString.toByteArray("FF00"))) {
+					return HexString.toByteArray("9000");
+				}
+				
+				if (Arrays.equals(apdu, HexString.toByteArray("00000000"))) {
+					return "RESPONSE".getBytes();
+				}
+				
+				return null;
+			}
+			
+			@Override
+			public boolean loadPersonalization(Personalization personalization) {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public boolean isRunning() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public byte[] cardReset() {
+				// TODO Auto-generated method stub
+				return testAtr;
+			}
+			
+			@Override
+			public byte[] cardPowerUp() {
+				// TODO Auto-generated method stub
+				return testAtr;
+			}
+			
+			@Override
+			public byte[] cardPowerDown() {
+				// TODO Auto-generated method stub
+				return Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR);
+			}
+			
+		};
 	}
 
 	@After
@@ -111,14 +191,18 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 	
 	@Test
-	public void testPcscTransmitToIcc() throws IOException, InterruptedException{
+	public void testPcscTransmitToIcc(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws IOException, InterruptedException{
 		final byte [] apdu = new byte []{0,0,0,0};
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		//prepare the mock
-		sim.setHandler(handler);
-		new Expectations() {
+//		sim.setHandler(handler);
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF01"));
-				result = "11223344";
+				result = testAtr;
 				handler.processCommand(withEqual(HexString.encode(apdu)));
 				result = HexString.encode("RESPONSE".getBytes());
 			}
@@ -132,11 +216,16 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 	
 	@Test
-	public void testPcscControl() throws IOException, InterruptedException{
+	public void testPcscControl(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws IOException, InterruptedException{
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
+		
 		//prepare the mock
-		sim.setHandler(handler);
-		new Expectations() {
+//		sim.setHandler(handler);
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF01"));
 				result = "11223344";
 			}
@@ -171,12 +260,16 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 
 	@Test
-	public void testPcscPowerIccPowerOn() throws Exception{
+	public void testPcscPowerIccPowerOn(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws Exception{
 		final byte [] testAtr = "TESTATR".getBytes();
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		//prepare the mock
-		sim.setHandler(handler);
-		new Expectations() {
+//		sim.setHandler(handler);
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF01"));
 				result = HexString.encode(testAtr);
 			}
@@ -189,11 +282,15 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 
 	@Test
-	public void testPcscIsIccPresent() throws Exception{
+	public void testPcscIsIccPresent(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws Exception{
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		//prepare the mock
-		sim.setHandler(handler);
-		new Expectations() {
+//		sim.setHandler(handler);
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF90"));
 				result = "9000";
 			}
@@ -206,7 +303,15 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 	
 	@Test
-	public void testPcscPowerIccPowerDownWithoutPowerUp() throws Exception{
+	public void testPcscPowerIccPowerDownWithoutPowerUp(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws Exception {
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
+		
+		new NonStrictExpectations() {
+			{
+				simulatorServiceTracker.getService();
+				result = simulator;
+			}
+		};
 		
 		String result = driver.sendData(new UnsignedInteger(0), NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray());
 		
@@ -215,12 +320,17 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 	
 	@Test
-	public void testPcscPowerIccPowerDown() throws Exception{
-		final byte [] testAtr = "TESTATR".getBytes();
+	public void testPcscPowerIccPowerDown(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws Exception{
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
+		
 		//prepare the mock
 		sim.setHandler(handler);
-		new Expectations() {
+
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF01"));
 				result = HexString.encode(testAtr);
 				handler.processCommand(withPrefix("FF00"));
@@ -237,12 +347,16 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	}
 	
 	@Test
-	public void testPcscPowerIccReset() throws Exception{
+	public void testPcscPowerIccReset(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws Exception{
 		final byte [] testAtr = "TESTATR".getBytes();
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		//prepare the mock
-		sim.setHandler(handler);
-		new Expectations() {
+//		sim.setHandler(handler);
+		new NonStrictExpectations() {
 			{
+				simulatorServiceTracker.getService();
+				result = simulator;
 				handler.processCommand(withPrefix("FF01"));
 				result = HexString.encode(testAtr);
 				handler.processCommand(withPrefix("FFFF"));
@@ -264,7 +378,9 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testListenerProcessingOrder() throws IOException, InterruptedException{
+	public void testListenerProcessingOrder(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws IOException, InterruptedException{
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		
 		nativeConnector.addListener(new PcscListener() {
 			
@@ -295,7 +411,9 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testListenerProcessingOrderEarlyAnswer() throws IOException, InterruptedException{
+	public void testListenerProcessingOrderEarlyAnswer(@Mocked final ServiceTracker<Simulator, Simulator> simulatorServiceTracker) throws IOException, InterruptedException {
+		
+		Deencapsulation.setField(de.persosim.driver.connector.Activator.class, "simulatorServiceTracker", simulatorServiceTracker);
 		
 		nativeConnector.addListener(new PcscListener() {
 			
