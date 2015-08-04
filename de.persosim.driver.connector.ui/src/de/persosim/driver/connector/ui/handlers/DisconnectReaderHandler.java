@@ -22,7 +22,7 @@ public class DisconnectReaderHandler {
 
 			if (readerPart.getObject() instanceof ReaderPart) {
 
-				((ReaderPart) readerPart.getObject()).disconnectReader();
+				((ReaderPart) readerPart.getObject()).resetReader();
 			}
 	}
 }

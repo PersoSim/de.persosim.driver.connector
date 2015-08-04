@@ -18,12 +18,13 @@ public class BasicReaderHandler {
 	@Execute
 	public void execute(Shell shell) {
 			// ID of part as defined in fragment.e4xmi application model
-			MPart readerPart = partService
-					.findPart("de.persosim.driver.connector.ui.parts.reader");
+			MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
 
 			if (readerPart.getObject() instanceof ReaderPart) {
+				ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
 
-				((ReaderPart) readerPart.getObject()).switchToReaderType(ReaderType.BASIC);
+				readerPartObject.switchToReaderType(ReaderType.BASIC);
+				readerPartObject.connectReader();
 			}
 	}
 }
