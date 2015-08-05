@@ -29,6 +29,9 @@ import de.persosim.simulator.utils.Utils;
  * 
  */
 public class NativeDriverConnector implements PcscConstants, PcscListener {
+	
+	public static final String DEFAULT_HOST = "localhost";
+	public static final int DEFAULT_PORT = 5678;
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private List<PcscListener> listeners = new ArrayList<PcscListener>();
@@ -36,8 +39,8 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	private Thread communicationThread;
 	private NativeDriverComm communication;
 	
-	private String nativeDriverHostName;
-	private int nativeDriverPort;
+	private String nativeDriverHostName = null;
+	private int nativeDriverPort = Integer.MIN_VALUE;
 	private byte[] cachedAtr = null;
 	private int timeout = 5000;
 
@@ -50,12 +53,25 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public NativeDriverConnector(String nativeDriverHostName,
-			int nativeDriverPort)
+	public NativeDriverConnector(String nativeDriverHostName, int nativeDriverPort)
 			throws UnknownHostException, IOException {
+		
+		this();
 		this.nativeDriverHostName = nativeDriverHostName;
 		this.nativeDriverPort = nativeDriverPort;
+		
+	}
+	
+	public NativeDriverConnector() {
 		listeners.add(this);
+	}
+	
+	public void connect() throws IOException {
+		if((nativeDriverHostName == null) || (nativeDriverPort < 0)) {
+			connect(DEFAULT_HOST, DEFAULT_PORT);
+		} else{
+			connect(nativeDriverHostName, nativeDriverPort);
+		}
 	}
 
 	/**
@@ -64,9 +80,11 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	public void connect() throws IOException {
-		communication = new NativeDriverComm(nativeDriverHostName, nativeDriverPort,
-				listeners); 
+	public void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException {
+		this.nativeDriverHostName = nativeDriverHostName;
+		this.nativeDriverPort = nativeDriverPort;
+		
+		communication = new NativeDriverComm(this.nativeDriverHostName, this.nativeDriverPort, listeners); 
 		communicationThread = new Thread(communication);
 		communicationThread.start();
 
