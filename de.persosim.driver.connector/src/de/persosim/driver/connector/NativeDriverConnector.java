@@ -15,6 +15,7 @@ import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.pcsc.UiEnabled;
+import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.PersoSimLogger;
 import de.persosim.simulator.utils.Utils;
@@ -28,7 +29,7 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements PcscConstants, PcscListener {
+public class NativeDriverConnector implements PcscConstants, PcscListener, NativeDriverConnectorInterface {
 	
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 5678;
@@ -66,6 +67,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		listeners.add(this);
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#connect()
+	 */
+	@Override
 	public void connect() throws IOException {
 		if((nativeDriverHostName == null) || (nativeDriverPort < 0)) {
 			connect(DEFAULT_HOST, DEFAULT_PORT);
@@ -74,12 +79,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		}
 	}
 
-	/**
-	 * This method connects to the native driver part.
-	 * 
-	 * @throws IOException
-	 * @throws UnknownHostException
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#connect(java.lang.String, int)
 	 */
+	@Override
 	public void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException {
 		this.nativeDriverHostName = nativeDriverHostName;
 		this.nativeDriverPort = nativeDriverPort;
@@ -101,16 +104,18 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#isRunning()
+	 */
+	@Override
 	public boolean isRunning() {
 		return ((communicationThread != null) && communicationThread.isAlive());
 	}
 
-	/**
-	 * This method disconnects from the native driver part.
-	 * 
-	 * @throws IOException
-	 * @throws InterruptedException
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#disconnect()
 	 */
+	@Override
 	public void disconnect() throws IOException, InterruptedException {
 		//close dangling connections if any
 		if (Activator.getSim() != null) {
@@ -143,20 +148,18 @@ public class NativeDriverConnector implements PcscConstants, PcscListener {
 		listeners.remove(listener);
 	}
 
-	/**
-	 * Add an additional user interface.
-	 * 
-	 * @param ui
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#addUi(de.persosim.driver.connector.VirtualReaderUi)
 	 */
+	@Override
 	public void addUi(VirtualReaderUi ui) {
 		this.userInterfaces.add(ui);
 	}
 
-	/**
-	 * Remove a user interface.
-	 * 
-	 * @param ui
+	/* (non-Javadoc)
+	 * @see de.persosim.driver.connector.XEX#removeUi(de.persosim.driver.connector.VirtualReaderUi)
 	 */
+	@Override
 	public void removeUi(VirtualReaderUi ui) {
 		this.userInterfaces.remove(ui);
 	}
