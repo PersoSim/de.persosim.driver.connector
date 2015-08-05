@@ -1,8 +1,6 @@
 package de.persosim.driver.connector.ui.parts;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +8,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -39,8 +35,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.framework.Bundle;
-import org.osgi.util.tracker.ServiceTracker;
 
 import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -50,10 +44,6 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.simulator.Activator;
-import de.persosim.simulator.Simulator;
-import de.persosim.simulator.perso.Personalization;
-import de.persosim.simulator.perso.PersonalizationFactory;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -67,10 +57,6 @@ public class ReaderPart implements VirtualReaderUi {
 	public enum ReaderType {
 		STANDARD, BASIC, NONE;
 	}
-	
-	public static final String DE_PERSOSIM_SIMULATOR_BUNDLE = "de.persosim.simulator";
-	public static final String PERSO_PATH = "personalization/profiles/";
-	public static final String PERSO_FILE = "Profile01.xml"; 
 
 	private static final String FONT_NAME = "Helvetica";
 
@@ -94,8 +80,6 @@ public class ReaderPart implements VirtualReaderUi {
 	private Button checkAutoLogin;
 	private IStructuredSelection selectedRow;
 	private int selectedIndex = -1;
-
-	private ServiceTracker<Simulator, Simulator> serviceTrackerSimulator;
 
 	public static TableViewerColumn columnPassword;
 	private List<String> pressedKeys = new ArrayList<>();
@@ -543,9 +527,6 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		serviceTrackerSimulator = new ServiceTracker<>(Activator.getContext(), Simulator.class.getName(), null);
-		serviceTrackerSimulator.open();
-		
 		createNewReader();
 		
 		switchToReaderType(ReaderType.STANDARD);
@@ -957,28 +938,6 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 	
 	/**
-	 * This method returns a personalization which can be used as default.
-	 * @return a default personalization
-	 * @throws IOException
-	 */
-	private Personalization getDefaultPersonalization() throws IOException {
-		Bundle plugin = Platform.getBundle(DE_PERSOSIM_SIMULATOR_BUNDLE);
-		URL url = plugin.getEntry (PERSO_PATH);
-		URL resolvedUrl;
-		
-		resolvedUrl = FileLocator.resolve(url);
-		
-		File folder = new File(resolvedUrl.getFile());
-		String pathString = folder.getAbsolutePath() + File.separator + PERSO_FILE;
-		
-		System.out.println("Loading default personalization from: " + pathString);
-		
-		Personalization personalization = (Personalization) PersonalizationFactory.unmarshal(pathString);
-		
-		return personalization;
-	}
-	
-	/**
 	 * Switch the parts user interface and behavior to the reader type
 	 * associated with the provided parameter.
 	 * 
@@ -1030,33 +989,12 @@ public class ReaderPart implements VirtualReaderUi {
 	 * Attach reader to simulator, i.e. connect connector
 	 */
 	public void connectReader() {
-		Simulator sim = (Simulator) serviceTrackerSimulator.getService();
-		
-		if(sim == null) {
-			MessageDialog.openError(root.getShell(), "Error", "Simulator service not found");
-			return;
-		} else{
-			//ensure at least a default personalization is loaded before connecting
-			if(!sim.isRunning()) {
-				try {
-					Personalization defaultPersonalization = getDefaultPersonalization(); 
-					sim.loadPersonalization(defaultPersonalization);
-				} catch (IOException e) {
-					e.printStackTrace();
-					
-					MessageDialog.openError(root.getShell(), "Error",
-							"Failed to automatically load default personalization");
-					return;
-				}
-			}
-			
-			try {
-				connector.connect();
-			} catch (IOException e) {
-				resetReader();
-				MessageDialog.openError(root.getShell(), "Error",
-						"Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\".");
-			}
+		try {
+			connector.connect();
+		} catch (IOException e) {
+			resetReader();
+			MessageDialog.openError(root.getShell(), "Error",
+					"Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\".");
 		}
 	}
 	
