@@ -1,9 +1,12 @@
 package de.persosim.driver.connector;
 
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 import de.persosim.simulator.Simulator;
 
 /**
@@ -39,6 +42,10 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 
 		Activator.context = bundleContext;
+		
+		//register service in service registry
+		Hashtable<String, String> props = new Hashtable<String, String>();
+		bundleContext.registerService(NativeDriverConnectorInterface.class, new NativeDriverConnector(), props);
 		
 		simulatorServiceTracker = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
 		simulatorServiceTracker.open();

@@ -11,4 +11,5 @@ Bundle-ActivationPolicy: lazy
 Export-Package: de.persosim.driver.connector,
  de.persosim.driver.connector.exceptions,
  de.persosim.driver.connector.features,
- de.persosim.driver.connector.pcsc
+ de.persosim.driver.connector.pcsc,
+ de.persosim.driver.connector.service
