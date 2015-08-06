@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.ui.parts;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -973,16 +972,8 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createNewReader() {
 		resetReader();
 		
-		try {
-			connector = new NativeDriverConnector("localhost", 5678);
-			connector.addUi(this);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		connector = new NativeDriverConnector();
+		connector.addUi(this);
 	}
 	
 	/**
@@ -990,7 +981,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 */
 	public void connectReader() {
 		try {
-			connector.connect();
+			connector.connect("localhost", 5678);
 		} catch (IOException e) {
 			resetReader();
 			MessageDialog.openError(root.getShell(), "Error",

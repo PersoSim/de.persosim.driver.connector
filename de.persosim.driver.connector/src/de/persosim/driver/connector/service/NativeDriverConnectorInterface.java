@@ -7,8 +7,6 @@ import de.persosim.driver.connector.VirtualReaderUi;
 
 public interface NativeDriverConnectorInterface {
 	
-	void connect() throws IOException;
-
 	/**
 	 * This method connects to the native driver part.
 	 * 

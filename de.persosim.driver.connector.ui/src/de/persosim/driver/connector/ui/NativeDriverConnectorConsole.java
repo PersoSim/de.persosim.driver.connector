@@ -22,15 +22,14 @@ public class NativeDriverConnectorConsole {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		NativeDriverConnector connector = new NativeDriverConnector(
-				"localhost", 5678);
+		NativeDriverConnector connector = new NativeDriverConnector();
 		connector.addUi(new ConsoleUi());
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x42000DB2)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x42000DB3)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x42000DB4)));
 		connector.addListener(new MctUniversal(new UnsignedInteger(0x42000DB5)));
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x42000DCC)));
-		connector.connect();
+		connector.connect("localhost", 5678);
 
 	}
 

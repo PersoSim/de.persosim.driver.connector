@@ -1,7 +1,6 @@
 package de.persosim.driver.connector;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,37 +45,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 	private int timeout = 5000;
 
 	/**
-	 * Create a connector object using the connection data for the native driver
-	 * part and the simulation.
-	 * 
-	 * @param nativeDriverHostName
-	 * @param nativeDriverPort
-	 * @throws UnknownHostException
-	 * @throws IOException
+	 * Create a connector object
 	 */
-	public NativeDriverConnector(String nativeDriverHostName, int nativeDriverPort)
-			throws UnknownHostException, IOException {
-		
-		this();
-		this.nativeDriverHostName = nativeDriverHostName;
-		this.nativeDriverPort = nativeDriverPort;
-		
-	}
-	
 	public NativeDriverConnector() {
 		listeners.add(this);
-	}
-	
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#connect()
-	 */
-	@Override
-	public void connect() throws IOException {
-		if((nativeDriverHostName == null) || (nativeDriverPort < 0)) {
-			connect(DEFAULT_HOST, DEFAULT_PORT);
-		} else{
-			connect(nativeDriverHostName, nativeDriverPort);
-		}
 	}
 
 	/* (non-Javadoc)
