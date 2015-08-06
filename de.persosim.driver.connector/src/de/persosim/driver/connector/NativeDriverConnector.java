@@ -98,11 +98,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 		communicationThread.join();
 	}
 
-	/**
-	 * Add a listener that is to be informed about PCSC calls.
-	 * 
-	 * @param listener
-	 */
+	@Override
 	public void addListener(PcscListener listener) {
 		//add the new listener behind the others but preserve the position of this object
 		listeners.add(listeners.size() - 1, listener);

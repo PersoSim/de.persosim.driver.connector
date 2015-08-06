@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.pcsc.PcscListener;
 
 public interface NativeDriverConnectorInterface {
 	
@@ -38,5 +39,12 @@ public interface NativeDriverConnectorInterface {
 	 * @param ui
 	 */
 	void removeUi(VirtualReaderUi ui);
+	
+	/**
+	 * Add a listener that is to be informed about PCSC calls.
+	 * 
+	 * @param listener
+	 */
+	public void addListener(PcscListener listener);
 	
 }
