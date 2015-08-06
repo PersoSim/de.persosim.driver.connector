@@ -17,7 +17,8 @@ import de.persosim.simulator.Simulator;
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;
-	private static ServiceTracker<Simulator, Simulator> simulatorServiceTracker;
+	private static ServiceTracker<Simulator, Simulator> serviceTrackerSimulator;
+	private static ServiceTracker<NativeDriverConnectorInterface, NativeDriverConnectorInterface> serviceTrackerNativeDriverConnector;
 
 	static BundleContext getContext() {
 		return context;
@@ -27,9 +28,17 @@ public class Activator implements BundleActivator {
 	 * @return the OSGi-provided simulator service or null if it is not available
 	 */
 	public static Simulator getSim() {
-		if (simulatorServiceTracker != null){
+		if (serviceTrackerSimulator != null){
 
-			return simulatorServiceTracker.getService();
+			return serviceTrackerSimulator.getService();
+		}
+		return null;
+	}
+	
+	public static NativeDriverConnectorInterface getConnector() {
+		if (serviceTrackerNativeDriverConnector != null){
+
+			return serviceTrackerNativeDriverConnector.getService();
 		}
 		return null;
 	}
@@ -47,8 +56,11 @@ public class Activator implements BundleActivator {
 		Hashtable<String, String> props = new Hashtable<String, String>();
 		bundleContext.registerService(NativeDriverConnectorInterface.class, new NativeDriverConnector(), props);
 		
-		simulatorServiceTracker = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
-		simulatorServiceTracker.open();
+		serviceTrackerSimulator = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
+		serviceTrackerSimulator.open();
+		
+		serviceTrackerNativeDriverConnector = new ServiceTracker<NativeDriverConnectorInterface, NativeDriverConnectorInterface>(context, NativeDriverConnectorInterface.class.getName(), null);
+		serviceTrackerNativeDriverConnector.open();
 	}
 
 	/*
@@ -58,7 +70,8 @@ public class Activator implements BundleActivator {
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
-		simulatorServiceTracker.close();
+		serviceTrackerSimulator.close();
+		serviceTrackerNativeDriverConnector.close();
 	}
 
 }
