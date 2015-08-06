@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
-import de.persosim.driver.connector.NativeDriverConnector;
+import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.features.MctReaderDirect;
@@ -43,6 +43,7 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
+import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -82,7 +83,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 	public static TableViewerColumn columnPassword;
 	private List<String> pressedKeys = new ArrayList<>();
-	private NativeDriverConnector connector;
+	private NativeDriverConnectorInterface connector;
 
 	private Composite root;
 	private Composite basicReaderControls;
@@ -928,7 +929,7 @@ public class ReaderPart implements VirtualReaderUi {
 		return null;
 	}
 
-	private void addStandardListeners(NativeDriverConnector connector) {
+	private void addStandardListeners(NativeDriverConnectorInterface connector) {
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
@@ -972,7 +973,7 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createNewReader() {
 		resetReader();
 		
-		connector = new NativeDriverConnector();
+		connector = Activator.getConnector();
 		connector.addUi(this);
 	}
 	
