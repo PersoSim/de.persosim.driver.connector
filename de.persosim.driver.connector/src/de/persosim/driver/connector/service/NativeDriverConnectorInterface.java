@@ -47,4 +47,11 @@ public interface NativeDriverConnectorInterface {
 	 */
 	public void addListener(PcscListener listener);
 	
+	/**
+	 * Remove a listener and stop informing it about PCSC calls.
+	 * 
+	 * @param listener
+	 */
+	public void removeListener(PcscListener listener);
+	
 }

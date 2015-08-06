@@ -107,11 +107,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 		}
 	}
 
-	/**
-	 * Remove a listener and stop informing it about PCSC calls.
-	 * 
-	 * @param listener
-	 */
+	@Override
 	public void removeListener(PcscListener listener) {
 		listeners.remove(listener);
 	}
