@@ -24,7 +24,6 @@ public class BasicReaderHandler {
 				ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
 
 				readerPartObject.switchToReaderType(ReaderType.BASIC);
-				readerPartObject.connectReader();
 			}
 	}
 }

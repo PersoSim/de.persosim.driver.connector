@@ -43,6 +43,7 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
+import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 
 /**
@@ -88,6 +89,8 @@ public class ReaderPart implements VirtualReaderUi {
 	private Composite root;
 	private Composite basicReaderControls;
 	private Composite standardReaderControls;
+	
+	private List<PcscListener> listeners = new ArrayList<PcscListener>();
 
 	private ReaderType type = ReaderType.NONE;
 
@@ -99,7 +102,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param parent composite where the reader will be placed
 	 */
 	private void createBasicReader(Composite parent) {
-		disposeReaders();
+		disposeReaderControls();
 
 		basicReaderControls = new Composite(parent, SWT.NONE);
 
@@ -130,7 +133,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param parent composite where the reader will be placed
 	 */
 	private void createStandardReader(Composite parent) {
-		disposeReaders();
+		disposeReaderControls();
 		standardReaderControls = new Composite(parent, SWT.NONE);
 
 		GridData gridData;
@@ -514,7 +517,7 @@ public class ReaderPart implements VirtualReaderUi {
 		parent.redraw();
 	}
 	
-	private void disposeReaders() {
+	private void disposeReaderControls() {
 		if (basicReaderControls != null)
 			basicReaderControls.dispose();
 		if (standardReaderControls != null)
@@ -527,11 +530,9 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		createNewReader();
+		initializeReader();
 		
 		switchToReaderType(ReaderType.STANDARD);
-		
-		connectReader();
 	}
 	
 	
@@ -930,11 +931,23 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	private void addStandardListeners(NativeDriverConnectorInterface connector) {
-		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
-		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
-		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
-		connector.addListener(new MctUniversal(new UnsignedInteger(0x3136D4)));
-		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
+		listeners = new ArrayList<>();
+		
+		PcscListener verifyPinDirect = new VerifyPinDirect(new UnsignedInteger(0x3136C8));
+		PcscListener modifyPinDirect = new ModifyPinDirect(new UnsignedInteger(0x3136CC));
+		PcscListener mctReaderDirect = new MctReaderDirect(new UnsignedInteger(0x3136D0));
+		PcscListener mctUniversal = new MctUniversal(new UnsignedInteger(0x3136D4));
+		PcscListener persoSimPcscProcessor = new PersoSimPcscProcessor(new UnsignedInteger(0x313730));
+		
+		listeners.add(verifyPinDirect);
+		listeners.add(modifyPinDirect);
+		listeners.add(mctReaderDirect);
+		listeners.add(mctUniversal);
+		listeners.add(persoSimPcscProcessor);
+		
+		for(PcscListener pcscListener : listeners) {
+			connector.addListener(pcscListener);
+		}
 	}
 	
 	/**
@@ -970,38 +983,12 @@ public class ReaderPart implements VirtualReaderUi {
 	 * Create a new reader and clean up any remainders of previous readers.
 	 * Reader type still needs to be set before reader can be used.
 	 */
-	public void createNewReader() {
+	public void initializeReader() {
+		connector = Activator.getConnector();
+		
 		resetReader();
 		
-		connector = Activator.getConnector();
 		connector.addUi(this);
-	}
-	
-	/**
-	 * Attach reader to simulator, i.e. connect connector
-	 */
-	public void connectReader() {
-		try {
-			connector.connect("localhost", 5678);
-		} catch (IOException e) {
-			resetReader();
-			MessageDialog.openError(root.getShell(), "Error",
-					"Failed to connect to virtual card reader driver!\nTry to restart driver, then re-connect by selecting\ndesired reader type from menu \"Reader Type\".");
-		}
-	}
-	
-	/**
-	 * Separate reader from simulator, i.e. disconnect connector
-	 */
-	public void disconnectReader() {
-		if ((connector != null) && (connector.isRunning())) {
-			try {
-				connector.disconnect();
-			} catch (IOException | InterruptedException e) {
-				e.printStackTrace();
-				MessageDialog.openError(root.getShell(), "Error", "Failed to disconnect reader");
-			}
-		}
 	}
 	
 	/**
@@ -1010,8 +997,16 @@ public class ReaderPart implements VirtualReaderUi {
 	 * attempting a new connection.
 	 */
 	public void resetReader() {
-		disconnectReader();
-		disposeReaders();
+		disposeReaderControls();
+		connector.removeUi(this);
 		type = ReaderType.NONE;
+		
+		for(PcscListener pcscListener : listeners) {
+			connector.removeListener(pcscListener);
+		}
+		
+		connector.addUi(this);
+		
+		listeners = new ArrayList<>();
 	}
 }
