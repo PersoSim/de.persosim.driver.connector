@@ -88,12 +88,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 	 * @see de.persosim.driver.connector.XEX#disconnect()
 	 */
 	@Override
-	public void disconnect() throws IOException, InterruptedException {
-		//close dangling connections if any
-		if (Activator.getSim() != null) {
-			Activator.getSim().stopSimulator();
-		}
-		
+	public void disconnect() throws IOException, InterruptedException {		
 		communication.disconnect();
 		communicationThread.join();
 	}
