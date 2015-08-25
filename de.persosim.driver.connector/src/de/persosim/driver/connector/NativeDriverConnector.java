@@ -368,7 +368,6 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 		if (Activator.getSim() != null){
 			return new SimplePcscCallResult(IFD_ICC_PRESENT);
 		}
-		PersoSimLogger.log(getClass(), "The simulator service is not availiable");
 		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);
 	}
 
