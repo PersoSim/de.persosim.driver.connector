@@ -2,12 +2,12 @@ package de.persosim.driver.connector;
 
 import java.util.Hashtable;
 
+import org.globaltester.simulator.Simulator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
-import de.persosim.simulator.Simulator;
 
 /**
  * The activator for this bundle.

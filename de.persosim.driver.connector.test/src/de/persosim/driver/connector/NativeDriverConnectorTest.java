@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-
+import org.globaltester.simulator.Simulator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,11 +21,11 @@ import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
-import de.persosim.simulator.Simulator;
-import de.persosim.simulator.perso.Personalization;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 
 /**
  * This class tests the {@link NativeDriverConnector}.
@@ -97,12 +95,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				}
 				
 				return null;
-			}
-			
-			@Override
-			public boolean loadPersonalization(Personalization personalization) {
-				// TODO Auto-generated method stub
-				return true;
 			}
 			
 			@Override
