@@ -530,7 +530,7 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		initializeReader();
+		resetReader();
 		
 		switchToReaderType(ReaderType.STANDARD);
 	}
@@ -957,7 +957,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param readerType the reader type to use
 	 */
 	public void switchToReaderType(ReaderType readerType) {
-		initializeReader();
+		resetReader();
 		
 			switch (readerType) {
 			case BASIC:
@@ -982,21 +982,12 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 	
 	/**
-	 * Create a new reader and clean up any remainders of previous readers.
-	 * Reader type still needs to be set before reader can be used.
-	 */
-	public void initializeReader() {
-		connector = Activator.getConnector();
-		
-		resetReader();
-	}
-	
-	/**
 	 * Reset all reader-related elements to default values and states. Any
 	 * connection to a reader is lost and reader type needs to be set before
 	 * attempting a new connection.
 	 */
 	public void resetReader() {
+		connector = Activator.getConnector();
 		disposeReaderControls();
 		connector.removeUi(this);
 		type = ReaderType.NONE;
