@@ -957,6 +957,8 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param readerType the reader type to use
 	 */
 	public void switchToReaderType(ReaderType readerType) {
+		initializeReader();
+		
 			switch (readerType) {
 			case BASIC:
 				createBasicReader(root);
@@ -987,8 +989,6 @@ public class ReaderPart implements VirtualReaderUi {
 		connector = Activator.getConnector();
 		
 		resetReader();
-		
-		connector.addUi(this);
 	}
 	
 	/**
