@@ -3,18 +3,15 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kZ9_gD9FEeS_D-1xKGHHEA" featurename="commands" parentElementId="de.persosim.rcp.application">
     <elements xsi:type="commands:Command" xmi:id="_g10FYD_LEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.command.basicCommand" commandName="Change to basic reader"/>
     <elements xsi:type="commands:Command" xmi:id="_cO4TEEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.command.standardCommand" commandName="Change to standard reader"/>
-    <elements xsi:type="commands:Command" xmi:id="_cxx9QEfkEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.command.disconnect" commandName="Disconnect Reader"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="__yeK0D_LEeS0lKPtDtc_Vw" featurename="handlers" parentElementId="de.persosim.rcp.application">
     <elements xsi:type="commands:Handler" xmi:id="_X31aUEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.handler.standard" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.StandardReaderHandler" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
     <elements xsi:type="commands:Handler" xmi:id="_xdGWwEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handler.basic" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.BasicReaderHandler" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
-    <elements xsi:type="commands:Handler" xmi:id="_hBoo4EfkEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handler.0" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.DisconnectReaderHandler" command="_cxx9QEfkEeSy-836va2YTA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2CwHwD_MEeS0lKPtDtc_Vw" featurename="children" parentElementId="de.persosim.rcp.mainMenue" positionInList="before:de.persosim.rcp.mainMenue.help">
     <elements xsi:type="menu:Menu" xmi:id="_2_oyQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.menu.readerType" label="Reader Type">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_4JpHQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.basic" label="Change to basic reader" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
       <children xsi:type="menu:HandledMenuItem" xmi:id="_6zsSsEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.changeToStandardReader" label="Change to standard reader" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_jtsmgEfkEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.disconnect" label="Disconnect Reader" command="_cxx9QEfkEeSy-836va2YTA"/>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jbTUMEIsEeS095NvfbDi9w" featurename="children" parentElementId="de.persosim.rcp.partSashContainer">
