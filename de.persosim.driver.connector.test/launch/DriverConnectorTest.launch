@@ -13,5 +13,5 @@
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="de.persosim.driver.connector.test"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-javaagent:${project_loc:/de.persosim.driver.connector.test}/lib/jmockit.jar -Dcoverage-srcDirs=${project_loc:/de.persosim.driver.connector}/src,${project_loc:/de.persosim.driver.connector.test}/src/"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-javaagent:${project_loc:/org.globaltester.base.test}/lib/jmockit.jar&#10;-Dcoverage-srcDirs=${project_loc:/de.persosim.driver.connector}/src,${project_loc:/de.persosim.driver.connector.test}/src/"/>
 </launchConfiguration>
