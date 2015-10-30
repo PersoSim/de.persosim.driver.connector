@@ -530,7 +530,7 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		initializeReader();
+		resetReader();
 		
 		switchToReaderType(ReaderType.STANDARD);
 	}
@@ -760,8 +760,6 @@ public class ReaderPart implements VirtualReaderUi {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				setButton(text);
-				
-				
 			}
 		};
 
@@ -851,47 +849,45 @@ public class ReaderPart implements VirtualReaderUi {
 		if (autologin == false) {
 			if (type.equals(ReaderType.STANDARD)) {
 				
-					setEnabledKeySetController(KEYS_ALL, true);
-					
-					
-					pressedKeys.clear();
-					synchronized (pressedKeys) {
-						while (pressedKeys.size() == 0
-								|| (!pressedKeys.get(pressedKeys.size() - 1)
-										.equals("OK") && !pressedKeys.get(
-										pressedKeys.size() - 1).equals("C"))) {
-							try {
-								pressedKeys.wait();
-							} catch (InterruptedException e) {
-								throw new IOException(
-										"The reading of the PIN could not be completed");
-							}
-						}
-					}
-					if (pressedKeys.get(pressedKeys.size() - 1).equals("C")) {
-						setText("");
-						setEnabledKeySetController(KEYS_ALL, false);
-						return null;
-					}
-	
-					byte[] result = new byte[pressedKeys.size() - 1];
-					for (int i = 0; i < result.length; i++) {
-						try {
-							byte currentNumber = (byte) pressedKeys.get(i)
-									.charAt(0);
-							result[i] = currentNumber;
-						} catch (NumberFormatException e) {
-							throw new IOException(
-									"PIN containing non valid characters entered");
-						}
-					}
-	 
-					setEnabledKeySetController(KEYS_ALL, false);
+				setEnabledKeySetController(KEYS_ALL, true);
 				
-					return result;
-					
+				pressedKeys.clear();
+				synchronized (pressedKeys) {
+					while (pressedKeys.size() == 0
+							|| (!pressedKeys.get(pressedKeys.size() - 1)
+									.equals("OK") && !pressedKeys.get(
+									pressedKeys.size() - 1).equals("C"))) {
+						try {
+							pressedKeys.wait();
+						} catch (InterruptedException e) {
+							throw new IOException(
+									"The reading of the PIN could not be completed");
+						}
+					}
 				}
-			return null;
+				if (pressedKeys.get(pressedKeys.size() - 1).equals("C")) {
+					setText("");
+					setEnabledKeySetController(KEYS_ALL, false);
+					return null;
+				}
+
+				byte[] result = new byte[pressedKeys.size() - 1];
+				for (int i = 0; i < result.length; i++) {
+					try {
+						byte currentNumber = (byte) pressedKeys.get(i)
+								.charAt(0);
+						result[i] = currentNumber;
+					} catch (NumberFormatException e) {
+						throw new IOException(
+								"PIN containing non valid characters entered");
+					}
+				}
+ 
+				setEnabledKeySetController(KEYS_ALL, false);
+				return result;
+				
+			}
+		return null;
 			
 		} else {
 			byte[] result = new byte[pressedKeys.size() - 1];
@@ -901,8 +897,7 @@ public class ReaderPart implements VirtualReaderUi {
 							.charAt(0);
 					result[i] = currentNumber;
 				} catch (NumberFormatException e) {
-					throw new IOException(
-							"PIN containing non valid characters entered");
+					throw new IOException("PIN containing non valid characters entered");
 				}
 			}
 			setText("");
@@ -926,7 +921,6 @@ public class ReaderPart implements VirtualReaderUi {
 
 	@Override
 	public byte[] getDeviceDescriptors() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -957,38 +951,27 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param readerType the reader type to use
 	 */
 	public void switchToReaderType(ReaderType readerType) {
-			switch (readerType) {
-			case BASIC:
-				createBasicReader(root);
-				autologin = false;
-				break;
-			case STANDARD:
-				addStandardListeners(connector);
-				createStandardReader(root);
-				viewer.getTable().setSelection(selectedIndex);
-				if(selectedIndex != -1)
-				{
-					checkAutoLogin.setEnabled(true);
-				}
-				break;
-			default:
-				;
-				break;
-			}
-
-			type = readerType;
-	}
-	
-	/**
-	 * Create a new reader and clean up any remainders of previous readers.
-	 * Reader type still needs to be set before reader can be used.
-	 */
-	public void initializeReader() {
-		connector = Activator.getConnector();
-		
 		resetReader();
 		
-		connector.addUi(this);
+		switch (readerType) {
+		case BASIC:
+			createBasicReader(root);
+			autologin = false;
+			break;
+		case STANDARD:
+			addStandardListeners(connector);
+			createStandardReader(root);
+			viewer.getTable().setSelection(selectedIndex);
+			if(selectedIndex != -1)
+			{
+				checkAutoLogin.setEnabled(true);
+			}
+			break;
+		default:
+			break;
+		}
+
+		type = readerType;
 	}
 	
 	/**
@@ -997,6 +980,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * attempting a new connection.
 	 */
 	public void resetReader() {
+		connector = Activator.getConnector();
 		disposeReaderControls();
 		connector.removeUi(this);
 		type = ReaderType.NONE;
