@@ -17,3 +17,4 @@ Require-Bundle: org.eclipse.swt;bundle-version="3.103.0",
  de.persosim.simulator;bundle-version="0.1.0",
  de.persosim.driver.connector
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: HJP Consulting GmbH
