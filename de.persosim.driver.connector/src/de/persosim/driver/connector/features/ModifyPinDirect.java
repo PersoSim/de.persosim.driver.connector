@@ -25,7 +25,6 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 	
 	public ModifyPinDirect(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -34,8 +33,6 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
 				List<byte[]> params = data.getParameters();
 				// XXX SLS actually use data from param
-//				byte[] param = params.get(1);
-//				byte[] apduHeaderReceived = Arrays.copyOfRange(param, 24, param.length);
 				byte[] apduHeaderExpected = HexString.toByteArray("002C0203");
 				byte[] expectedLength = params.get(2);
 				
@@ -90,8 +87,6 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 						}
 					}
 				}
-				
-//				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte [] {(byte) 0x90,0});
 			}
 		}
 		return null;

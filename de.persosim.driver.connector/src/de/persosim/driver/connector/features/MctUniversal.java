@@ -11,12 +11,10 @@ public class MctUniversal extends AbstractPcscFeature {
 	
 	public MctUniversal(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

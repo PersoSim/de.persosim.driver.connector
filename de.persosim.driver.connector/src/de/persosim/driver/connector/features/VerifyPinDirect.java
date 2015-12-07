@@ -11,12 +11,10 @@ public class VerifyPinDirect extends AbstractPcscFeature {
 	
 	public VerifyPinDirect(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-
 		return null;
 	}
 

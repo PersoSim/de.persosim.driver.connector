@@ -11,12 +11,10 @@ public class MctReaderDirect extends AbstractPcscFeature {
 	
 	public MctReaderDirect(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
