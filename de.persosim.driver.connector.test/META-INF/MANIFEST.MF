@@ -10,7 +10,6 @@ Require-Bundle: org.eclipse.ui,
  org.junit,
  de.persosim.simulator;bundle-version="0.5.0",
  org.globaltester.simulator,
- org.globaltester.base.test,
  org.globaltester.lib.jmockit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
