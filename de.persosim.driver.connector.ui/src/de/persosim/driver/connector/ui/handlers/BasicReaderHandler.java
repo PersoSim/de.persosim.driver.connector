@@ -1,5 +1,7 @@
 package de.persosim.driver.connector.ui.handlers;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -9,6 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
+import de.persosim.simulator.utils.PersoSimLogger;
 
 public class BasicReaderHandler {
 
@@ -23,7 +26,11 @@ public class BasicReaderHandler {
 			if (readerPart.getObject() instanceof ReaderPart) {
 				ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
 
-				readerPartObject.switchToReaderType(ReaderType.BASIC);
+				try {
+					readerPartObject.switchToReaderType(ReaderType.BASIC);
+				} catch (IOException e) {
+					PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.ERROR);
+				}
 			}
 	}
 }

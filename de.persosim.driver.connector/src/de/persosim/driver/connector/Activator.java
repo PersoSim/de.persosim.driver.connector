@@ -7,8 +7,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
-
 /**
  * The activator for this bundle.
  * @author mboonk
@@ -18,7 +16,9 @@ public class Activator implements BundleActivator {
 
 	private static BundleContext context;
 	private static ServiceTracker<Simulator, Simulator> serviceTrackerSimulator;
-	private static ServiceTracker<NativeDriverConnectorInterface, NativeDriverConnectorInterface> serviceTrackerNativeDriverConnector;
+	private static ServiceTracker<DriverConnectorFactory, DriverConnectorFactory> serviceTrackerDriverConnectorFactory;
+
+	public static final String PERSOSIM_CONNECTOR_CONTEXT_ID = "de.persosim";
 
 	static BundleContext getContext() {
 		return context;
@@ -35,10 +35,10 @@ public class Activator implements BundleActivator {
 		return null;
 	}
 	
-	public static NativeDriverConnectorInterface getConnector() {
-		if (serviceTrackerNativeDriverConnector != null){
+	public static DriverConnectorFactory getFactory() {
+		if (serviceTrackerDriverConnectorFactory != null){
 
-			return serviceTrackerNativeDriverConnector.getService();
+			return serviceTrackerDriverConnectorFactory.getService();
 		}
 		return null;
 	}
@@ -54,13 +54,13 @@ public class Activator implements BundleActivator {
 		
 		//register service in service registry
 		Hashtable<String, String> props = new Hashtable<String, String>();
-		bundleContext.registerService(NativeDriverConnectorInterface.class, new NativeDriverConnector(), props);
+		bundleContext.registerService(DriverConnectorFactory.class, new DriverConnectorFactoryImpl(), props);
 		
 		serviceTrackerSimulator = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
 		serviceTrackerSimulator.open();
 		
-		serviceTrackerNativeDriverConnector = new ServiceTracker<NativeDriverConnectorInterface, NativeDriverConnectorInterface>(context, NativeDriverConnectorInterface.class.getName(), null);
-		serviceTrackerNativeDriverConnector.open();
+		serviceTrackerDriverConnectorFactory = new ServiceTracker<DriverConnectorFactory, DriverConnectorFactory>(context, DriverConnectorFactory.class.getName(), null);
+		serviceTrackerDriverConnectorFactory.open();
 	}
 
 	/*
@@ -71,7 +71,7 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 		serviceTrackerSimulator.close();
-		serviceTrackerNativeDriverConnector.close();
+		serviceTrackerDriverConnectorFactory.close();
 	}
 
 }

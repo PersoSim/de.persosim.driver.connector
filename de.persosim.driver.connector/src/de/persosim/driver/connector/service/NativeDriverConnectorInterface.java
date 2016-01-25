@@ -9,7 +9,7 @@ import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscListener;
 
 public interface NativeDriverConnectorInterface {
-	
+
 	/**
 	 * This method connects to the native driver part.
 	 * 
@@ -36,38 +36,29 @@ public interface NativeDriverConnectorInterface {
 	void addUi(VirtualReaderUi ui);
 
 	/**
-	 * Remove a user interface.
-	 * 
-	 * @param ui
-	 */
-	void removeUi(VirtualReaderUi ui);
-	
-	/**
-	 * Add a listener that is to be informed about PCSC calls.
+	 * Add a listener that is to be informed about PCSC calls. Listeners are
+	 * prioritized in order of addition, the first added listener beeing the
+	 * lowest priority.
 	 * 
 	 * @param listener
 	 */
 	public void addListener(PcscListener listener);
-	
-	/**
-	 * Remove a listener and stop informing it about PCSC calls.
-	 * 
-	 * @param listener
-	 */
-	public void removeListener(PcscListener listener);
 
 	/**
-	 * Returns a collection of references to the currently added {@link VirtualReaderUi} instances.
+	 * Returns a collection of references to the currently added
+	 * {@link VirtualReaderUi} instances.
 	 * 
-	 * @return a collection of user interfaces currently attached to the connector
+	 * @return a collection of user interfaces currently attached to the
+	 *         connector
 	 */
 	public Collection<VirtualReaderUi> getUserInterfaces();
 
 	/**
-	 * Returns the currently active listeners as a list of actual references to the listeners.
+	 * Returns the currently active listeners as a list of actual references to
+	 * the listeners.
 	 * 
 	 * @return the list of currently attached listeners
 	 */
 	public List<PcscListener> getListeners();
-	
+
 }

@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.persosim.driver.connector.features.DefaultListener;
+import de.persosim.driver.connector.pcsc.ConnectorEnabled;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
@@ -34,13 +34,6 @@ public class NativeDriverConnector implements NativeDriverConnectorInterface {
 	private String nativeDriverHostName = null;
 	private int nativeDriverPort = Integer.MIN_VALUE;
 	private int timeout = 5000;
-
-	/**
-	 * Create a connector object
-	 */
-	public NativeDriverConnector() {
-		listeners.add(new DefaultListener());
-	}
 
 	@Override
 	public void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException {
@@ -70,33 +63,27 @@ public class NativeDriverConnector implements NativeDriverConnectorInterface {
 	}
 
 	@Override
-	public void disconnect() throws IOException, InterruptedException {		
-		communication.disconnect();
-		communicationThread.join();
-	}
-
-	@Override
-	public void addListener(PcscListener listener) {
-		//add the new listener behind the others but preserve the position of this object
-		listeners.add(listeners.size() - 1, listener);
-		if (listener instanceof UiEnabled){
-			((UiEnabled)listener).setUserInterfaces(userInterfaces);
+	public void disconnect() throws IOException, InterruptedException {
+		if (communication != null){
+			communication.disconnect();
+			communicationThread.join();
 		}
 	}
 
 	@Override
-	public void removeListener(PcscListener listener) {
-		listeners.remove(listener);
+	public void addListener(PcscListener listener) {
+		listeners.add(0, listener);
+		if (listener instanceof UiEnabled){
+			((UiEnabled)listener).setUserInterfaces(userInterfaces);
+		}
+		if (listener instanceof ConnectorEnabled){
+			((ConnectorEnabled)listener).setConnector(this);
+		}
 	}
 
 	@Override
 	public void addUi(VirtualReaderUi ui) {
 		this.userInterfaces.add(ui);
-	}
-	
-	@Override
-	public void removeUi(VirtualReaderUi ui) {
-		this.userInterfaces.remove(ui);
 	}
 
 	@Override
