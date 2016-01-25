@@ -91,8 +91,6 @@ public class ReaderPart implements VirtualReaderUi {
 	private Composite root;
 	private Composite basicReaderControls;
 	private Composite standardReaderControls;
-	
-	private List<PcscListener> listeners = new ArrayList<PcscListener>();
 
 	private ReaderType type = ReaderType.NONE;
 
@@ -929,7 +927,6 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	private void addStandardListeners(NativeDriverConnectorInterface connector) {
-		listeners = new ArrayList<>();
 		
 		PcscListener verifyPinDirect = new VerifyPinDirect(new UnsignedInteger(0x3136C8));
 		PcscListener modifyPinDirect = new ModifyPinDirect(new UnsignedInteger(0x3136CC));
@@ -937,15 +934,11 @@ public class ReaderPart implements VirtualReaderUi {
 		PcscListener mctUniversal = new MctUniversal(new UnsignedInteger(0x3136D4));
 		PcscListener persoSimPcscProcessor = new PersoSimPcscProcessor(new UnsignedInteger(0x313730));
 		
-		listeners.add(verifyPinDirect);
-		listeners.add(modifyPinDirect);
-		listeners.add(mctReaderDirect);
-		listeners.add(mctUniversal);
-		listeners.add(persoSimPcscProcessor);
-		
-		for(PcscListener pcscListener : listeners) {
-			connector.addListener(pcscListener);
-		}
+		connector.addListener(verifyPinDirect);
+		connector.addListener(modifyPinDirect);
+		connector.addListener(mctReaderDirect);
+		connector.addListener(mctUniversal);
+		connector.addListener(persoSimPcscProcessor);
 	}
 
 	private void addBasicListeners(NativeDriverConnectorInterface connector) {
@@ -1012,7 +1005,5 @@ public class ReaderPart implements VirtualReaderUi {
 
 		disposeReaderControls();
 		type = ReaderType.NONE;
-		
-		listeners = new ArrayList<>();
 	}
 }
