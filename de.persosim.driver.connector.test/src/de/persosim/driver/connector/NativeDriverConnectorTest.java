@@ -20,7 +20,8 @@ import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.platform.Iso7816;
@@ -30,13 +31,13 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
 /**
- * This class tests the {@link NativeDriverConnector}.
+ * This class tests the {@link NativeDriverConnectorImpl}.
  * @author mboonk
  *
  */
 public class NativeDriverConnectorTest extends ConnectorTest{
 
-	private NativeDriverConnectorInterface nativeConnector;
+	private NativeDriverConnector nativeConnector;
 	private TestDriver driver;
 	private final byte [] testAtr = "TESTATR".getBytes();
 	@Mocked
@@ -58,7 +59,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		driver = new TestDriver();
 		driver.start(TESTDRIVER_PORT);
 				
-		nativeConnector = new NativeDriverConnector();
+		nativeConnector = new NativeDriverConnectorImpl();
 		nativeConnector.addListener(new DefaultListener());
 		nativeConnector.connect(TESTDRIVER_HOST, TESTDRIVER_PORT);
 		

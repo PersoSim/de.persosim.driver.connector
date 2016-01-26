@@ -2,17 +2,18 @@ package de.persosim.driver.connector;
 
 import java.io.IOException;
 
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 
 public class DriverConnectorFactoryImpl implements DriverConnectorFactory {
 
-	private NativeDriverConnectorInterface connector;
+	private NativeDriverConnector connector;
 	private String contextIdentifier;
 
 	@Override
-	public NativeDriverConnectorInterface getConnector(String contextIdentifier) throws IOException {
+	public NativeDriverConnector getConnector(String contextIdentifier) throws IOException {
 		if (connector == null) {
-			connector = new NativeDriverConnector();
+			connector = new NativeDriverConnectorImpl();
 			this.contextIdentifier = contextIdentifier;
 		}
 		if (this.contextIdentifier.equals(contextIdentifier)){
@@ -22,7 +23,7 @@ public class DriverConnectorFactoryImpl implements DriverConnectorFactory {
 	}
 
 	@Override
-	public void returnConnector(NativeDriverConnectorInterface connector) {
+	public void returnConnector(NativeDriverConnector connector) {
 		if (this.connector == connector) {
 			try {
 				connector.disconnect();

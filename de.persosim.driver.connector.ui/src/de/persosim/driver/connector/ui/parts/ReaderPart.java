@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
-import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.features.DefaultListener;
@@ -45,7 +44,8 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
@@ -925,7 +925,7 @@ public class ReaderPart implements VirtualReaderUi {
 		return null;
 	}
 
-	private void addStandardListeners(NativeDriverConnectorInterface connector) {
+	private void addStandardListeners(NativeDriverConnector connector) {
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
@@ -933,7 +933,7 @@ public class ReaderPart implements VirtualReaderUi {
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
 
-	private void addBasicListeners(NativeDriverConnectorInterface connector) {
+	private void addBasicListeners(NativeDriverConnector connector) {
 		connector.addListener(new DefaultListener());
 	}
 	
@@ -949,7 +949,7 @@ public class ReaderPart implements VirtualReaderUi {
 		resetReader();
 		
 		disposeConnector();
-		NativeDriverConnectorInterface connector = getConnector();
+		NativeDriverConnector connector = getConnector();
 		switch (readerType) {
 		case BASIC:
 			addBasicListeners(connector);
@@ -970,11 +970,11 @@ public class ReaderPart implements VirtualReaderUi {
 		default:
 			break;
 		}
-		connector.connect(NativeDriverConnector.DEFAULT_HOST, NativeDriverConnector.DEFAULT_PORT);
+		connector.connect(NativeDriverConnectorImpl.DEFAULT_HOST, NativeDriverConnectorImpl.DEFAULT_PORT);
 		type = readerType;
 	}
 	
-	private NativeDriverConnectorInterface getConnector() throws IOException{
+	private NativeDriverConnector getConnector() throws IOException{
 		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
 		return factory.getConnector(de.persosim.driver.connector.Activator.PERSOSIM_CONNECTOR_CONTEXT_ID);
 	}

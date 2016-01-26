@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.driver.connector.pcsc.PcscCallData;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
@@ -66,7 +67,7 @@ public class CommUtils {
 
 	/**
 	 * This method performs a handshake against the
-	 * {@link NativeDriverConnector} if no lun is known. This is the case for
+	 * {@link NativeDriverConnectorImpl} if no lun is known. This is the case for
 	 * the initial connection initiation.
 	 * 
 	 * @param iccSocket
@@ -84,7 +85,7 @@ public class CommUtils {
 
 	/**
 	 * This method performs a handshake against the
-	 * {@link NativeDriverConnector}.
+	 * {@link NativeDriverConnectorImpl}.
 	 * 
 	 * @param iccSocket
 	 *            the socket to communicate over

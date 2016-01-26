@@ -8,7 +8,10 @@ import java.util.List;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscListener;
 
-public interface NativeDriverConnectorInterface {
+public interface NativeDriverConnector {
+	
+	public static final String DEFAULT_HOST = "localhost";
+	public static final int DEFAULT_PORT = 5678;
 
 	/**
 	 * This method connects to the native driver part.

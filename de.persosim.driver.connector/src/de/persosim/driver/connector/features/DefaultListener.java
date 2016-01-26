@@ -19,7 +19,7 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.PersoSimLogger;
 import de.persosim.simulator.utils.Utils;
@@ -33,7 +33,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private byte[] cachedAtr = null;
-	private NativeDriverConnectorInterface connector;
+	private NativeDriverConnector connector;
 	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
@@ -308,7 +308,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	@Override
-	public void setConnector(NativeDriverConnectorInterface connector) {
+	public void setConnector(NativeDriverConnector connector) {
 		this.connector = connector;
 	}
 }

@@ -3,7 +3,6 @@ package de.persosim.driver.connector.ui;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.features.MctReaderDirect;
@@ -11,7 +10,8 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 
 /**
  * This class serves as a simple console interface to the native driver
@@ -24,7 +24,7 @@ public class NativeDriverConnectorConsole {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		NativeDriverConnectorInterface connector = new NativeDriverConnector();
+		NativeDriverConnector connector = new NativeDriverConnectorImpl();
 		connector.addUi(new ConsoleUi());
 		connector.addListener(new DefaultListener());
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x42000DB2)));

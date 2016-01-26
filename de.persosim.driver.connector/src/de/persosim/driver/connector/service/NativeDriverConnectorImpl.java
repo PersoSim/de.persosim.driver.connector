@@ -1,4 +1,4 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.service;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -7,10 +7,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.ConnectorEnabled;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.UiEnabled;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 
 /**
  * This class handles the connection to the native part of the PersoSim driver
@@ -21,10 +22,7 @@ import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
  * @author mboonk
  * 
  */
-public class NativeDriverConnector implements NativeDriverConnectorInterface {
-	
-	public static final String DEFAULT_HOST = "localhost";
-	public static final int DEFAULT_PORT = 5678;
+public class NativeDriverConnectorImpl implements NativeDriverConnector {
 
 	private List<PcscListener> listeners = new LinkedList<PcscListener>();
 	private List<VirtualReaderUi> userInterfaces = new LinkedList<VirtualReaderUi>();
