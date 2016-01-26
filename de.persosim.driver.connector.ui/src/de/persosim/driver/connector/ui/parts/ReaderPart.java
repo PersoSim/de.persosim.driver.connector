@@ -45,7 +45,6 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
 import de.persosim.simulator.utils.PersoSimLogger;
 
@@ -927,18 +926,11 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	private void addStandardListeners(NativeDriverConnectorInterface connector) {
-		
-		PcscListener verifyPinDirect = new VerifyPinDirect(new UnsignedInteger(0x3136C8));
-		PcscListener modifyPinDirect = new ModifyPinDirect(new UnsignedInteger(0x3136CC));
-		PcscListener mctReaderDirect = new MctReaderDirect(new UnsignedInteger(0x3136D0));
-		PcscListener mctUniversal = new MctUniversal(new UnsignedInteger(0x3136D4));
-		PcscListener persoSimPcscProcessor = new PersoSimPcscProcessor(new UnsignedInteger(0x313730));
-		
-		connector.addListener(verifyPinDirect);
-		connector.addListener(modifyPinDirect);
-		connector.addListener(mctReaderDirect);
-		connector.addListener(mctUniversal);
-		connector.addListener(persoSimPcscProcessor);
+		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
+		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
+		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
+		connector.addListener(new MctUniversal(new UnsignedInteger(0x3136D4)));
+		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
 
 	private void addBasicListeners(NativeDriverConnectorInterface connector) {
