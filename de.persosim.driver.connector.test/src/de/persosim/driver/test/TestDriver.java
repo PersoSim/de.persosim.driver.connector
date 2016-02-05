@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import de.persosim.driver.connector.NativeDriverConnector;
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
@@ -23,7 +24,6 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class TestDriver {
-	public static final int PORT_NUMBER_DEFAULT = 5678;
 
 	private Collection<DriverEventListener> listeners = new HashSet<DriverEventListener>();
 
@@ -35,12 +35,14 @@ public class TestDriver {
 	private boolean running = false;
 
 	/**
-	 * Start the test driver on the default port.
+	 * Start the test driver on the default port. It uses the Java system
+	 * property name {@value #PROPERTY_NAME_DRIVER_PORT} to be able to receive a value
+	 * for the port to be used from the outside.
 	 * 
 	 * @throws IOException
 	 */
 	public void start() throws IOException {
-		start(PORT_NUMBER_DEFAULT);
+		start(NativeDriverConnector.DEFAULT_PORT);
 	}
 
 	/**
