@@ -1,128 +1,40 @@
-package de.persosim.driver.connector;
+package de.persosim.driver.connector.features;
 
-import java.io.IOException;
+import static de.persosim.driver.connector.pcsc.PcscConstants.*;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
+import de.persosim.driver.connector.Activator;
+import de.persosim.driver.connector.CommUtils;
+import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.UnsignedInteger;
+import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.pcsc.ConnectorEnabled;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.pcsc.UiEnabled;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.PersoSimLogger;
 import de.persosim.simulator.utils.Utils;
 
 /**
- * This class handles the connection to the native part of the PersoSim driver
- * package via a socket Connection. In PCSC terms this would represent
- * functionality like an IFD Handler presents to the upper layers as described
- * in the PCSC specification part 3.
- * 
+ * This implements basic PC/SC behaviour for the driver connector.
  * @author mboonk
- * 
+ *
  */
-public class NativeDriverConnector implements PcscConstants, PcscListener, NativeDriverConnectorInterface {
-	
-	public static final String DEFAULT_HOST = "localhost";
-	public static final int DEFAULT_PORT = 5678;
+public class DefaultListener implements PcscListener, ConnectorEnabled {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
-	private List<PcscListener> listeners = new ArrayList<PcscListener>();
-	private List<VirtualReaderUi> userInterfaces = new ArrayList<VirtualReaderUi>();
-	private Thread communicationThread;
-	private NativeDriverComm communication;
-	
-	private String nativeDriverHostName = null;
-	private int nativeDriverPort = Integer.MIN_VALUE;
 	private byte[] cachedAtr = null;
-	private int timeout = 5000;
-
-	/**
-	 * Create a connector object
-	 */
-	public NativeDriverConnector() {
-		listeners.add(this);
-	}
-
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#connect(java.lang.String, int)
-	 */
-	@Override
-	public void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException {
-		this.nativeDriverHostName = nativeDriverHostName;
-		this.nativeDriverPort = nativeDriverPort;
-		
-		communication = new NativeDriverComm(this.nativeDriverHostName, this.nativeDriverPort, listeners); 
-		communicationThread = new Thread(communication);
-		communicationThread.start();
-
-		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
-		while (!communication.isConnected()){
-			if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
-				throw new IOException("The communication thread has run into a timeout");
-			}
-			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
-				throw new IOException("The waiting for the communication thread was interrupted");
-			}
-		}
-	}
+	private NativeDriverConnector connector;
 	
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#isRunning()
-	 */
-	@Override
-	public boolean isRunning() {
-		return ((communicationThread != null) && communicationThread.isAlive());
-	}
-
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#disconnect()
-	 */
-	@Override
-	public void disconnect() throws IOException, InterruptedException {		
-		communication.disconnect();
-		communicationThread.join();
-	}
-
-	@Override
-	public void addListener(PcscListener listener) {
-		//add the new listener behind the others but preserve the position of this object
-		listeners.add(listeners.size() - 1, listener);
-		if (listener instanceof UiEnabled){
-			((UiEnabled)listener).setUserInterfaces(userInterfaces);
-		}
-	}
-
-	@Override
-	public void removeListener(PcscListener listener) {
-		listeners.remove(listener);
-	}
-
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#addUi(de.persosim.driver.connector.VirtualReaderUi)
-	 */
-	@Override
-	public void addUi(VirtualReaderUi ui) {
-		this.userInterfaces.add(ui);
-	}
-
-	/* (non-Javadoc)
-	 * @see de.persosim.driver.connector.XEX#removeUi(de.persosim.driver.connector.VirtualReaderUi)
-	 */
-	@Override
-	public void removeUi(VirtualReaderUi ui) {
-		this.userInterfaces.remove(ui);
-	}
-
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction().getAsInt()) {
@@ -166,7 +78,7 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 				.getNullTerminatedAsciiString("PersoSim Virtual Reader Slot"),
 				PcscConstants.DEVICE_TYPE_SLOT.getAsByteArray());
 
-		for (VirtualReaderUi ui : userInterfaces) {
+		for (VirtualReaderUi ui : connector.getUserInterfaces()) {
 			result = Utils.concatByteArrays(result, ui.getDeviceDescriptors());
 		}
 
@@ -354,13 +266,12 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 
 	private List<byte[]> getFeatures() {
 		List<byte[]> featureDefinitions = new ArrayList<byte[]>();
-		for (PcscListener listener : listeners) {
+		for (PcscListener listener : connector.getListeners()) {
 			if (listener instanceof PcscFeature) {
 				featureDefinitions.add(((PcscFeature) listener)
 						.getFeatureDefinition());
 			}
 		}
-
 		return featureDefinitions;
 	}
 
@@ -394,5 +305,10 @@ public class NativeDriverConnector implements PcscConstants, PcscListener, Nativ
 	private PcscCallResult listInterfaces(PcscCallData data) {
 		// TODO Implement
 		return null;
+	}
+
+	@Override
+	public void setConnector(NativeDriverConnector connector) {
+		this.connector = connector;
 	}
 }

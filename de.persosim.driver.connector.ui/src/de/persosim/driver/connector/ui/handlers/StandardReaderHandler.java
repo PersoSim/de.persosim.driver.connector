@@ -1,5 +1,7 @@
 package de.persosim.driver.connector.ui.handlers;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -7,12 +9,13 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
-import de.persosim.driver.connector.NativeDriverConnector;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
+import de.persosim.simulator.utils.PersoSimLogger;
 
 public class StandardReaderHandler {
-	NativeDriverConnector connector;
+	NativeDriverConnectorImpl connector;
 
 	@Inject
 	private EPartService partService;
@@ -26,7 +29,11 @@ public class StandardReaderHandler {
 		if (readerPart.getObject() instanceof ReaderPart) {
 			ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
 
-			readerPartObject.switchToReaderType(ReaderType.STANDARD);
+			try {
+				readerPartObject.switchToReaderType(ReaderType.STANDARD);
+			} catch (IOException e) {
+				PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.ERROR);
+			}
 		}
 	}
 }

@@ -35,16 +35,18 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
-import de.persosim.driver.connector.Activator;
+import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
+import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.features.MctReaderDirect;
 import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.pcsc.PcscListener;
-import de.persosim.driver.connector.service.NativeDriverConnectorInterface;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
+import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -84,13 +86,10 @@ public class ReaderPart implements VirtualReaderUi {
 
 	public static TableViewerColumn columnPassword;
 	private List<String> pressedKeys = new ArrayList<>();
-	private NativeDriverConnectorInterface connector;
 
 	private Composite root;
 	private Composite basicReaderControls;
 	private Composite standardReaderControls;
-	
-	private List<PcscListener> listeners = new ArrayList<PcscListener>();
 
 	private ReaderType type = ReaderType.NONE;
 
@@ -530,9 +529,11 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		resetReader();
-		
-		switchToReaderType(ReaderType.STANDARD);
+		try {
+			switchToReaderType(ReaderType.STANDARD);
+		} catch (IOException e) {
+			PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.FATAL);
+		}
 	}
 	
 	
@@ -924,24 +925,16 @@ public class ReaderPart implements VirtualReaderUi {
 		return null;
 	}
 
-	private void addStandardListeners(NativeDriverConnectorInterface connector) {
-		listeners = new ArrayList<>();
-		
-		PcscListener verifyPinDirect = new VerifyPinDirect(new UnsignedInteger(0x3136C8));
-		PcscListener modifyPinDirect = new ModifyPinDirect(new UnsignedInteger(0x3136CC));
-		PcscListener mctReaderDirect = new MctReaderDirect(new UnsignedInteger(0x3136D0));
-		PcscListener mctUniversal = new MctUniversal(new UnsignedInteger(0x3136D4));
-		PcscListener persoSimPcscProcessor = new PersoSimPcscProcessor(new UnsignedInteger(0x313730));
-		
-		listeners.add(verifyPinDirect);
-		listeners.add(modifyPinDirect);
-		listeners.add(mctReaderDirect);
-		listeners.add(mctUniversal);
-		listeners.add(persoSimPcscProcessor);
-		
-		for(PcscListener pcscListener : listeners) {
-			connector.addListener(pcscListener);
-		}
+	private void addStandardListeners(NativeDriverConnector connector) {
+		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
+		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
+		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
+		connector.addListener(new MctUniversal(new UnsignedInteger(0x3136D4)));
+		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
+	}
+
+	private void addBasicListeners(NativeDriverConnector connector) {
+		connector.addListener(new DefaultListener());
 	}
 	
 	/**
@@ -949,16 +942,23 @@ public class ReaderPart implements VirtualReaderUi {
 	 * associated with the provided parameter.
 	 * 
 	 * @param readerType the reader type to use
+	 * @throws NoConnectorAvailableException 
+	 * @throws IOException 
 	 */
-	public void switchToReaderType(ReaderType readerType) {
+	public void switchToReaderType(ReaderType readerType) throws IOException {
 		resetReader();
 		
+		disposeConnector();
+		NativeDriverConnector connector = getConnector();
 		switch (readerType) {
 		case BASIC:
+			addBasicListeners(connector);
 			createBasicReader(root);
 			autologin = false;
 			break;
 		case STANDARD:
+			connector.addUi(this);
+			addBasicListeners(connector);
 			addStandardListeners(connector);
 			createStandardReader(root);
 			viewer.getTable().setSelection(selectedIndex);
@@ -970,8 +970,22 @@ public class ReaderPart implements VirtualReaderUi {
 		default:
 			break;
 		}
-
+		connector.connect(NativeDriverConnectorImpl.DEFAULT_HOST, NativeDriverConnectorImpl.DEFAULT_PORT);
 		type = readerType;
+	}
+	
+	private NativeDriverConnector getConnector() throws IOException{
+		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
+		return factory.getConnector(de.persosim.driver.connector.Activator.PERSOSIM_CONNECTOR_CONTEXT_ID);
+	}
+	
+	private void disposeConnector(){
+		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
+		try {
+			factory.returnConnector(getConnector());
+		} catch (IOException e) {
+			PersoSimLogger.logException(this.getClass(), e);
+		}
 	}
 	
 	/**
@@ -980,17 +994,8 @@ public class ReaderPart implements VirtualReaderUi {
 	 * attempting a new connection.
 	 */
 	public void resetReader() {
-		connector = Activator.getConnector();
+
 		disposeReaderControls();
-		connector.removeUi(this);
 		type = ReaderType.NONE;
-		
-		for(PcscListener pcscListener : listeners) {
-			connector.removeListener(pcscListener);
-		}
-		
-		connector.addUi(this);
-		
-		listeners = new ArrayList<>();
 	}
 }

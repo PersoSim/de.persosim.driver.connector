@@ -13,12 +13,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
 import de.persosim.simulator.platform.Iso7816;
@@ -28,7 +31,7 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
 /**
- * This class tests the {@link NativeDriverConnector}.
+ * This class tests the {@link NativeDriverConnectorImpl}.
  * @author mboonk
  *
  */
@@ -56,7 +59,8 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		driver = new TestDriver();
 		driver.start(TESTDRIVER_PORT);
 				
-		nativeConnector = new NativeDriverConnector();
+		nativeConnector = new NativeDriverConnectorImpl();
+		nativeConnector.addListener(new DefaultListener());
 		nativeConnector.connect(TESTDRIVER_HOST, TESTDRIVER_PORT);
 		
 		simulator = new Simulator() {
@@ -357,6 +361,14 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	@Test
 	public void testListenerProcessingOrder() throws IOException, InterruptedException {
 
+		nativeConnector.addListener(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				assertEquals(1, data.getFunction().getAsSignedLong());
+				return null;
+			}
+		});
 		
 		nativeConnector.addListener(new PcscListener() {
 			
@@ -364,14 +376,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			public PcscCallResult processPcscCall(PcscCallData data) {
 				assertEquals(0, data.getFunction().getAsSignedLong());
 				data.setFunction(new UnsignedInteger(1));
-				return null;
-			}
-		});
-		nativeConnector.addListener(new PcscListener() {
-			
-			@Override
-			public PcscCallResult processPcscCall(PcscCallData data) {
-				assertEquals(1, data.getFunction().getAsSignedLong());
 				return null;
 			}
 		});

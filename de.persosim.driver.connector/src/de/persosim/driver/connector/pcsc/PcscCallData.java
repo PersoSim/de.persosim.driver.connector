@@ -85,4 +85,13 @@ public class PcscCallData {
 		}
 		return UnsignedInteger.parseUnsignedInteger(dataArray[0], 16);
 	}
+	
+	@Override
+	public String toString() {
+		String result = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + logicalUnitNumber.getAsHexString();
+		for (byte [] current : parameters){
+			result += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+		}
+		return result;
+	}
 }
