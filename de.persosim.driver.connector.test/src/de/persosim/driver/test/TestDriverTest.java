@@ -27,7 +27,7 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 	public void setUp() throws IOException {
 		nativeDriver = new TestDriver();
 		nativeDriver.addListener(this);
-		nativeDriver.start(TESTDRIVER_PORT);
+		nativeDriver.start(getTestDriverPort());
 		message = null;
 	}
 
@@ -39,8 +39,8 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 	@Test
 	public void testHandshake() throws UnknownHostException, IOException,
 			InterruptedException {
-		Socket iccSocket = new Socket(TESTDRIVER_HOST,
-				TESTDRIVER_PORT);
+		Socket iccSocket = new Socket(getTestDriverHost(),
+				getTestDriverPort());
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 				iccSocket.getOutputStream()));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -54,8 +54,8 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 
 	@Test
 	public void testSendData() throws IOException, InterruptedException {
-		Socket dataSocket = new Socket(TESTDRIVER_HOST,
-				TESTDRIVER_PORT);
+		Socket dataSocket = new Socket(getTestDriverHost(),
+				getTestDriverPort());
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(
 				dataSocket.getInputStream()));
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(

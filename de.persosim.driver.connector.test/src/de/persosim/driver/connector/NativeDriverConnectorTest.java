@@ -57,11 +57,11 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.start();
 		
 		driver = new TestDriver();
-		driver.start(TESTDRIVER_PORT);
+		driver.start(getTestDriverPort());
 				
 		nativeConnector = new NativeDriverConnectorImpl();
 		nativeConnector.addListener(new DefaultListener());
-		nativeConnector.connect(TESTDRIVER_HOST, TESTDRIVER_PORT);
+		nativeConnector.connect(getTestDriverHost(), getTestDriverPort());
 		
 		simulator = new Simulator() {
 			
@@ -369,7 +369,6 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				return null;
 			}
 		});
-		
 		nativeConnector.addListener(new PcscListener() {
 			
 			@Override
