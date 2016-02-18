@@ -1,3 +1,10 @@
+Version 0.8.1 (18.02.2016)
+
+* Updated Bundle-Name to match naming conventions
+* Renames NativeDriverConnector and NativeDriverConnectorInterface
+* Extracted the default PC/SC functionality into a dedicated listener
+
+
 Version 0.8.0 (18.12.2015)
 
 * Use the jMockit library provided as org.globaltester.lib.jmockit
