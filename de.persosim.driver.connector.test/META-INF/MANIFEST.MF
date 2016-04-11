@@ -11,6 +11,6 @@ Require-Bundle: org.eclipse.ui,
  de.persosim.simulator;bundle-version="0.5.0",
  org.globaltester.simulator,
  org.globaltester.lib.jmockit
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: HJP Consulting GmbH
