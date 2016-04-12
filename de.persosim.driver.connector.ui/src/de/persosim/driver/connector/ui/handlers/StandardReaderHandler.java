@@ -8,11 +8,11 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
+import org.globaltester.logging.PersoSimLogger;
 
 import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
-import de.persosim.simulator.utils.PersoSimLogger;
 
 public class StandardReaderHandler {
 	NativeDriverConnectorImpl connector;

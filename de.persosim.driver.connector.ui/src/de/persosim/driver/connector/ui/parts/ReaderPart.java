@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.globaltester.logging.PersoSimLogger;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -46,7 +47,6 @@ import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
 import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.service.NativeDriverConnector;
-import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used

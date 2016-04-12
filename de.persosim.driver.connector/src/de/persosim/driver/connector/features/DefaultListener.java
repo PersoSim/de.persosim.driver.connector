@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.globaltester.logging.PersoSimLogger;
+
 import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
@@ -21,7 +23,6 @@ import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.connector.service.NativeDriverConnector;
 import de.persosim.simulator.platform.Iso7816;
-import de.persosim.simulator.utils.PersoSimLogger;
 import de.persosim.simulator.utils.Utils;
 
 /**
