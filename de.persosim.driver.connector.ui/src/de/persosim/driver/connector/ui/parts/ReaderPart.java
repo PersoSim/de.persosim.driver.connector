@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
-import org.globaltester.logging.PersoSimLogger;
+import org.globaltester.logging.BasicLogger;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -532,7 +532,7 @@ public class ReaderPart implements VirtualReaderUi {
 		try {
 			switchToReaderType(ReaderType.STANDARD);
 		} catch (IOException e) {
-			PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.FATAL);
+			BasicLogger.logException(this.getClass(), e, BasicLogger.FATAL);
 		}
 	}
 	
@@ -984,7 +984,7 @@ public class ReaderPart implements VirtualReaderUi {
 		try {
 			factory.returnConnector(getConnector());
 		} catch (IOException e) {
-			PersoSimLogger.logException(this.getClass(), e);
+			BasicLogger.logException(this.getClass(), e);
 		}
 	}
 	

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.globaltester.logging.PersoSimLogger;
+import org.globaltester.logging.BasicLogger;
 
 import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.CommUtils;
@@ -178,7 +178,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 		}
 		
 		if (Activator.getSim() == null){
-			PersoSimLogger.log(getClass(), "The simulator service is not available", PersoSimLogger.WARN);
+			BasicLogger.log(getClass(), "The simulator service is not available", BasicLogger.WARN);
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 		}
 				
@@ -201,7 +201,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 				if (Activator.getSim().isRunning())
 					cachedAtr = Activator.getSim().cardPowerUp();
 				else 
-					PersoSimLogger.log(getClass(), "The simulator is not running, card was not powered up", PersoSimLogger.WARN);
+					BasicLogger.log(getClass(), "The simulator is not running, card was not powered up", BasicLogger.WARN);
 			} else if (IFD_RESET.equals(
 					action)) {
 				

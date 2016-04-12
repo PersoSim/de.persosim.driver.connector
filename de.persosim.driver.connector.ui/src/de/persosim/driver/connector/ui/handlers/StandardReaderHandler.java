@@ -8,7 +8,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
-import org.globaltester.logging.PersoSimLogger;
+import org.globaltester.logging.BasicLogger;
 
 import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
@@ -32,7 +32,7 @@ public class StandardReaderHandler {
 			try {
 				readerPartObject.switchToReaderType(ReaderType.STANDARD);
 			} catch (IOException e) {
-				PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.ERROR);
+				BasicLogger.logException(this.getClass(), e, BasicLogger.ERROR);
 			}
 		}
 	}
