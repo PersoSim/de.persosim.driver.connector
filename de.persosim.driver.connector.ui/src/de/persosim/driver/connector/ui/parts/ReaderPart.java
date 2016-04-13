@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.globaltester.logging.BasicLogger;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.UnsignedInteger;
@@ -46,7 +47,6 @@ import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
 import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.service.NativeDriverConnector;
-import de.persosim.simulator.utils.PersoSimLogger;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -532,7 +532,7 @@ public class ReaderPart implements VirtualReaderUi {
 		try {
 			switchToReaderType(ReaderType.STANDARD);
 		} catch (IOException e) {
-			PersoSimLogger.logException(this.getClass(), e, PersoSimLogger.FATAL);
+			BasicLogger.logException(this.getClass(), e, BasicLogger.FATAL);
 		}
 	}
 	
@@ -984,7 +984,7 @@ public class ReaderPart implements VirtualReaderUi {
 		try {
 			factory.returnConnector(getConnector());
 		} catch (IOException e) {
-			PersoSimLogger.logException(this.getClass(), e);
+			BasicLogger.logException(this.getClass(), e);
 		}
 	}
 	

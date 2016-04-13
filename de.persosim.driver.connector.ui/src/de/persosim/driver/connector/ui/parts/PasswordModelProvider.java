@@ -1,7 +1,7 @@
 package de.persosim.driver.connector.ui.parts;
 
-import static de.persosim.simulator.utils.PersoSimLogger.ERROR;
-import static de.persosim.simulator.utils.PersoSimLogger.log;
+import static org.globaltester.logging.BasicLogger.ERROR;
+import static org.globaltester.logging.BasicLogger.log;
 
 import java.util.ArrayList;
 import java.util.List;
