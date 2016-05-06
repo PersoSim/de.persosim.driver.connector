@@ -1,5 +1,23 @@
-Version 0.8.2 (29.02.2016)
+Version 0.9.0 (06.05.2016)
 
+* Merge branch 'usr/cstroh/extractPersoSimLogger'
+* Refactored PersoSimLogger to BasicLogger
+* PersoSimLogger moved from d.p.s to o.g.logging
+* Merge remote-tracking branch 'origin/usr/mboonk/qaSprint15'
+* Set all build relevant settings to Java 1.8
+* Merge branch 'usr/cstroh/opensourcingPlatform'
+* Add LICENSE and NOTICE files for our code
+* Add LICENSE and NOTICE files to gitattributes
+* Merge branch 'usr/amay/releaseBuild'
+* Update version numbers in POM
+* Remove anmespaces from POMs
+* Update version numbers
+* Merge remote-tracking branch 'origin/usr/mboonk/fixFileEndings'
+* update parent pom version
+* Updated the changelog
+* Added missing line endings at the end of text files
+* Merge remote-tracking branch 'origin/usr/cstroh/fixGitAttributes'
+* Replace gitattributes by file from o.g.dev
 * Code maintenance
 
 
