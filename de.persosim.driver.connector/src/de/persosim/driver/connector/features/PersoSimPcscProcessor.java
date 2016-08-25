@@ -293,7 +293,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 			}
 		} catch (IOException e) {
-			// TODO logging
+			// #833 Use proper logging mechanism
 			return new SimplePcscCallResult(IFD_ERROR_NOT_SUPPORTED);
 		}
 
@@ -322,7 +322,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 					pcscResponse);
 
 		} catch (IOException e) {
-			// TODO logging
+			// #833 Use proper logging mechanism
 			return buildResponse(PcscConstants.IFD_SUCCESS,
 					RESULT_COMMUNICATION_ABORT, new byte[0]);
 		} catch (PaceExecutionException e) {
@@ -462,7 +462,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 						response.length - 2, response.length - 1));
 
 		if (Iso7816Lib.isReportingError(statusWord)) {
-			// TODO logging			
+			// #833 Use proper logging mechanism			
 			throw new PaceExecutionException(new UnsignedInteger(Utils.concatByteArrays(
 					Utils.toUnsignedByteArray(RESULT_PREFIX_SELECT_EF_CA),
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);
@@ -475,7 +475,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 						response.length - 2, response.length - 1));
 
 		if (Iso7816Lib.isReportingError(statusWord)) {
-			// TODO logging			
+			// #833 Use proper logging mechanism			
 			throw new PaceExecutionException(new UnsignedInteger(Utils.concatByteArrays(
 					Utils.toUnsignedByteArray(RESULT_PREFIX_READ_BINARY_EF_CA),
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);

@@ -160,12 +160,12 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	private PcscCallResult setCapabilities(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult setProtocolParameters(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
@@ -220,12 +220,12 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	private PcscCallResult swallowIcc(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult ejectIcc(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
@@ -284,27 +284,27 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	private PcscCallResult isIccAbsent(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult listContexts(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult isContextSupported(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult getIfdsp(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
 	private PcscCallResult listInterfaces(PcscCallData data) {
-		// TODO Implement
+		// not supported
 		return null;
 	}
 
