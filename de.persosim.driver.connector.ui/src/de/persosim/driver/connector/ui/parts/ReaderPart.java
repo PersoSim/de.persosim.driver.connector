@@ -844,8 +844,6 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	@Override
-	//TODO the method should be renamed to getPassword(), but first its needed to check to which classes 
-	//the method relies and in which other classes the method is beeing used.
 	public byte[] getPin() throws IOException {
 		if (autologin == false) {
 			if (type.equals(ReaderType.STANDARD)) {

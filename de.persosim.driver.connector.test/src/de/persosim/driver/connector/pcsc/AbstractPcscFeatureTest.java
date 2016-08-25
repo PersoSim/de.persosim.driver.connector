@@ -22,7 +22,6 @@ public class AbstractPcscFeatureTest extends ConnectorTest {
 			
 			@Override
 			public PcscCallResult processPcscCall(PcscCallData data) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};

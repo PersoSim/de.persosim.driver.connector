@@ -50,7 +50,6 @@ public class TestDriverCommunication implements Runnable,
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -93,7 +92,7 @@ public class TestDriverCommunication implements Runnable,
 			} catch (SocketException e) {
 				// ignore, expected behaviour on interrupt
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// only log as we are in test code here
 				e.printStackTrace();
 			}
 		}
@@ -121,7 +120,7 @@ public class TestDriverCommunication implements Runnable,
 							System.out.println("Closed socket on port: "
 									+ lunMapping.get(lun.getAsInt()).getPort());
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
+							// only log as we are in test code here
 							e.printStackTrace();
 						}
 					}
@@ -163,7 +162,7 @@ public class TestDriverCommunication implements Runnable,
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// intentionally ignore
 			e.printStackTrace();
 		}
 	}
