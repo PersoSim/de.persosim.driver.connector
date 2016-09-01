@@ -79,7 +79,7 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 
 					System.out.println("Connector mock sent data: " + response);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// only log as we are in test code here
 					e.printStackTrace();
 				}
 

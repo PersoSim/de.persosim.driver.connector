@@ -42,19 +42,14 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	private final byte [] testAtr = "TESTATR".getBytes();
 	@Mocked
 	private Activator activator;
-//	TestSocketSim sim;
-//	@Mocked
-//	private TestApduHandler handler;
 	
 	private Simulator simulator;
 	
-	//XXX use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
+	//IMPL use JUnit test rule with http://junit.org/apidocs/org/junit/rules/DisableOnDebug.html when using JUnit 4.12
 	
 	@Before
 	public void setUp() throws Exception {
 		
-//		sim = new TestSocketSim(SIMULATOR_PORT);
-//		sim.start();
 		
 		driver = new TestDriver();
 		driver.start(getTestDriverPort());
@@ -67,25 +62,21 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			
 			@Override
 			public boolean stopSimulator() {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public boolean startSimulator() {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public boolean restartSimulator() {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public byte[] processCommand(byte[] apdu) {
-				// TODO Auto-generated method stub
 				if(Arrays.equals(apdu, HexString.toByteArray("FF01"))) {
 					return testAtr;
 				}
@@ -103,25 +94,21 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			
 			@Override
 			public boolean isRunning() {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public byte[] cardReset() {
-				// TODO Auto-generated method stub
 				return testAtr;
 			}
 			
 			@Override
 			public byte[] cardPowerUp() {
-				// TODO Auto-generated method stub
 				return testAtr;
 			}
 			
 			@Override
 			public byte[] cardPowerDown() {
-				// TODO Auto-generated method stub
 				return Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR);
 			}
 			

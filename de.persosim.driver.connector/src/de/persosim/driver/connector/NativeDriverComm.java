@@ -119,22 +119,18 @@ public class NativeDriverComm implements Runnable {
 					// expected behavior after interrupting
 				}
 			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 	}
 
 	public void log(PcscCallResult data) {
-		//TODO use proper logging mechanism
+		// #833 Use proper logging mechanism
 		//System.out.println("PCSC Out:\t" + data.getEncoded());
 	}
 
 	public void log(PcscCallData data) {
-		//TODO use proper logging mechanism
+		//#833 Use proper logging mechanism
 		/*System.out.print("PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString());
 		for (byte[] current : data.getParameters()) {
 			System.out.print(NativeDriverInterface.MESSAGE_DIVIDER
@@ -174,7 +170,7 @@ public class NativeDriverComm implements Runnable {
 		CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
 		temp.close();
 
-		// XXX Hack (wait for pcsc to poll and kill connections until the driver
+		// Hack (wait for pcsc to poll and kill connections until the driver
 		// handles the closure handshakes)
 		Thread.sleep(3000);
 		isConnected = false;

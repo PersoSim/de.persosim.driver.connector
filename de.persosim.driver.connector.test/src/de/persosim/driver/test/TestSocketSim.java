@@ -33,7 +33,7 @@ public class TestSocketSim {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				// log only,as we are in test code here
 				e.printStackTrace();
 			}
 		}
