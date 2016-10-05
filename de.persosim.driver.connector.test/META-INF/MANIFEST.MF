@@ -13,4 +13,4 @@ Require-Bundle: org.eclipse.ui,
  org.globaltester.lib.jmockit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-Vendor: HJP Consulting GmbH
+Bundle-Vendor: secunet Security Networks AG
