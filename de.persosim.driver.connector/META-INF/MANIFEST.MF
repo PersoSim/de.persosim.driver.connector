@@ -15,4 +15,4 @@ Export-Package: de.persosim.driver.connector,
  de.persosim.driver.connector.features,
  de.persosim.driver.connector.pcsc,
  de.persosim.driver.connector.service
-Bundle-Vendor: HJP Consulting GmbH
+Bundle-Vendor: secunet Security Networks AG
