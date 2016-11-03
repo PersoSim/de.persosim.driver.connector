@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.ui.parts;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,8 +46,8 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 import de.persosim.driver.connector.service.NativeDriverConnector;
+import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -968,7 +969,7 @@ public class ReaderPart implements VirtualReaderUi {
 		default:
 			break;
 		}
-		connector.connect(NativeDriverConnectorImpl.DEFAULT_HOST, NativeDriverConnectorImpl.DEFAULT_PORT);
+		connector.connect(new Socket(NativeDriverConnectorImpl.DEFAULT_HOST, NativeDriverConnectorImpl.DEFAULT_PORT));
 		type = readerType;
 	}
 	

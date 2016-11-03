@@ -25,8 +25,8 @@ public class TestSocketSimTest extends ConnectorTest {
 	
 	@Before
 	public void setUp() throws IOException{
-		sim = new TestSocketSim(getSimulatorDriverPort());
-		sim.start();
+		sim = new TestSocketSim();
+		sim.start(getSimulatorServerSocket());
 	}
 	
 	@After
@@ -49,7 +49,7 @@ public class TestSocketSimTest extends ConnectorTest {
 			}
 		};
 		
-		Socket socket = new Socket(getSimulatorDriverHost(), getSimulatorDriverPort());
+		Socket socket = getSimulatorSocket();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		
