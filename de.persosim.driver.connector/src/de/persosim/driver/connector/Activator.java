@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import org.globaltester.simulator.Simulator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -17,6 +18,7 @@ public class Activator implements BundleActivator {
 	private static BundleContext context;
 	private static ServiceTracker<Simulator, Simulator> serviceTrackerSimulator;
 	private static ServiceTracker<DriverConnectorFactory, DriverConnectorFactory> serviceTrackerDriverConnectorFactory;
+	private static ServiceRegistration<DriverConnectorFactory> driverConnectorFactoryRegistration;
 
 	public static final String PERSOSIM_CONNECTOR_CONTEXT_ID = "de.persosim";
 
@@ -43,6 +45,7 @@ public class Activator implements BundleActivator {
 		return null;
 	}
 
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -54,7 +57,7 @@ public class Activator implements BundleActivator {
 		
 		//register service in service registry
 		Hashtable<String, String> props = new Hashtable<String, String>();
-		bundleContext.registerService(DriverConnectorFactory.class, new DriverConnectorFactoryImpl(), props);
+		driverConnectorFactoryRegistration = bundleContext.registerService(DriverConnectorFactory.class, new DriverConnectorFactoryImpl(), props);
 		
 		serviceTrackerSimulator = new ServiceTracker<Simulator, Simulator>(context, Simulator.class.getName(), null);
 		serviceTrackerSimulator.open();
@@ -70,6 +73,7 @@ public class Activator implements BundleActivator {
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
+		driverConnectorFactoryRegistration.unregister();
 		serviceTrackerSimulator.close();
 		serviceTrackerDriverConnectorFactory.close();
 	}
