@@ -33,9 +33,9 @@ public class NativeDriverCommTest extends ConnectorTest{
 	@Before
 	public void setUp() throws Exception{
 		driver = new TestDriver();
-		driver.start(getTestDriverPort());
+		driver.start(getTestDriverServerSocket());
 		listeners = new ArrayList<>();
-		nativeCommunication = new NativeDriverComm(getTestDriverHost(), getTestDriverPort(), listeners);
+		nativeCommunication = new NativeDriverComm(getTestDriverSocket(), listeners);
 		nativeCommThread = new Thread(nativeCommunication);
 		
 		nativeCommThread.start();

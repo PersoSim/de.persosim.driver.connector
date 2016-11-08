@@ -1,6 +1,7 @@
 package de.persosim.driver.test;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 
 /**
  * This class provides a simulation of the PersoSim socket simulator adaptor by
@@ -13,20 +14,15 @@ import java.io.IOException;
 public class TestSocketSim {
 	private Thread communicationThread;
 	private TestSocketSimComm communication;
-	private int port;
 	private boolean isRunning;
-
-	public TestSocketSim(int port) {
-		this.port = port;
-	}
-
+	
 	/**
 	 * Creates the server and starts listening for connections.
 	 * 
 	 * @throws IOException
 	 */
-	public void start() throws IOException {
-		communication = new TestSocketSimComm(port);
+	public void start(ServerSocket serverSocket) throws IOException {
+		communication = new TestSocketSimComm(serverSocket);
 		communicationThread = new Thread(communication);
 		communicationThread.start();
 		while (!communication.isRunning()) {

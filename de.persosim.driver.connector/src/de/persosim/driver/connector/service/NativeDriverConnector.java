@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.service;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface NativeDriverConnector {
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException;
+	void connect(Socket socket) throws IOException;
 
 	boolean isRunning();
 

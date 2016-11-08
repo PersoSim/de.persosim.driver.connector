@@ -1,6 +1,7 @@
 package de.persosim.driver.connector.service;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,17 +29,11 @@ public class NativeDriverConnectorImpl implements NativeDriverConnector {
 	private List<VirtualReaderUi> userInterfaces = new LinkedList<VirtualReaderUi>();
 	private Thread communicationThread;
 	private NativeDriverComm communication;
-	
-	private String nativeDriverHostName = null;
-	private int nativeDriverPort = Integer.MIN_VALUE;
 	private int timeout = 5000;
 
 	@Override
-	public void connect(String nativeDriverHostName, int nativeDriverPort) throws IOException {
-		this.nativeDriverHostName = nativeDriverHostName;
-		this.nativeDriverPort = nativeDriverPort;
-		
-		communication = new NativeDriverComm(this.nativeDriverHostName, this.nativeDriverPort, listeners); 
+	public void connect(Socket socket) throws IOException {
+		communication = new NativeDriverComm(socket, listeners); 
 		communicationThread = new Thread(communication);
 		communicationThread.start();
 

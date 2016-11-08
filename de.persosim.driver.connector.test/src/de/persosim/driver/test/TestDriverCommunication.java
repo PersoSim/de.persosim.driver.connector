@@ -41,17 +41,13 @@ public class TestDriverCommunication implements Runnable,
 		return NativeDriverInterface.LUN_NOT_ASSIGNED;
 	}
 
-	public TestDriverCommunication(int port,
+	public TestDriverCommunication(ServerSocket serverSocket,
 			HashMap<Integer, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
 		this.lunMapping = lunMapping;
 		lunHandshakeData = new HashMap<Integer, HandshakeData>();
 
-		try {
-			serverSocket = new ServerSocket(port);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.serverSocket = serverSocket;
 	}
 
 	@Override

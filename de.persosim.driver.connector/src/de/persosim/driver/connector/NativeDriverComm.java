@@ -33,26 +33,21 @@ public class NativeDriverComm implements Runnable {
 	private boolean isRunning = true;
 	private boolean isConnected = false;
 
-	String hostName;
-	int dataPort;
-
 	/**
 	 * Constructor using the connection information and a {@link Collection} of
 	 * listeners.
 	 * 
-	 * @param hostName
-	 * @param dataPort
+	 * @param socket
+	 *            the socket to use for communication with the native driver
 	 * @param listeners
 	 *            the {@link PcscListener}s that need to be informed when a new
 	 *            PCSC message is transmitted
 	 * @throws IOException
 	 */
-	public NativeDriverComm(String hostName, int dataPort,
+	public NativeDriverComm(Socket socket,
 			List<PcscListener> listeners) throws IOException {
 		this.listeners = listeners;
-		this.dataSocket = new Socket(hostName, dataPort);
-		this.hostName = hostName;
-		this.dataPort = dataPort;
+		this.dataSocket = socket;
 		bufferedDataIn = new BufferedReader(new InputStreamReader(
 				dataSocket.getInputStream()));
 		bufferedDataOut = new BufferedWriter(new OutputStreamWriter(
@@ -166,7 +161,7 @@ public class NativeDriverComm implements Runnable {
 
 		dataSocket.close();
 
-		Socket temp = new Socket(hostName, dataPort);
+		Socket temp = new Socket(dataSocket.getInetAddress(), dataSocket.getPort());
 		CommUtils.doHandshake(temp, lun, HandshakeMode.CLOSE);
 		temp.close();
 

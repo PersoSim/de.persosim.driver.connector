@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Calendar;
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class TestDriver {
 	 * @throws IOException
 	 */
 	public void start() throws IOException {
-		start(NativeDriverConnectorImpl.DEFAULT_PORT);
+		start(new ServerSocket(NativeDriverConnectorImpl.DEFAULT_PORT));
 	}
 
 	/**
@@ -51,10 +52,10 @@ public class TestDriver {
 	 * @param port
 	 * @throws IOException
 	 */
-	public void start(int port) throws IOException {
+	public void start(ServerSocket serverSocket) throws IOException {
 		if (!running) {
-			System.out.println("Starting test driver on port " + port);
-			communication = new TestDriverCommunication(port,
+			System.out.println("Starting test driver on port " + serverSocket.getLocalPort());
+			communication = new TestDriverCommunication(serverSocket,
 					lunMapping, listeners);
 			communicationThread = new Thread(communication);
 			communicationThread.setDaemon(true);

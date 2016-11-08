@@ -25,9 +25,9 @@ public class TestSocketSimComm implements Runnable {
 	private boolean isRunning = false;
 	private Socket clientSocket;
 
-	public TestSocketSimComm(int port) throws IOException {
-		serverSocket = new ServerSocket(port);
-		System.out.println("Starting TestSocketSim on port: " + port);
+	public TestSocketSimComm(ServerSocket serverSocket) throws IOException {
+		this.serverSocket = serverSocket;
+		System.out.println("Starting TestSocketSim on port: " + serverSocket.getLocalPort());
 	}
 
 	@Override
