@@ -120,7 +120,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 		}
 		
 		if (TAG_VENDOR_NAME.equals(currentTag)) {
-			result = "HJP Consulting".getBytes(StandardCharsets.US_ASCII);
+			result = "secunet Security Networks AG".getBytes(StandardCharsets.US_ASCII);
 		} else if (TAG_VENDOR_TYPE.equals(
 				currentTag)) {
 			result = "Virtual Card Reader IFD"

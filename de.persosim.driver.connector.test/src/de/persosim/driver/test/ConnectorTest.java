@@ -14,10 +14,6 @@ import org.junit.Before;
  *
  */
 public class ConnectorTest {
-	public static final String PROPERTY_NAME_DRIVER_PORT = "hjp.test.driver.port";
-	public static final String PROPERTY_NAME_SIMULATOR_PORT = "hjp.test.simulator.port";
-	private static final int SIMULATOR_PORT = 0;
-	private static final int TESTDRIVER_PORT = 0;
 	private ServerSocket simulatorServerSocket;
 	private ServerSocket testDriverServerSocket;
 
@@ -29,32 +25,8 @@ public class ConnectorTest {
 		if (testDriverServerSocket != null) {
 			testDriverServerSocket.close();
 		}
-		simulatorServerSocket = new ServerSocket(getSimulatorDriverPort());
-		testDriverServerSocket = new ServerSocket(getTestDriverPort());
-	}
-
-	/**
-	 * It uses the Java system property name {@value #PROPERTY_NAME_DRIVER_PORT}
-	 * to be able to receive a value for the port to be used from the outside.
-	 * Otherwise it returns the default value
-	 * {@value ConnectorTest#TESTDRIVER_PORT}
-	 * 
-	 * @return
-	 */
-	private int getTestDriverPort() {
-		return Integer.parseInt(System.getProperty(PROPERTY_NAME_DRIVER_PORT, TESTDRIVER_PORT + ""));
-	}
-
-	/**
-	 * It uses the Java system property name
-	 * {@value #PROPERTY_NAME_SIMULATOR_PORT} to be able to receive a value for
-	 * the port to be used from the outside. Otherwise it returns the default
-	 * value {@value #SIMULATOR_PORT}
-	 * 
-	 * @return
-	 */
-	private int getSimulatorDriverPort() {
-		return Integer.parseInt(System.getProperty(PROPERTY_NAME_SIMULATOR_PORT, SIMULATOR_PORT + ""));
+		simulatorServerSocket = new ServerSocket(0);
+		testDriverServerSocket = new ServerSocket(0);
 	}
 
 	/**
