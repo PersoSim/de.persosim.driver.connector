@@ -9,6 +9,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 import org.globaltester.logging.BasicLogger;
+import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 import de.persosim.driver.connector.ui.parts.ReaderPart.ReaderType;
@@ -29,7 +30,7 @@ public class BasicReaderHandler {
 				try {
 					readerPartObject.switchToReaderType(ReaderType.BASIC);
 				} catch (IOException e) {
-					BasicLogger.logException(this.getClass(), e, BasicLogger.ERROR);
+					BasicLogger.logException(this.getClass(), e, LogLevel.ERROR);
 				}
 			}
 	}

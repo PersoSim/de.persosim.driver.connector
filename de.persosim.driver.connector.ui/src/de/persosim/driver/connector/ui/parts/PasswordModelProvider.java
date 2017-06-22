@@ -1,12 +1,12 @@
 package de.persosim.driver.connector.ui.parts;
 
-import static org.globaltester.logging.BasicLogger.ERROR;
 import static org.globaltester.logging.BasicLogger.log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.globaltester.logging.tags.LogLevel;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
@@ -117,7 +117,7 @@ public class PasswordModelProvider {
 		try {
 			prefsUi.flush();
 		} catch (BackingStoreException e) {
-			log(getClass(), "could not save the password in the preferences file", ERROR);
+			log(getClass(), "could not save the password in the preferences file", LogLevel.ERROR);
 			e.printStackTrace();
 		}
 	}
@@ -129,7 +129,7 @@ public class PasswordModelProvider {
 			nodePassword.flush();
 
 		} catch (BackingStoreException e1) {
-			log(getClass(), "could not save the password in the preferences file", ERROR);
+			log(getClass(), "could not save the password in the preferences file", LogLevel.ERROR);
 			e1.printStackTrace();
 		}
 		for (int i = 0; i < pins.size(); i++) {
@@ -137,7 +137,7 @@ public class PasswordModelProvider {
 			try {
 				prefsUi.flush();
 			} catch (BackingStoreException e) {
-				log(getClass(), "could not save the password in the preferences file", ERROR);
+				log(getClass(), "could not save the password in the preferences file", LogLevel.ERROR);
 				e.printStackTrace();
 			}
 
