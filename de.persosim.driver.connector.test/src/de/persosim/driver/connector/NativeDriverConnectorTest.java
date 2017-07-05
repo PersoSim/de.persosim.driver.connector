@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import org.globaltester.simulator.Simulator;
+import org.globaltester.simulator.SimulatorEventListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,6 +111,16 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			@Override
 			public byte[] cardPowerDown() {
 				return Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR);
+			}
+
+			@Override
+			public void addEventListener(SimulatorEventListener... newListeners) {
+				// intentionally empty, no implementation needed in this test code		
+			}
+
+			@Override
+			public void removeEventListener(SimulatorEventListener oldListener) {
+				// intentionally empty, no implementation needed in this test code
 			}
 			
 		};
