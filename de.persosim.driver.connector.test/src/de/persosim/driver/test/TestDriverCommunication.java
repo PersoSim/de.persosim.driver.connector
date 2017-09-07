@@ -26,7 +26,7 @@ public class TestDriverCommunication implements Runnable,
 
 	private ServerSocket serverSocket;
 	private HashMap<Integer, Socket> lunMapping;
-	private HashMap<Integer, HandshakeData> lunHandshakeData;
+	private HashMap<UnsignedInteger, HandshakeData> lunHandshakeData;
 	private HandshakeData currentHandshake;
 	private Socket clientSocket;
 	private boolean isRunning = false;
@@ -34,7 +34,7 @@ public class TestDriverCommunication implements Runnable,
 
 	private UnsignedInteger getLowestFreeLun() {
 
-		for (byte i = 0; i < MAX_LUNS; i++) {
+		for (int i = 0; i < MAX_LUNS; i++) {
 			if (!lunMapping.containsKey(i))
 				return new UnsignedInteger(i);
 		}
@@ -45,7 +45,7 @@ public class TestDriverCommunication implements Runnable,
 			HashMap<Integer, Socket> lunMapping,
 			Collection<DriverEventListener> listeners) throws IOException {
 		this.lunMapping = lunMapping;
-		lunHandshakeData = new HashMap<Integer, HandshakeData>();
+		lunHandshakeData = new HashMap<UnsignedInteger, HandshakeData>();
 
 		this.serverSocket = serverSocket;
 	}
@@ -126,15 +126,15 @@ public class TestDriverCommunication implements Runnable,
 					} else {
 						currentHandshake = new HandshakeData();
 						currentHandshake.setLun(lun);
-						lunHandshakeData.put(lun.getAsInt(), currentHandshake);
+						lunHandshakeData.put(lun, currentHandshake);
 					}
 					return MESSAGE_IFD_HELLO.getAsHexString() + "|" + lun.getAsHexString();
 				}
 				break;
 			case VALUE_MESSAGE_ICC_STOP:
 				UnsignedInteger lun = currentHandshake.getLun();
-				if (lunHandshakeData.containsKey(lun.getAsInt())
-						&& !lunHandshakeData.get(lun.getAsInt()).isHandshakeDone()) {
+				if (lunHandshakeData.containsKey(lun)
+						&& !lunHandshakeData.get(lun).isHandshakeDone()) {
 					return MESSAGE_IFD_ERROR.getAsHexString();
 				}
 				lunHandshakeData.remove(lun);
