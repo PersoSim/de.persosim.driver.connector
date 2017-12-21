@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_fyNxQD9FEeS_D-1xKGHHEA">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kZ9_gD9FEeS_D-1xKGHHEA" featurename="commands" parentElementId="de.persosim.rcp.application">
-    <elements xsi:type="commands:Command" xmi:id="_g10FYD_LEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.command.basicCommand" commandName="Change to basic reader"/>
-    <elements xsi:type="commands:Command" xmi:id="_cO4TEEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.command.standardCommand" commandName="Change to standard reader"/>
+    <elements xsi:type="commands:Command" xmi:id="_g10FYD_LEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.command.useBasicReaderCommand" commandName="Use basic reader"/>
+    <elements xsi:type="commands:Command" xmi:id="_cO4TEEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.command.useStandardReaderCommand" commandName="Use standard reader"/>
+    <elements xsi:type="commands:Command" xmi:id="_3McVIOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.command.useNativeDriverCommand" commandName="Use native driver"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="__yeK0D_LEeS0lKPtDtc_Vw" featurename="handlers" parentElementId="de.persosim.rcp.application">
     <elements xsi:type="commands:Handler" xmi:id="_X31aUEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.handler.standard" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.StandardReaderHandler" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
     <elements xsi:type="commands:Handler" xmi:id="_xdGWwEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handler.basic" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.BasicReaderHandler" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
+    <elements xsi:type="commands:Handler" xmi:id="__jzosOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handler.nativeDriver" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.NativeDriverHandler" command="_3McVIOZWEee50pt6teHFRg"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2CwHwD_MEeS0lKPtDtc_Vw" featurename="children" parentElementId="de.persosim.rcp.mainMenue" positionInList="before:de.persosim.rcp.mainMenue.help">
     <elements xsi:type="menu:Menu" xmi:id="_2_oyQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.menu.readerType" label="Reader Type">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_4JpHQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.basic" label="Change to basic reader" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_6zsSsEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.changeToStandardReader" label="Change to standard reader" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_FBcsMOZOEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handledmenuitem.nativeDriver" label="Use native driver" type="Radio" command="_3McVIOZWEee50pt6teHFRg"/>
+      <children xsi:type="menu:MenuSeparator" xmi:id="_dxp2cOZOEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.menuseparator.0"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_4JpHQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.basic" label="Basic reader" type="Radio" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_6zsSsEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.changeToStandardReader" label="Standard reader" type="Radio" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jbTUMEIsEeS095NvfbDi9w" featurename="children" parentElementId="de.persosim.rcp.partSashContainer">
