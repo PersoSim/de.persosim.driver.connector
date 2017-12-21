@@ -1,5 +1,8 @@
 package de.persosim.driver.connector.pcsc;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
@@ -10,22 +13,36 @@ import de.persosim.simulator.utils.HexString;
  *
  */
 public class SimplePcscCallResult implements PcscCallResult {
-	private String resultData;
+	private String resultEncoding;
+	private UnsignedInteger responseCode;
+	private List<byte []> data;
 	
 	public SimplePcscCallResult(UnsignedInteger responseCode){
-		resultData = responseCode.getAsHexString();
+		resultEncoding = responseCode.getAsHexString();
+		this.responseCode = responseCode;
 	}
 	
-	public SimplePcscCallResult(UnsignedInteger responseCode, byte [] ... data) {
+	public SimplePcscCallResult(UnsignedInteger responseCode, byte [] ... resultData) {
 		this(responseCode);
+		this.data = Arrays.asList(resultData);
 		for (byte[] current : data) {
-			resultData += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+			resultEncoding += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 	}
 	
 	@Override
 	public String getEncoded() {
-		return resultData;
+		return resultEncoding;
+	}
+
+	@Override
+	public UnsignedInteger getResponseCode() {
+		return responseCode;
+	}
+
+	@Override
+	public List<byte[]> getData() {
+		return data;
 	}
 
 }

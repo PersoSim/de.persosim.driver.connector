@@ -39,6 +39,7 @@ import org.globaltester.logging.BasicLogger;
 import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
+import de.persosim.driver.connector.NativeDriverComm;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -96,6 +97,8 @@ public class ReaderPart implements VirtualReaderUi {
 	private ReaderType type = ReaderType.NONE;
 
 	private PasswordModelProvider passwordModelProvider = PasswordModelProvider.getInstance();
+
+	private NativeDriverComm currentComm;
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
@@ -970,8 +973,30 @@ public class ReaderPart implements VirtualReaderUi {
 		default:
 			break;
 		}
-		connector.connect(new VirtualDriverComm(new Socket(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT)));
+		
+		if (currentComm == null) {
+			currentComm = new VirtualDriverComm(new Socket(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));
+		}
+		
+		connector.connect(currentComm);
 		type = readerType;
+	}
+	
+	/**
+	 * Switch the parts user interface and behavior to the reader type
+	 * associated with the provided parameter.
+	 * 
+	 * @param readerType the reader type to use
+	 * @throws NoConnectorAvailableException 
+	 * @throws IOException 
+	 */
+	public void switchToCommType(NativeDriverComm comm) throws IOException {
+		resetReader();
+		
+		disposeConnector();
+		NativeDriverConnector connector = getConnector();
+		connector.connect(comm);
+		this.currentComm = comm;
 	}
 	
 	private NativeDriverConnector getConnector() throws IOException{

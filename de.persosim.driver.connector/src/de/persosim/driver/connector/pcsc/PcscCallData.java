@@ -29,7 +29,12 @@ public class PcscCallData {
 		function = getCallType(data);
 		logicalUnitNumber = getLogicalUnitNumber(data);
 		parameters = getParameters(data);
-		
+	}
+	
+	public PcscCallData(UnsignedInteger function, UnsignedInteger logicalUnitNumber, List<byte[]> parameters) {
+		this.function = function;
+		this.logicalUnitNumber = logicalUnitNumber;
+		this.parameters = parameters;
 	}
 
 	public void setFunction(UnsignedInteger function) {

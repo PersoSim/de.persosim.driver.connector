@@ -1,5 +1,9 @@
 package de.persosim.driver.connector.pcsc;
 
+import java.util.List;
+
+import de.persosim.driver.connector.UnsignedInteger;
+
 /**
  * This interface describes the result data for a PCSC function call.
  * 
@@ -16,4 +20,8 @@ public interface PcscCallResult {
 	 * @return the data encoded for sending to the native driver
 	 */
 	public String getEncoded();
+	
+	public UnsignedInteger getResponseCode();
+	
+	public List<byte []> getData();
 }
