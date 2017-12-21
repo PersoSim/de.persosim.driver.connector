@@ -14,7 +14,7 @@ import java.util.HashSet;
 
 import de.persosim.driver.connector.NativeDriverInterface;
 import de.persosim.driver.connector.UnsignedInteger;
-import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -43,7 +43,7 @@ public class TestDriver {
 	 * @throws IOException
 	 */
 	public void start() throws IOException {
-		start(new ServerSocket(NativeDriverConnectorImpl.DEFAULT_PORT));
+		start(new ServerSocket(VirtualDriverComm.DEFAULT_PORT));
 	}
 
 	/**

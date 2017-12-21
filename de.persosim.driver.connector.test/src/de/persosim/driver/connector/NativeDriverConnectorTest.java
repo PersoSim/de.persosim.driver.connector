@@ -57,7 +57,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 				
 		nativeConnector = new NativeDriverConnectorImpl();
 		nativeConnector.addListener(new DefaultListener());
-		nativeConnector.connect(getTestDriverSocket());
+		nativeConnector.connect(new VirtualDriverComm(getTestDriverSocket()));
 		
 		simulator = new Simulator() {
 			
@@ -187,7 +187,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.setHandler(handler);
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF01"));
 //				result = testAtr;
@@ -210,7 +210,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.setHandler(handler);
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF01"));
 //				result = "11223344";
@@ -253,7 +253,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.setHandler(handler);
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF01"));
 //				result = HexString.encode(testAtr);
@@ -273,7 +273,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.setHandler(handler);
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF90"));
 //				result = "9000";
@@ -291,7 +291,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 			}
 		};
@@ -309,7 +309,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF01"));
 //				result = HexString.encode(testAtr);
@@ -334,7 +334,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 //		sim.setHandler(handler);
 		new NonStrictExpectations() {
 			{
-				Activator.getSim();
+				SimulatorManager.getSim();
 				result = simulator;
 //				handler.processCommand(withPrefix("FF01"));
 //				result = HexString.encode(testAtr);

@@ -1,6 +1,20 @@
 package de.persosim.driver.connector.features;
 
-import static de.persosim.driver.connector.pcsc.PcscConstants.*;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_ICC_NOT_PRESENT;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_ICC_PRESENT;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_POWER_DOWN;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_POWER_UP;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_RESET;
+import static de.persosim.driver.connector.pcsc.PcscConstants.IFD_SUCCESS;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_IFD_ATR;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_IFD_SIMULTANEOUS_ACCESS;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_IFD_SLOTS_NUMBER;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_IFD_SLOT_THREAD_SAFE;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_VENDOR_NAME;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_VENDOR_SERIAL;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_VENDOR_TYPE;
+import static de.persosim.driver.connector.pcsc.PcscConstants.TAG_VENDOR_VERSION;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -10,9 +24,9 @@ import java.util.List;
 import org.globaltester.logging.BasicLogger;
 import org.globaltester.logging.tags.LogLevel;
 
-import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.SimulatorManager;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.ConnectorEnabled;
@@ -178,17 +192,17 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_INSUFFICIENT_BUFFER);
 		}
 		
-		if (Activator.getSim() == null){
+		if (SimulatorManager.getSim() == null){
 			BasicLogger.log(getClass(), "The simulator service is not available", LogLevel.WARN);
 			return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 		}
 				
 		if (IFD_POWER_DOWN.equals(
 				action)) {
-			if (Activator.getSim().isRunning()) {
+			if (SimulatorManager.getSim().isRunning()) {
 				byte[] result;
 				
-				result = Activator.getSim().cardPowerDown();
+				result = SimulatorManager.getSim().cardPowerDown();
 				
 				if (Arrays.equals(result,
 						Utils.toUnsignedByteArray(Iso7816.SW_9000_NO_ERROR))) {
@@ -199,14 +213,14 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 			return new SimplePcscCallResult(IFD_SUCCESS); //already powered down
 		} else {
 			if (IFD_POWER_UP.equals(action)) {
-				if (Activator.getSim().isRunning())
-					cachedAtr = Activator.getSim().cardPowerUp();
+				if (SimulatorManager.getSim().isRunning())
+					cachedAtr = SimulatorManager.getSim().cardPowerUp();
 				else 
 					BasicLogger.log(getClass(), "The simulator is not running, card was not powered up", LogLevel.WARN);
 			} else if (IFD_RESET.equals(
 					action)) {
 				
-				cachedAtr = Activator.getSim().cardReset();
+				cachedAtr = SimulatorManager.getSim().cardReset();
 			}
 			
 			if (cachedAtr == null) {
@@ -246,7 +260,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 		if (Utils.arrayHasPrefix(commandApdu, expectedHeaderAndLc)) {
 			result = getOnlyTagsFromFeatureList(getFeatures());
 		} else {
-			result = Activator.getSim().processCommand(commandApdu);
+			result = SimulatorManager.getSim().processCommand(commandApdu);
 		}
 
 		if (result.length > expectedLength.getAsSignedLong()){
@@ -278,7 +292,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {
-		if ((Activator.getSim() != null)&& (Activator.getSim().isRunning())){
+		if ((SimulatorManager.getSim() != null)&& (SimulatorManager.getSim().isRunning())){
 			return new SimplePcscCallResult(IFD_ICC_PRESENT);
 		}
 		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);

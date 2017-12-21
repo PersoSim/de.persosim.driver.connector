@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import de.persosim.driver.connector.Activator;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.SimulatorManager;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.exceptions.PaceExecutionException;
@@ -310,7 +310,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 			byte[] pseudoApduHeader = new byte[] { (byte) 0xff, (byte) 0x86, 0,
 					0, (byte) (0xFF & data.toByteArray().length) };
-			byte[] responseApdu = Activator.getSim()
+			byte[] responseApdu = SimulatorManager.getSim()
 					.processCommand(
 							Utils.concatByteArrays(pseudoApduHeader,
 									data.toByteArray()));
@@ -455,7 +455,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		byte[] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
 		byte[] readBinary = HexString.toByteArray("00 B0 00 00 00");
 
-		byte[] response = Activator.getSim().processCommand(select);
+		byte[] response = SimulatorManager.getSim().processCommand(select);
 		
 		short statusWord = Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(response,
@@ -468,7 +468,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);
 		}
 		
-		response = Activator.getSim().processCommand(readBinary);
+		response = SimulatorManager.getSim().processCommand(readBinary);
 
 		statusWord = Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(response,

@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import de.persosim.driver.connector.UnsignedInteger;
+import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.features.MctReaderDirect;
 import de.persosim.driver.connector.features.MctUniversal;
@@ -33,7 +34,7 @@ public class NativeDriverConnectorConsole {
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x42000DB4)));
 		connector.addListener(new MctUniversal(new UnsignedInteger(0x42000DB5)));
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x42000DCC)));
-		connector.connect(new Socket("localhost", 5678));
+		connector.connect(new VirtualDriverComm(new Socket("localhost", 5678)));
 
 	}
 

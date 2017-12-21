@@ -40,6 +40,7 @@ import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.UnsignedInteger;
+import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.features.MctReaderDirect;
@@ -48,7 +49,6 @@ import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
 import de.persosim.driver.connector.service.NativeDriverConnector;
-import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -970,7 +970,7 @@ public class ReaderPart implements VirtualReaderUi {
 		default:
 			break;
 		}
-		connector.connect(new Socket(NativeDriverConnectorImpl.DEFAULT_HOST, NativeDriverConnectorImpl.DEFAULT_PORT));
+		connector.connect(new VirtualDriverComm(new Socket(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT)));
 		type = readerType;
 	}
 	

@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.service;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,18 +26,21 @@ public class NativeDriverConnectorImpl implements NativeDriverConnector {
 
 	private List<PcscListener> listeners = new LinkedList<PcscListener>();
 	private List<VirtualReaderUi> userInterfaces = new LinkedList<VirtualReaderUi>();
-	private Thread communicationThread;
 	private NativeDriverComm communication;
 	private int timeout = 5000;
+	
+	public NativeDriverConnectorImpl() {
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
-	public void connect(Socket socket) throws IOException {
-		communication = new NativeDriverComm(socket, listeners); 
-		communicationThread = new Thread(communication);
-		communicationThread.start();
+	public void connect(NativeDriverComm comm) throws IOException {
+		communication = comm;
+		communication.setListeners(listeners);
+		communication.start();
 
 		long timeOutTime = Calendar.getInstance().getTimeInMillis() + timeout;
-		while (!communication.isConnected()){
+		while (!communication.isRunning()){
 			if (Calendar.getInstance().getTimeInMillis() > timeOutTime){
 				throw new IOException("The communication thread has run into a timeout");
 			}
@@ -52,14 +54,13 @@ public class NativeDriverConnectorImpl implements NativeDriverConnector {
 
 	@Override
 	public boolean isRunning() {
-		return ((communicationThread != null) && communicationThread.isAlive());
+		return ((communication != null) && communication.isRunning());
 	}
 
 	@Override
 	public void disconnect() throws IOException, InterruptedException {
 		if (communication != null){
-			communication.disconnect();
-			communicationThread.join();
+			communication.stop();
 		}
 	}
 
