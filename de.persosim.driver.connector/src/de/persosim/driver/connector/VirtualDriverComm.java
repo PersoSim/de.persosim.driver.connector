@@ -29,17 +29,18 @@ import de.persosim.simulator.utils.HexString;
  * 
  */
 public class VirtualDriverComm implements NativeDriverComm, Runnable {
-	
+
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 5678;
-	
-	
+
 	private List<PcscListener> listeners;
 	private Socket dataSocket;
 	private UnsignedInteger lun;
-	private boolean isRunning = true;
+	private boolean isRunning = false;
 	private boolean isConnected = false;
 	private Thread driverComm;
+	private String host;
+	private int port;
 
 	/**
 	 * Constructor using the connection information.
@@ -48,8 +49,9 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 	 *            the socket to use for communication with the native driver
 	 * @throws IOException
 	 */
-	public VirtualDriverComm(Socket socket) throws IOException {
-		this.dataSocket = socket;
+	public VirtualDriverComm(String host, int port) throws IOException {
+		this.host = host;
+		this.port = port;
 	}
 
 	public void log(PcscCallResult data) {
@@ -57,10 +59,10 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 	}
 
 	public void log(PcscCallData data) {
-		String logmessage = "PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER + data.getLogicalUnitNumber().getAsHexString();
+		String logmessage = "PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER
+				+ data.getLogicalUnitNumber().getAsHexString();
 		for (byte[] current : data.getParameters()) {
-			logmessage += System.lineSeparator() + NativeDriverInterface.MESSAGE_DIVIDER
-					+ HexString.encode(current);
+			logmessage += System.lineSeparator() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 		BasicLogger.log(this.getClass(), logmessage, LogLevel.TRACE);
 	}
@@ -89,14 +91,24 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 	}
 
 	@Override
-	public void start() {		
+	public void start() {
+		try {
+			dataSocket = new Socket(host, port);
+		} catch (IOException e) {
+			throw new IllegalStateException("Socket could not be created", e);
+		}
 		driverComm = new Thread(this);
 		driverComm.start();
+		isRunning = true;
 	}
 
 	@Override
 	public void stop() {
-		isRunning = false;
+		if (!isRunning) {
+			return;
+		}
+
+		driverComm.interrupt();
 
 		try {
 			dataSocket.close();
@@ -113,18 +125,20 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 			// Hack (wait for pcsc to poll and kill connections until the driver
 			// handles the closure handshakes)
 			Thread.sleep(3000);
-		} catch (IOException|InterruptedException e) {
+		} catch (IOException | InterruptedException e) {
 			BasicLogger.logException("Could not perform closing handshake", e, LogLevel.ERROR);
 		}
-		
 
 		try {
 			driverComm.join();
 		} catch (InterruptedException e) {
 			BasicLogger.logException("Waiting for communication thread join failed", e, LogLevel.ERROR);
 		}
-		
+
 		isConnected = false;
+		dataSocket = null;
+		driverComm = null;
+		isRunning = false;
 	}
 
 	@Override
@@ -139,63 +153,67 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 
 	@Override
 	public void run() {
-		try (BufferedReader bufferedDataIn = new BufferedReader(new InputStreamReader(
-				dataSocket.getInputStream()));
-		BufferedWriter bufferedDataOut = new BufferedWriter(new OutputStreamWriter(
-				dataSocket.getOutputStream()));){
-		
-		isRunning = true;
-		lun = CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
-		isConnected = true;
-		while (isRunning) {
-			try {
-				String data = bufferedDataIn.readLine();
-				PcscCallResult result = null;
-				if (data != null) {
-					try {
-						PcscCallData callData = new PcscCallData(data);
-						log(callData);
-						if (listeners != null) {
-							for (PcscListener listener : listeners) {
-								try {
-									PcscCallResult currentResult = listener
-											.processPcscCall(callData);
-									if (result == null && currentResult != null) {
-										// ignore all but the first result
-										result = currentResult;
+		try (BufferedReader bufferedDataIn = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
+				BufferedWriter bufferedDataOut = new BufferedWriter(
+						new OutputStreamWriter(dataSocket.getOutputStream()));) {
+
+			lun = CommUtils.doHandshake(dataSocket, HandshakeMode.OPEN);
+			isConnected = true;
+			while (!Thread.interrupted()) {
+				try {
+					String data = bufferedDataIn.readLine();
+					PcscCallResult result = null;
+					if (data != null) {
+						try {
+							PcscCallData callData = new PcscCallData(data);
+							log(callData);
+							if (listeners != null) {
+								for (PcscListener listener : listeners) {
+									try {
+										PcscCallResult currentResult = listener.processPcscCall(callData);
+										if (result == null && currentResult != null) {
+											// ignore all but the first result
+											result = currentResult;
+										}
+									} catch (RuntimeException e) {
+										BasicLogger.logException(getClass(),
+												"Something went wrong while processing of the PCSC data by listener \""
+														+ listener.getClass().getName() + "\"!\"",
+												e, LogLevel.ERROR);
 									}
-								} catch (RuntimeException e) {
-									BasicLogger.logException(getClass(),
-											"Something went wrong while processing of the PCSC data by listener \""
-													+ listener.getClass().getName() + "\"!\"",
-											e, LogLevel.ERROR);
 								}
-							}										
-						} else {
-							BasicLogger.log(getClass(), "No PCSC listeners registered!", LogLevel.WARN);
+							} else {
+								BasicLogger.log(getClass(), "No PCSC listeners registered!", LogLevel.WARN);
+							}
+						} catch (RuntimeException e) {
+							BasicLogger.logException(getClass(), "Something went wrong while parsing the PCSC data!", e,
+									LogLevel.ERROR);
 						}
-					} catch (RuntimeException e) {
-						BasicLogger.logException(getClass(),
-								"Something went wrong while parsing the PCSC data!",
-								e, LogLevel.ERROR);
-					}
-					if (result == null) {
-						result = new SimplePcscCallResult(PcscConstants.IFD_NOT_SUPPORTED);
-					}
+						if (result == null) {
+							result = new SimplePcscCallResult(PcscConstants.IFD_NOT_SUPPORTED);
+						}
 
-					log(result);
+						log(result);
 
-					bufferedDataOut.write(result.getEncoded());
-					bufferedDataOut.newLine();
-					bufferedDataOut.flush();
+						bufferedDataOut.write(result.getEncoded());
+						bufferedDataOut.newLine();
+						bufferedDataOut.flush();
+					}
+				} catch (SocketException e) {
+					// expected behavior after interrupting
 				}
-			} catch (SocketException e) {
-				// expected behavior after interrupting
 			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
-	} catch (Exception e1) {
-		e1.printStackTrace();
 	}
+
+	@Override
+	public void reset() {
+		if (isRunning) {
+			stop();
+		}
+		listeners = null;
 	}
 
 }

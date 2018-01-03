@@ -104,7 +104,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	private static final int LENGTH_ESTABLISH_PACE_CHAT_LENGTH = 1;
 	private static final int LENGTH_ESTABLISH_PACE_PIN_LENGTH = 1;
 
-	private static final byte FEATURE_CONTROL_CODE = 0x20;
+	public static final byte FEATURE_CONTROL_CODE = 0x20;
 
 	public static final int OFFSET_FUNCTION = 0;
 	public static final int OFFSET_DATA_LENGTH = 1;
@@ -249,25 +249,6 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		// not supported
 		return null;
 	}
-
-	/**
-	 * Extracts the value field from an arbitrary structure containing a length
-	 * field
-	 * 
-	 * @param data
-	 * @param offsetLengthField
-	 *            the offset to the length field
-	 * @param lengthFieldLength
-	 *            the length in bytes of the length field
-	 * @return the value part as byte array
-	 */
-	private byte[] getValue(byte[] data, int offsetLengthField,
-			int lengthFieldLength) {
-		int length = Utils.getIntFromUnsignedByteArray(Arrays.copyOfRange(data,
-				offsetLengthField, offsetLengthField + lengthFieldLength));
-		return Arrays.copyOfRange(data, offsetLengthField + lengthFieldLength,
-				offsetLengthField + lengthFieldLength + length);
-	}
 	
 	/**
 	 * Establish a pseudo PACE channel between the connector and the simulator
@@ -280,10 +261,10 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		
 		int offset = OFFSET_ESTABLISH_PACE_PIN_ID;
 		byte pinId = inputDataFromPpdu[offset];
-		byte[] chat = getValue(inputDataFromPpdu, ++offset,
+		byte[] chat = Utils.getValue(inputDataFromPpdu, ++offset,
 				LENGTH_ESTABLISH_PACE_CHAT_LENGTH);
 		offset += chat.length + LENGTH_ESTABLISH_PACE_CHAT_LENGTH;
-		byte[] pin = getValue(inputDataFromPpdu, offset,
+		byte[] pin = Utils.getValue(inputDataFromPpdu, offset,
 				LENGTH_ESTABLISH_PACE_PIN_LENGTH);
 		offset += pin.length + LENGTH_ESTABLISH_PACE_PIN_LENGTH;
 

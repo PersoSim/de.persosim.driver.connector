@@ -45,6 +45,14 @@ public class ConnectorTest {
 	public Socket getTestDriverSocket() throws IOException {
 		return new Socket("localhost", testDriverServerSocket.getLocalPort());
 	}
+	
+	public int getTestDriverPort() {
+		return testDriverServerSocket.getLocalPort();
+	}
+	
+	public String getTestDriverHost() {
+		return "localhost";
+	}
 
 	/**
 	 * @return The {@link ServerSocket} to be used for the test simulator

@@ -1,7 +1,6 @@
 package de.persosim.driver.connector.ui.parts;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.globaltester.logging.BasicLogger;
-import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.DriverConnectorFactory;
 import de.persosim.driver.connector.NativeDriverComm;
@@ -99,6 +97,8 @@ public class ReaderPart implements VirtualReaderUi {
 	private PasswordModelProvider passwordModelProvider = PasswordModelProvider.getInstance();
 
 	private NativeDriverComm currentComm;
+
+	private ReaderType currentReaderType;
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
@@ -534,14 +534,18 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		try {
-			switchToReaderType(ReaderType.STANDARD);
-		} catch (IOException e) {
-			BasicLogger.logException(this.getClass(), e, LogLevel.FATAL);
-		}
+		switchReaderType(getDefaultReaderType(), getDefaultComm());
 	}
 	
 	
+
+	private NativeDriverComm getDefaultComm() {
+		try {
+			return new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT);
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not create default comm object", e);
+		}
+	}
 
 	/**
 	 * This method defines the Buttons all getxxxKey-methods use it for creating
@@ -940,20 +944,43 @@ public class ReaderPart implements VirtualReaderUi {
 		connector.addListener(new DefaultListener());
 	}
 	
+	public void switchReaderType(ReaderType readerType) {
+		switchReaderType(readerType, null);
+	}
+	
+	public void switchReaderType(NativeDriverComm comm) {
+		switchReaderType(null, comm);
+	}
+
+	
 	/**
 	 * Switch the parts user interface and behavior to the reader type
 	 * associated with the provided parameter.
 	 * 
 	 * @param readerType the reader type to use
+	 * @param comm the {@link NativeDriverComm} object to use
 	 * @throws NoConnectorAvailableException 
 	 * @throws IOException 
 	 */
-	public void switchToReaderType(ReaderType readerType) throws IOException {
+	private void switchReaderType(ReaderType readerType, NativeDriverComm comm) {
 		resetReader();
 		
+		if (readerType != null) {
+			currentReaderType = readerType;
+		}
+		
+		if (currentReaderType == null) {
+			currentReaderType = getDefaultReaderType();
+		}
+		
 		disposeConnector();
-		NativeDriverConnector connector = getConnector();
-		switch (readerType) {
+		NativeDriverConnector connector;
+		try {
+			connector = getConnector();
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not get reader connector object", e);
+		}
+		switch (currentReaderType) {
 		case BASIC:
 			addBasicListeners(connector);
 			createBasicReader(root);
@@ -974,31 +1001,28 @@ public class ReaderPart implements VirtualReaderUi {
 			break;
 		}
 		
-		if (currentComm == null) {
-			currentComm = new VirtualDriverComm(new Socket(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));
+		if (comm != null) {
+			currentComm = comm;
 		}
 		
-		connector.connect(currentComm);
-		type = readerType;
-	}
-	
-	/**
-	 * Switch the parts user interface and behavior to the reader type
-	 * associated with the provided parameter.
-	 * 
-	 * @param readerType the reader type to use
-	 * @throws NoConnectorAvailableException 
-	 * @throws IOException 
-	 */
-	public void switchToCommType(NativeDriverComm comm) throws IOException {
-		resetReader();
+		if (currentComm == null) {
+			currentComm = getDefaultComm();
+		} else {
+			currentComm.reset();
+		}
 		
-		disposeConnector();
-		NativeDriverConnector connector = getConnector();
-		connector.connect(comm);
-		this.currentComm = comm;
+		try {
+			connector.connect(currentComm);
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not connect the reader connector", e);
+		}
+		type = currentReaderType;
 	}
 	
+	private ReaderType getDefaultReaderType() {
+		return ReaderType.STANDARD;
+	}
+
 	private NativeDriverConnector getConnector() throws IOException{
 		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
 		return factory.getConnector(de.persosim.driver.connector.Activator.PERSOSIM_CONNECTOR_CONTEXT_ID);

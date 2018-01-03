@@ -34,7 +34,7 @@ public class NativeDriverCommTest extends ConnectorTest{
 		driver = new TestDriver();
 		driver.start(getTestDriverServerSocket());
 		listeners = new ArrayList<>();
-		nativeCommunication = new VirtualDriverComm(getTestDriverSocket());
+		nativeCommunication = new VirtualDriverComm(getTestDriverHost(), getTestDriverPort());
 		nativeCommunication.setListeners(listeners);
 		nativeCommunication.start();
 		
