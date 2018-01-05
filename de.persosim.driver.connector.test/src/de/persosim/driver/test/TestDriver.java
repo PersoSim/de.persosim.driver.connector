@@ -137,7 +137,7 @@ public class TestDriver {
 			System.out.println("Driver received PCSC data:\t" + responseData);
 			return responseData;
 		}
-		System.out.println("No connected socket found for lun: " + lun);
+		System.out.println("No connected socket found for lun: 0x" + lun.getAsHexString());
 		return null;
 	}
 
