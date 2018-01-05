@@ -99,7 +99,6 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 		}
 		driverComm = new Thread(this);
 		driverComm.start();
-		isRunning = true;
 	}
 
 	@Override
@@ -153,6 +152,7 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 
 	@Override
 	public void run() {
+		isRunning = true;
 		try (BufferedReader bufferedDataIn = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
 				BufferedWriter bufferedDataOut = new BufferedWriter(
 						new OutputStreamWriter(dataSocket.getOutputStream()));) {

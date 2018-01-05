@@ -20,4 +20,5 @@ Require-Bundle: org.eclipse.swt;bundle-version="3.103.0",
  org.globaltester.logging
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.inject;version="1.0.0"
-Export-Package: de.persosim.driver.connector.ui.parts
+Export-Package: de.persosim.driver.connector.ui,
+ de.persosim.driver.connector.ui.parts

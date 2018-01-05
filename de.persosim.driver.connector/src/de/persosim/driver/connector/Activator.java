@@ -19,6 +19,7 @@ public class Activator implements BundleActivator {
 	private static ServiceRegistration<DriverConnectorFactory> driverConnectorFactoryRegistration;
 
 	public static final String PERSOSIM_CONNECTOR_CONTEXT_ID = "de.persosim";
+	public static final String PLUGIN = "de.persosim.driver.connector";
 	
 	static BundleContext getContext() {
 		return context;

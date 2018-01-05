@@ -100,6 +100,8 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private ReaderType currentReaderType;
 
+	private ReaderType lastReaderType;
+
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
 	 * 
@@ -964,6 +966,12 @@ public class ReaderPart implements VirtualReaderUi {
 	 */
 	private void switchReaderType(ReaderType readerType, NativeDriverComm comm) {
 		resetReader();
+
+		disposeConnector();
+		
+		if (ReaderType.NONE.equals(readerType)) {
+			return;
+		}
 		
 		if (readerType != null) {
 			currentReaderType = readerType;
@@ -973,7 +981,8 @@ public class ReaderPart implements VirtualReaderUi {
 			currentReaderType = getDefaultReaderType();
 		}
 		
-		disposeConnector();
+		lastReaderType = currentReaderType;
+		
 		NativeDriverConnector connector;
 		try {
 			connector = getConnector();
@@ -1046,5 +1055,9 @@ public class ReaderPart implements VirtualReaderUi {
 
 		disposeReaderControls();
 		type = ReaderType.NONE;
+	}
+
+	public void restartReader() {
+		switchReaderType(lastReaderType, null);
 	}
 }
