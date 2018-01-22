@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
 
@@ -68,7 +68,7 @@ public class PcscCallData {
 
 	private List<byte[]> getParameters(String data) {
 		List<byte []> result = new ArrayList<byte []>();
-		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		String [] dataArray = data.split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER));
 		for (int i = 2; i < dataArray.length; i++){
 			result.add(HexString.toByteArray(dataArray[i]));
 		}
@@ -76,7 +76,7 @@ public class PcscCallData {
 	}
 
 	private UnsignedInteger getLogicalUnitNumber(String data) {
-		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		String [] dataArray = data.split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER));
 		if (dataArray.length < 1){
 			throw new InvalidParameterException("Given data does not contain a logical number");
 		}
@@ -84,7 +84,7 @@ public class PcscCallData {
 	}
 
 	private UnsignedInteger getCallType(String data) {
-		String [] dataArray = data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+		String [] dataArray = data.split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER));
 		if (dataArray.length < 2){
 			throw new InvalidParameterException("Given data does not contain a function number");
 		}
@@ -93,9 +93,9 @@ public class PcscCallData {
 	
 	@Override
 	public String toString() {
-		String result = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + logicalUnitNumber.getAsHexString();
+		String result = function.getAsHexString() + IfdInterface.MESSAGE_DIVIDER + logicalUnitNumber.getAsHexString();
 		for (byte [] current : parameters){
-			result += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+			result += IfdInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 		return result;
 	}

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.persosim.driver.connector.CommUtils;
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.SimulatorManager;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -128,11 +128,11 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction().getAsInt()) {
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
+		case IfdInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
 			return powerIcc(data);
 		default:
 			return null;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
@@ -29,7 +29,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		if (data.getFunction().equals(NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
+		if (data.getFunction().equals(IfdInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
 			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
 				List<byte[]> params = data.getParameters();
 				byte[] apduHeaderExpected = HexString.toByteArray("002C0203");
@@ -77,7 +77,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 							list.add(resetRetryCounterApduBytes);
 							list.add(expectedLength);
 							
-							data.setFunction(NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
+							data.setFunction(IfdInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
 							data.setParameters(list);
 
 							System.out.println("modified param 0: " + HexString.encode(data.getParameters().get(0)));

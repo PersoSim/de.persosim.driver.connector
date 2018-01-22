@@ -36,8 +36,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.globaltester.logging.BasicLogger;
 
+import de.persosim.driver.connector.CommManager;
 import de.persosim.driver.connector.DriverConnectorFactory;
-import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.IfdComm;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -47,7 +48,8 @@ import de.persosim.driver.connector.features.MctUniversal;
 import de.persosim.driver.connector.features.ModifyPinDirect;
 import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
-import de.persosim.driver.connector.service.NativeDriverConnector;
+import de.persosim.driver.connector.service.IfdConnector;
+import de.persosim.simulator.preferences.PersoSimPreferenceManager;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -57,6 +59,10 @@ import de.persosim.driver.connector.service.NativeDriverConnector;
  *
  */
 public class ReaderPart implements VirtualReaderUi {
+
+	private static final String LAST_COMM_TYPE = "LAST_COMM_TYPE";
+
+	private static final String LAST_READER_TYPE = "LAST_READER_TYPE";
 
 	public enum ReaderType {
 		STANDARD, BASIC, NONE;
@@ -96,7 +102,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private PasswordModelProvider passwordModelProvider = PasswordModelProvider.getInstance();
 
-	private NativeDriverComm currentComm;
+	private IfdComm currentComm;
 
 	private ReaderType currentReaderType;
 
@@ -536,17 +542,28 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
-		switchReaderType(getDefaultReaderType(), getDefaultComm());
-	}
-	
-	
-
-	private NativeDriverComm getDefaultComm() {
-		try {
-			return new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT);
-		} catch (IOException e) {
-			throw new IllegalStateException("Could not create default comm object", e);
+		String lastReaderType = PersoSimPreferenceManager.getPreference(LAST_READER_TYPE);
+		String lastCommType = PersoSimPreferenceManager.getPreference(LAST_COMM_TYPE);
+		
+		IfdComm comm = CommManager.getCommForType(lastCommType);
+		
+		if (comm == null){
+			comm = getDefaultComm();
 		}
+		
+		ReaderType readerType;
+		try {
+			readerType = ReaderType.valueOf(lastReaderType);
+		} catch (IllegalArgumentException | NullPointerException e){
+			//NOSONAR: if no value existing, use default
+			readerType = getDefaultReaderType();
+		}
+		
+		switchReaderType(readerType, comm);
+	}
+
+	private IfdComm getDefaultComm() {
+		return CommManager.getCommForType(VirtualDriverComm.NAME);
 	}
 
 	/**
@@ -934,7 +951,7 @@ public class ReaderPart implements VirtualReaderUi {
 		return null;
 	}
 
-	private void addStandardListeners(NativeDriverConnector connector) {
+	private void addStandardListeners(IfdConnector connector) {
 		connector.addListener(new VerifyPinDirect(new UnsignedInteger(0x3136C8)));
 		connector.addListener(new ModifyPinDirect(new UnsignedInteger(0x3136CC)));
 		connector.addListener(new MctReaderDirect(new UnsignedInteger(0x3136D0)));
@@ -942,7 +959,7 @@ public class ReaderPart implements VirtualReaderUi {
 		connector.addListener(new PersoSimPcscProcessor(new UnsignedInteger(0x313730)));
 	}
 
-	private void addBasicListeners(NativeDriverConnector connector) {
+	private void addBasicListeners(IfdConnector connector) {
 		connector.addListener(new DefaultListener());
 	}
 	
@@ -950,7 +967,7 @@ public class ReaderPart implements VirtualReaderUi {
 		switchReaderType(readerType, null);
 	}
 	
-	public void switchReaderType(NativeDriverComm comm) {
+	public void switchReaderType(IfdComm comm) {
 		switchReaderType(null, comm);
 	}
 
@@ -960,11 +977,11 @@ public class ReaderPart implements VirtualReaderUi {
 	 * associated with the provided parameter.
 	 * 
 	 * @param readerType the reader type to use
-	 * @param comm the {@link NativeDriverComm} object to use
+	 * @param comm the {@link IfdComm} object to use
 	 * @throws NoConnectorAvailableException 
 	 * @throws IOException 
 	 */
-	private void switchReaderType(ReaderType readerType, NativeDriverComm comm) {
+	private void switchReaderType(ReaderType readerType, IfdComm comm) {
 		resetReader();
 
 		disposeConnector();
@@ -983,7 +1000,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		lastReaderType = currentReaderType;
 		
-		NativeDriverConnector connector;
+		IfdConnector connector;
 		try {
 			connector = getConnector();
 		} catch (IOException e) {
@@ -1026,13 +1043,15 @@ public class ReaderPart implements VirtualReaderUi {
 			throw new IllegalStateException("Could not connect the reader connector", e);
 		}
 		type = currentReaderType;
+		PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
+		PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
 	}
 	
 	private ReaderType getDefaultReaderType() {
 		return ReaderType.STANDARD;
 	}
 
-	private NativeDriverConnector getConnector() throws IOException{
+	private IfdConnector getConnector() throws IOException{
 		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
 		return factory.getConnector(de.persosim.driver.connector.Activator.PERSOSIM_CONNECTOR_CONTEXT_ID);
 	}

@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 
 public class TestDriverTest extends ConnectorTest implements DriverEventListener {
@@ -45,9 +45,9 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				iccSocket.getInputStream()));
 
-		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_HELLO.getAsHexString() + "|" + new UnsignedInteger(-1).getAsHexString());
-		assertEquals(NativeDriverInterface.MESSAGE_IFD_HELLO.getAsHexString() + "|" + new UnsignedInteger(0).getAsHexString(), reader.readLine());
-		CommUtils.writeLine(writer, NativeDriverInterface.MESSAGE_ICC_DONE.getAsHexString());
+		CommUtils.writeLine(writer, IfdInterface.MESSAGE_ICC_HELLO.getAsHexString() + "|" + new UnsignedInteger(-1).getAsHexString());
+		assertEquals(IfdInterface.MESSAGE_IFD_HELLO.getAsHexString() + "|" + new UnsignedInteger(0).getAsHexString(), reader.readLine());
+		CommUtils.writeLine(writer, IfdInterface.MESSAGE_ICC_DONE.getAsHexString());
 		iccSocket.close();
 	}
 
@@ -68,7 +68,7 @@ public class TestDriverTest extends ConnectorTest implements DriverEventListener
 					System.out.println("Connector mock waiting for data");
 					data = reader.readLine();
 					System.out.println("Connector mock received data: " + data);
-					assertEquals("00000000" + NativeDriverInterface.MESSAGE_DIVIDER + "00000000" + NativeDriverInterface.MESSAGE_DIVIDER + "54657374", data);
+					assertEquals("00000000" + IfdInterface.MESSAGE_DIVIDER + "00000000" + IfdInterface.MESSAGE_DIVIDER + "54657374", data);
 					System.out.println("Connector mock writing data");
 					String response = "00112233"; 
 					writer.write(response);

@@ -21,8 +21,8 @@ import de.persosim.driver.connector.pcsc.AbstractPcscFeature;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
-import de.persosim.driver.connector.service.NativeDriverConnector;
-import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.IfdConnector;
+import de.persosim.driver.connector.service.IfdConnectorImpl;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
@@ -30,13 +30,13 @@ import de.persosim.simulator.utils.Utils;
 import mockit.Mocked;
 
 /**
- * This class tests the {@link NativeDriverConnectorImpl}.
+ * This class tests the {@link IfdConnectorImpl}.
  * @author mboonk
  *
  */
-public class NativeDriverConnectorTest extends ConnectorTest{
+public class IfdConnectorTest extends ConnectorTest{
 
-	private NativeDriverConnector nativeConnector;
+	private IfdConnector nativeConnector;
 	private final byte [] testAtr = "TESTATR".getBytes();
 	@Mocked
 	private Activator activator;
@@ -49,7 +49,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	@Before
 	public void setUp() throws Exception {
 				
-		nativeConnector = new NativeDriverConnectorImpl();
+		nativeConnector = new IfdConnectorImpl();
 		nativeConnector.addListener(new DefaultListener());
 		
 		testDriverComm = new TestDriverComm();
@@ -141,7 +141,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	
 	private String checkPcscTag(UnsignedInteger tag, UnsignedInteger expectedResponseCode, UnsignedInteger expectedLength) throws Exception{
 
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_GET_CAPABILITIES, new UnsignedInteger(0), getAsList(tag.getAsByteArray(), expectedLength.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_GET_CAPABILITIES, new UnsignedInteger(0), getAsList(tag.getAsByteArray(), expectedLength.getAsByteArray())));
 
 		String expected = "";
 		
@@ -150,7 +150,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			expected = PcscConstants.IFD_ERROR_TAG.getAsHexString();
 			break;
 		case PcscConstants.VALUE_IFD_SUCCESS:
-			expected = expectedResponseCode.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER;
+			expected = expectedResponseCode.getAsHexString() + IfdInterface.MESSAGE_DIVIDER;
 			break;
 			default:
 				fail("invalid expected response code");
@@ -191,10 +191,10 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 		SimulatorManager.setSimulator(simulator);
 		
-		testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
-		PcscCallResult response = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, new UnsignedInteger(0), getAsList(apdu, UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult response = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC, new UnsignedInteger(0), getAsList(apdu, UnsignedInteger.MAX_VALUE.getAsByteArray())));
 				
-		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
+		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + IfdInterface.MESSAGE_DIVIDER + HexString.encode("RESPONSE".getBytes());
 		assertEquals(expected, response.getEncoded());
 	}
 	
@@ -215,12 +215,12 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		});
 		
 
-		testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 
-		PcscCallResult response = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_DEVICE_CONTROL, new UnsignedInteger(0), getAsList( PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray(), new byte[]{}, UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult response = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_DEVICE_CONTROL, new UnsignedInteger(0), getAsList( PcscConstants.CONTROL_CODE_GET_FEATURE_REQUEST.getAsByteArray(), new byte[]{}, UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
 		//a string of tag|00000004|xxxxxxxx bytes is expected in all but the last 4 byte
-		byte [] responseData = HexString.toByteArray(response.getEncoded().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[1]);
+		byte [] responseData = HexString.toByteArray(response.getEncoded().split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER))[1]);
 		boolean foundFeature = false;
 		for (int i = 0; i < responseData.length / 4; i++){
 			assertEquals(4, responseData[i*4+1]);
@@ -230,7 +230,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 			}
 		}
 		assertTrue("Feature inserted for testing not found", foundFeature);
-		assertEquals(PcscConstants.IFD_SUCCESS.getAsHexString(), response.getEncoded().split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0]);
+		assertEquals(PcscConstants.IFD_SUCCESS.getAsHexString(), response.getEncoded().split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER))[0]);
 	}
 
 	@Test
@@ -239,9 +239,9 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 		SimulatorManager.setSimulator(simulator);
 
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
-		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
+		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + IfdInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result.getEncoded());
 	}
 
@@ -250,7 +250,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 		SimulatorManager.setSimulator(simulator);
 
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT, new UnsignedInteger(0), getAsList(UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_IS_ICC_PRESENT, new UnsignedInteger(0), getAsList(UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
 		String expected = PcscConstants.IFD_ICC_PRESENT.getAsHexString();
 		assertEquals(expected, result.getEncoded());
@@ -261,7 +261,7 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 
 		SimulatorManager.setSimulator(simulator);
 		
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString();
 		assertEquals(expected, result.getEncoded());
@@ -271,9 +271,9 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 	public void testPcscPowerIccPowerDown() throws Exception{
 		SimulatorManager.setSimulator(simulator);
 		
-		testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_DOWN.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 
 		String expected = PcscConstants.IFD_SUCCESS.getAsHexString();
 		assertEquals(expected, result.getEncoded());
@@ -286,11 +286,11 @@ public class NativeDriverConnectorTest extends ConnectorTest{
 		SimulatorManager.setSimulator(simulator);
 		
 		
-		testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_POWER_UP.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
-		PcscCallResult result = testDriverComm.sendData(new PcscCallData(NativeDriverInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_RESET.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
+		PcscCallResult result = testDriverComm.sendData(new PcscCallData(IfdInterface.PCSC_FUNCTION_POWER_ICC, new UnsignedInteger(0), getAsList(PcscConstants.IFD_RESET.getAsByteArray(), UnsignedInteger.MAX_VALUE.getAsByteArray())));
 		
-		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
+		String expected = PcscConstants.IFD_SUCCESS.getAsHexString() + IfdInterface.MESSAGE_DIVIDER + HexString.encode(testAtr);
 		assertEquals(expected, result.getEncoded());
 	}
 }

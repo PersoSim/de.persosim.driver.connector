@@ -6,7 +6,7 @@ import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscListener;
 
-public class TestDriverComm implements NativeDriverComm {
+public class TestDriverComm implements IfdComm {
 
 	private List<PcscListener> listeners;
 	private boolean running;
@@ -46,6 +46,11 @@ public class TestDriverComm implements NativeDriverComm {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public String getName() {
+		return this.getName();
 	}
 
 }

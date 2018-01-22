@@ -5,11 +5,11 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 
-import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.IfdComm;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscListener;
 
-public interface NativeDriverConnector {
+public interface IfdConnector {
 
 	/**
 	 * This method connects to the native driver part.
@@ -17,7 +17,7 @@ public interface NativeDriverConnector {
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	void connect(NativeDriverComm comm) throws IOException;
+	void connect(IfdComm comm) throws IOException;
 
 	boolean isRunning();
 
@@ -61,5 +61,10 @@ public interface NativeDriverConnector {
 	 * @return the list of currently attached listeners
 	 */
 	public List<PcscListener> getListeners();
+	
+	/**
+	 * Reconnects using the same configuration.
+	 */
+	public void reconnect();
 
 }

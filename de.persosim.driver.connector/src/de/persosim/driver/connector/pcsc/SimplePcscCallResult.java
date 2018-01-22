@@ -3,7 +3,7 @@ package de.persosim.driver.connector.pcsc;
 import java.util.Arrays;
 import java.util.List;
 
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.simulator.utils.HexString;
 
@@ -26,7 +26,7 @@ public class SimplePcscCallResult implements PcscCallResult {
 		this(responseCode);
 		this.data = Arrays.asList(resultData);
 		for (byte[] current : data) {
-			resultEncoding += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+			resultEncoding += IfdInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 	}
 	

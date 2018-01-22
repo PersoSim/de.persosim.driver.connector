@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import de.persosim.driver.connector.exceptions.PcscNativeCommunicationException;
 import de.persosim.driver.connector.pcsc.PcscCallData;
-import de.persosim.driver.connector.service.NativeDriverConnectorImpl;
+import de.persosim.driver.connector.service.IfdConnectorImpl;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
@@ -67,7 +67,7 @@ public class CommUtils {
 
 	/**
 	 * This method performs a handshake against the
-	 * {@link NativeDriverConnectorImpl} if no lun is known. This is the case for
+	 * {@link IfdConnectorImpl} if no lun is known. This is the case for
 	 * the initial connection initiation.
 	 * 
 	 * @param iccSocket
@@ -80,12 +80,12 @@ public class CommUtils {
 	 */
 	public static UnsignedInteger doHandshake(Socket iccSocket,
 			HandshakeMode mode) throws IOException, InterruptedException {
-		return doHandshake(iccSocket, NativeDriverInterface.LUN_NOT_ASSIGNED, mode);
+		return doHandshake(iccSocket, IfdInterface.LUN_NOT_ASSIGNED, mode);
 	}
 
 	/**
 	 * This method performs a handshake against the
-	 * {@link NativeDriverConnectorImpl}.
+	 * {@link IfdConnectorImpl}.
 	 * 
 	 * @param iccSocket
 	 *            the socket to communicate over
@@ -107,14 +107,14 @@ public class CommUtils {
 
 		CommUtils.writeLine(
 				writer,
-				NativeDriverInterface.MESSAGE_ICC_HELLO.getAsHexString()
-						+ NativeDriverInterface.MESSAGE_DIVIDER
+				IfdInterface.MESSAGE_ICC_HELLO.getAsHexString()
+						+ IfdInterface.MESSAGE_DIVIDER
 						+ lun.getAsHexString());
 		String[] helloData = reader.readLine().split(
-				Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER));
+				Pattern.quote(IfdInterface.MESSAGE_DIVIDER));
 
 		if (!(new UnsignedInteger(HexString.toByteArray(helloData[0])))
-				.equals(NativeDriverInterface.MESSAGE_IFD_HELLO)) {
+				.equals(IfdInterface.MESSAGE_IFD_HELLO)) {
 			throw new PcscNativeCommunicationException(
 					"Unexpected message type");
 		}
@@ -126,12 +126,12 @@ public class CommUtils {
 			if (mode == HandshakeMode.OPEN) {
 				CommUtils
 						.writeLine(writer,
-								NativeDriverInterface.MESSAGE_ICC_DONE
+								IfdInterface.MESSAGE_ICC_DONE
 										.getAsHexString());
 			} else if (mode == HandshakeMode.CLOSE) {
 				CommUtils
 						.writeLine(writer,
-								NativeDriverInterface.MESSAGE_ICC_STOP
+								IfdInterface.MESSAGE_ICC_STOP
 										.getAsHexString());
 			} else {
 				throw new PcscNativeCommunicationException(

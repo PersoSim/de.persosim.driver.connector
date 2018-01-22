@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.simulator.utils.HexString;
@@ -154,10 +154,10 @@ public class TestDriver {
 	public String sendData(UnsignedInteger lun, UnsignedInteger function, byte[]... data)
 			throws IOException, InterruptedException {
 
-		String dataToSend = function.getAsHexString() + NativeDriverInterface.MESSAGE_DIVIDER + lun.getAsHexString();
+		String dataToSend = function.getAsHexString() + IfdInterface.MESSAGE_DIVIDER + lun.getAsHexString();
 
 		for (byte[] current : data) {
-			dataToSend += NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+			dataToSend += IfdInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 		return sendDataDirect(lun, dataToSend);
 	}
@@ -238,7 +238,7 @@ public class TestDriver {
 						params[i - 2] = HexString
 								.toByteArray(commandArgs[i]);
 					}
-					response = driver.sendData(lun, NativeDriverInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC,
+					response = driver.sendData(lun, IfdInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC,
 							params);
 
 					if (response != null) {
@@ -251,7 +251,7 @@ public class TestDriver {
 							.println("Response: "
 									+ driver.sendData(
 											lun,
-											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											IfdInterface.PCSC_FUNCTION_POWER_ICC,
 											new byte[] { 0x01, (byte) 0xf4 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
 				case "powerdown":
@@ -259,7 +259,7 @@ public class TestDriver {
 							.println("Response: "
 									+ driver.sendData(
 											lun,
-											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											IfdInterface.PCSC_FUNCTION_POWER_ICC,
 											new byte[] { 0x01, (byte) 0xf5 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
 				case "reset":
@@ -267,7 +267,7 @@ public class TestDriver {
 							.println("Response: "
 									+ driver.sendData(
 											lun,
-											NativeDriverInterface.PCSC_FUNCTION_POWER_ICC,
+											IfdInterface.PCSC_FUNCTION_POWER_ICC,
 											new byte[] { 0x01, (byte) 0xf6 }, new UnsignedInteger(4000).getAsByteArray()));
 					break;
 				case "iccpresent":
@@ -275,7 +275,7 @@ public class TestDriver {
 					.println("Response: "
 							+ driver.sendData(
 									lun,
-									NativeDriverInterface.PCSC_FUNCTION_IS_ICC_PRESENT));
+									IfdInterface.PCSC_FUNCTION_IS_ICC_PRESENT));
 			break;
 					
 				case "exit":

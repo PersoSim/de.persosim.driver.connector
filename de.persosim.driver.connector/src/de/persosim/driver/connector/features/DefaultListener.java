@@ -25,7 +25,7 @@ import org.globaltester.logging.BasicLogger;
 import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.CommUtils;
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.SimulatorManager;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -36,7 +36,7 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
-import de.persosim.driver.connector.service.NativeDriverConnector;
+import de.persosim.driver.connector.service.IfdConnector;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.Utils;
 
@@ -49,40 +49,40 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private byte[] cachedAtr = null;
-	private NativeDriverConnector connector;
+	private IfdConnector connector;
 	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
 		switch (data.getFunction().getAsInt()) {
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_LIST_DEVICES:
+		case IfdInterface.VALUE_PCSC_FUNCTION_DEVICE_LIST_DEVICES:
 			return deviceListDevices();
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
+		case IfdInterface.VALUE_PCSC_FUNCTION_DEVICE_CONTROL:
 			return deviceControl(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_GET_CAPABILITIES:
+		case IfdInterface.VALUE_PCSC_FUNCTION_GET_CAPABILITIES:
 			return getCapabilities(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_SET_CAPABILITIES:
+		case IfdInterface.VALUE_PCSC_FUNCTION_SET_CAPABILITIES:
 			return setCapabilities(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_POWER_ICC:
 			return powerIcc(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_TRANSMIT_TO_ICC:
 			return transmitToIcc(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_IS_ICC_PRESENT:
+		case IfdInterface.VALUE_PCSC_FUNCTION_IS_ICC_PRESENT:
 			return isIccPresent(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_EJECT_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_EJECT_ICC:
 			return ejectIcc(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_GET_IFDSP:
+		case IfdInterface.VALUE_PCSC_FUNCTION_GET_IFDSP:
 			return getIfdsp(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_IS_CONTEXT_SUPPORTED:
+		case IfdInterface.VALUE_PCSC_FUNCTION_IS_CONTEXT_SUPPORTED:
 			return isContextSupported(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_IS_ICC_ABSENT:
+		case IfdInterface.VALUE_PCSC_FUNCTION_IS_ICC_ABSENT:
 			return isIccAbsent(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_LIST_CONTEXTS:
+		case IfdInterface.VALUE_PCSC_FUNCTION_LIST_CONTEXTS:
 			return listContexts(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_LIST_INTERFACES:
+		case IfdInterface.VALUE_PCSC_FUNCTION_LIST_INTERFACES:
 			return listInterfaces(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS:
+		case IfdInterface.VALUE_PCSC_FUNCTION_SET_PROTOCOL_PARAMETERS:
 			return setProtocolParameters(data);
-		case NativeDriverInterface.VALUE_PCSC_FUNCTION_SWALLOW_ICC:
+		case IfdInterface.VALUE_PCSC_FUNCTION_SWALLOW_ICC:
 			return swallowIcc(data);
 		}
 		return null;
@@ -324,7 +324,7 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	@Override
-	public void setConnector(NativeDriverConnector connector) {
+	public void setConnector(IfdConnector connector) {
 		this.connector = connector;
 	}
 }

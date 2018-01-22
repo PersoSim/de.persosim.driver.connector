@@ -83,7 +83,7 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
  * @author mboonk
  *
  */
-public interface NativeDriverInterface {
+public interface IfdInterface {
 	public static final byte VALUE_MESSAGE_ICC_HELLO = 0x01;
 	public static final byte VALUE_MESSAGE_ICC_STOP = 0x02;
 	public static final byte VALUE_MESSAGE_ICC_ERROR = 0x03;

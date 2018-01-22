@@ -4,7 +4,7 @@ import java.util.List;
 
 import de.persosim.driver.connector.pcsc.PcscListener;
 
-public interface NativeDriverComm {
+public interface IfdComm {
 	public void start();
 	public void stop();
 	boolean isRunning();
@@ -17,4 +17,6 @@ public interface NativeDriverComm {
 	public void setListeners(List<PcscListener> listeners);
 	
 	public void reset();
+	
+	public String getName();
 }

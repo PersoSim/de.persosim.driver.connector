@@ -11,7 +11,7 @@ import java.net.SocketException;
 import java.util.Collection;
 import java.util.HashMap;
 
-import de.persosim.driver.connector.NativeDriverInterface;
+import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 
 /**
@@ -22,7 +22,7 @@ import de.persosim.driver.connector.UnsignedInteger;
  *
  */
 public class TestDriverCommunication implements Runnable,
-		NativeDriverInterface {
+		IfdInterface {
 
 	private ServerSocket serverSocket;
 	private HashMap<Integer, Socket> lunMapping;
@@ -38,7 +38,7 @@ public class TestDriverCommunication implements Runnable,
 			if (!lunMapping.containsKey(i))
 				return new UnsignedInteger(i);
 		}
-		return NativeDriverInterface.LUN_NOT_ASSIGNED;
+		return IfdInterface.LUN_NOT_ASSIGNED;
 	}
 
 	public TestDriverCommunication(ServerSocket serverSocket,
@@ -100,10 +100,10 @@ public class TestDriverCommunication implements Runnable,
 			switch (UnsignedInteger.parseUnsignedInteger(split[0], 16).getAsInt()) {
 			case VALUE_MESSAGE_ICC_HELLO:
 				if (split.length > 1) {
-					UnsignedInteger lun = NativeDriverInterface.LUN_NOT_ASSIGNED;
+					UnsignedInteger lun = IfdInterface.LUN_NOT_ASSIGNED;
 					if (split.length > 1) {
 						lun = UnsignedInteger.parseUnsignedInteger(split[1], 16);
-						if (lun.equals(NativeDriverInterface.LUN_NOT_ASSIGNED)) {
+						if (lun.equals(IfdInterface.LUN_NOT_ASSIGNED)) {
 							lun = getLowestFreeLun();
 						}
 						if (lun.getAsSignedLong() > MAX_LUNS) {

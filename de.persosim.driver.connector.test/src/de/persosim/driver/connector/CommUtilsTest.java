@@ -118,17 +118,17 @@ public class CommUtilsTest extends ConnectorTest {
 	@Test
 	public void testDoHandshake() throws Exception {
 
-		String simulatedDriverAnswers = NativeDriverInterface.MESSAGE_IFD_HELLO
+		String simulatedDriverAnswers = IfdInterface.MESSAGE_IFD_HELLO
 				.getAsHexString() + "|00000000\n";
-		String expectedConnectorHandshakeMessages = NativeDriverInterface.MESSAGE_ICC_HELLO
+		String expectedConnectorHandshakeMessages = IfdInterface.MESSAGE_ICC_HELLO
 				.getAsHexString()
-				+ NativeDriverInterface.MESSAGE_DIVIDER
+				+ IfdInterface.MESSAGE_DIVIDER
 				+ "FFFFFFFF\n"
-				+ NativeDriverInterface.MESSAGE_ICC_DONE.getAsHexString()
+				+ IfdInterface.MESSAGE_ICC_DONE.getAsHexString()
 				+ "\n";
 
 		testHandshakeWithConnector(simulatedDriverAnswers, expectedConnectorHandshakeMessages,
-				HandshakeMode.OPEN, NativeDriverInterface.LUN_NOT_ASSIGNED,
+				HandshakeMode.OPEN, IfdInterface.LUN_NOT_ASSIGNED,
 				new UnsignedInteger(0));
 	}
 
@@ -140,13 +140,13 @@ public class CommUtilsTest extends ConnectorTest {
 	@Test
 	public void testDoHandshakeClosing() throws Exception {
 
-		String simulatedDriverAnswers = NativeDriverInterface.MESSAGE_IFD_HELLO
+		String simulatedDriverAnswers = IfdInterface.MESSAGE_IFD_HELLO
 				.getAsHexString() + "|00000000\n";
-		String expectedConnectorHandshakeMessages = NativeDriverInterface.MESSAGE_ICC_HELLO
+		String expectedConnectorHandshakeMessages = IfdInterface.MESSAGE_ICC_HELLO
 				.getAsHexString()
-				+ NativeDriverInterface.MESSAGE_DIVIDER
+				+ IfdInterface.MESSAGE_DIVIDER
 				+ "00000000\n"
-				+ NativeDriverInterface.MESSAGE_ICC_STOP.getAsHexString()
+				+ IfdInterface.MESSAGE_ICC_STOP.getAsHexString()
 				+ "\n";
 
 		testHandshakeWithConnector(simulatedDriverAnswers, expectedConnectorHandshakeMessages,
@@ -163,15 +163,15 @@ public class CommUtilsTest extends ConnectorTest {
 	public void testDoHandshakeUnknownMessage() throws Exception {
 
 		String simulatedDriverAnswers = "12345678|00000000\n";
-		String expectedConnectorHandshakeMessages = NativeDriverInterface.MESSAGE_ICC_HELLO
+		String expectedConnectorHandshakeMessages = IfdInterface.MESSAGE_ICC_HELLO
 				.getAsHexString()
-				+ NativeDriverInterface.MESSAGE_DIVIDER
+				+ IfdInterface.MESSAGE_DIVIDER
 				+ "FFFFFFFF\n"
-				+ NativeDriverInterface.MESSAGE_ICC_DONE.getAsHexString()
+				+ IfdInterface.MESSAGE_ICC_DONE.getAsHexString()
 				+ "\n";
 
 		testHandshakeWithConnector(simulatedDriverAnswers, expectedConnectorHandshakeMessages,
-				HandshakeMode.OPEN, NativeDriverInterface.LUN_NOT_ASSIGNED, null);
+				HandshakeMode.OPEN, IfdInterface.LUN_NOT_ASSIGNED, null);
 	}
 
 	/**
@@ -182,13 +182,13 @@ public class CommUtilsTest extends ConnectorTest {
 	@Test
 	public void testDoHandshakeReuseLun() throws Exception {
 
-		String simulatedDriverAnswers = NativeDriverInterface.MESSAGE_IFD_HELLO
+		String simulatedDriverAnswers = IfdInterface.MESSAGE_IFD_HELLO
 				.getAsHexString() + "|00000004\n";
-		String expectedConnectorHandshakeMessages = NativeDriverInterface.MESSAGE_ICC_HELLO
+		String expectedConnectorHandshakeMessages = IfdInterface.MESSAGE_ICC_HELLO
 				.getAsHexString()
-				+ NativeDriverInterface.MESSAGE_DIVIDER
+				+ IfdInterface.MESSAGE_DIVIDER
 				+ "00000004\n"
-				+ NativeDriverInterface.MESSAGE_ICC_DONE.getAsHexString()
+				+ IfdInterface.MESSAGE_ICC_DONE.getAsHexString()
 				+ "\n";
 
 		testHandshakeWithConnector(simulatedDriverAnswers, expectedConnectorHandshakeMessages,

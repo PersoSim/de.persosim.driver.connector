@@ -14,14 +14,14 @@ import org.globaltester.logging.tags.LogLevel;
 import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 
-public class NativeDriverHandler {
+public class VirtualDriverHandler {
 
 	@Inject
 	private EPartService partService;
 	
 	@Execute
 	public void execute() {
-		BasicLogger.log(this.getClass(), "Switch to use NativeDriver", LogLevel.INFO);
+		BasicLogger.log(this.getClass(), "Switch to use virtual driver", LogLevel.INFO);
 
 		// ID of part as defined in fragment.e4xmi application model
 		MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");

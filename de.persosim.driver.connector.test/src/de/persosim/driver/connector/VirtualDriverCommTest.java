@@ -23,7 +23,7 @@ import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
 import de.persosim.driver.test.ConnectorTest;
 import de.persosim.driver.test.TestDriver;
 
-public class NativeDriverCommTest extends ConnectorTest {
+public class VirtualDriverCommTest extends ConnectorTest {
 
 	private VirtualDriverComm nativeCommunication;
 	@Mocked
@@ -71,7 +71,7 @@ public class NativeDriverCommTest extends ConnectorTest {
 
 		String data = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0), new byte[0]);
 		assertEquals(PcscConstants.IFD_SUCCESS, UnsignedInteger
-				.parseUnsignedInteger(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
+				.parseUnsignedInteger(data.split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER))[0], 16));
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class NativeDriverCommTest extends ConnectorTest {
 
 		String data = driver.sendDataDirect(new UnsignedInteger(0), "j09uc540q93rufq09u,³48	q3m05ru");
 		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, UnsignedInteger
-				.parseUnsignedInteger(data.split(Pattern.quote(NativeDriverInterface.MESSAGE_DIVIDER))[0], 16));
+				.parseUnsignedInteger(data.split(Pattern.quote(IfdInterface.MESSAGE_DIVIDER))[0], 16));
 	}
 
 	/**

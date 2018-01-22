@@ -3,12 +3,12 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kZ9_gD9FEeS_D-1xKGHHEA" featurename="commands" parentElementId="de.persosim.rcp.application">
     <elements xsi:type="commands:Command" xmi:id="_g10FYD_LEeS0lKPtDtc_Vw" elementId="de.persosim.driver.connector.ui.command.useBasicReaderCommand" commandName="Use basic reader"/>
     <elements xsi:type="commands:Command" xmi:id="_cO4TEEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.command.useStandardReaderCommand" commandName="Use standard reader"/>
-    <elements xsi:type="commands:Command" xmi:id="_3McVIOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.command.useNativeDriverCommand" commandName="Use native driver"/>
+    <elements xsi:type="commands:Command" xmi:id="_3McVIOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.command.useVirtualDriverCommand" commandName="Use virtual driver"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="__yeK0D_LEeS0lKPtDtc_Vw" featurename="handlers" parentElementId="de.persosim.rcp.application">
     <elements xsi:type="commands:Handler" xmi:id="_X31aUEe5EeS8Sb-zNDOJXw" elementId="de.persosim.driver.connector.ui.handler.standard" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.StandardReaderHandler" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
     <elements xsi:type="commands:Handler" xmi:id="_xdGWwEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handler.basic" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.BasicReaderHandler" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
-    <elements xsi:type="commands:Handler" xmi:id="__jzosOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handler.nativeDriver" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.NativeDriverHandler" command="_3McVIOZWEee50pt6teHFRg"/>
+    <elements xsi:type="commands:Handler" xmi:id="__jzosOZWEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handler.virtualDriver" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.handlers.VirtualDriverHandler" command="_3McVIOZWEee50pt6teHFRg"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2CwHwD_MEeS0lKPtDtc_Vw" featurename="children" parentElementId="de.persosim.rcp.mainMenue" positionInList="before:de.persosim.rcp.mainMenue.help">
     <elements xsi:type="menu:Menu" xmi:id="_2_oyQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.menu.readerType" label="Reader Type">

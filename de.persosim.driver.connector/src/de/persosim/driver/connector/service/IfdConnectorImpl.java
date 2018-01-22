@@ -7,34 +7,30 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.persosim.driver.connector.NativeDriverComm;
+import de.persosim.driver.connector.IfdComm;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.ConnectorEnabled;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.UiEnabled;
 
 /**
- * This class handles the connection to the native part of the PersoSim driver
- * package via a socket Connection. In PCSC terms this would represent
+ * This class handles the connection to the external part of the PersoSim interface
+ * package via an {@link IfdComm}. In PCSC terms this would represent
  * functionality like an IFD Handler presents to the upper layers as described
  * in the PCSC specification part 3.
  * 
  * @author mboonk
  * 
  */
-public class NativeDriverConnectorImpl implements NativeDriverConnector {
+public class IfdConnectorImpl implements IfdConnector {
 
 	private List<PcscListener> listeners = new LinkedList<PcscListener>();
 	private List<VirtualReaderUi> userInterfaces = new LinkedList<VirtualReaderUi>();
-	private NativeDriverComm communication;
+	private IfdComm communication;
 	private int timeout = 5000;
-	
-	public NativeDriverConnectorImpl() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@Override
-	public void connect(NativeDriverComm comm) throws IOException {
+	public void connect(IfdComm comm) throws IOException {
 		communication = comm;
 		communication.setListeners(listeners);
 		communication.start();
@@ -88,6 +84,12 @@ public class NativeDriverConnectorImpl implements NativeDriverConnector {
 	@Override
 	public List<PcscListener> getListeners() {
 		return new LinkedList<PcscListener> (listeners);
+	}
+
+	@Override
+	public void reconnect() {
+		communication.stop();
+		communication.start();
 	}
 
 

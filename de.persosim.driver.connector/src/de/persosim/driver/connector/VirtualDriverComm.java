@@ -28,10 +28,11 @@ import de.persosim.simulator.utils.HexString;
  * @author mboonk
  * 
  */
-public class VirtualDriverComm implements NativeDriverComm, Runnable {
+public class VirtualDriverComm implements IfdComm, Runnable {
 
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 5678;
+	public static final String NAME = "VIRTUAL";
 
 	private List<PcscListener> listeners;
 	private Socket dataSocket;
@@ -59,19 +60,19 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 	}
 
 	public void log(PcscCallData data) {
-		String logmessage = "PCSC In:\t" + getStringRep(data.getFunction()) + NativeDriverInterface.MESSAGE_DIVIDER
+		String logmessage = "PCSC In:\t" + getStringRep(data.getFunction()) + IfdInterface.MESSAGE_DIVIDER
 				+ data.getLogicalUnitNumber().getAsHexString();
 		for (byte[] current : data.getParameters()) {
-			logmessage += System.lineSeparator() + NativeDriverInterface.MESSAGE_DIVIDER + HexString.encode(current);
+			logmessage += System.lineSeparator() + IfdInterface.MESSAGE_DIVIDER + HexString.encode(current);
 		}
 		BasicLogger.log(this.getClass(), logmessage, LogLevel.TRACE);
 	}
 
 	String getStringRep(UnsignedInteger value) {
-		Field[] fields = NativeDriverInterface.class.getDeclaredFields();
+		Field[] fields = IfdInterface.class.getDeclaredFields();
 		for (Field field : fields) {
 			try {
-				if (value.equals(field.get(new NativeDriverInterface() {
+				if (value.equals(field.get(new IfdInterface() {
 				}))) {
 					return field.getName();
 				}
@@ -214,6 +215,11 @@ public class VirtualDriverComm implements NativeDriverComm, Runnable {
 			stop();
 		}
 		listeners = null;
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
 	}
 
 }
