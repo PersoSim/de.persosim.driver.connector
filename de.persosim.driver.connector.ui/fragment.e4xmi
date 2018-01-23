@@ -12,10 +12,10 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2CwHwD_MEeS0lKPtDtc_Vw" featurename="children" parentElementId="de.persosim.rcp.mainMenue" positionInList="before:de.persosim.rcp.mainMenue.help">
     <elements xsi:type="menu:Menu" xmi:id="_2_oyQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.menu.readerType" label="Reader Type">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_FBcsMOZOEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handledmenuitem.nativeDriver" label="Use native driver" type="Radio" command="_3McVIOZWEee50pt6teHFRg"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_FBcsMOZOEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.handledmenuitem.virtualDriver" label="Use virtual driver" command="_3McVIOZWEee50pt6teHFRg"/>
       <children xsi:type="menu:MenuSeparator" xmi:id="_dxp2cOZOEee50pt6teHFRg" elementId="de.persosim.driver.connector.ui.menuseparator.readerType"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_4JpHQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.basic" label="Basic reader" type="Radio" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_6zsSsEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.changeToStandardReader" label="Standard reader" type="Radio" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_4JpHQEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.basic" label="Basic reader" command="_g10FYD_LEeS0lKPtDtc_Vw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_6zsSsEfZEeSy-836va2YTA" elementId="de.persosim.driver.connector.ui.handledmenuitem.changeToStandardReader" label="Standard reader" command="_cO4TEEe5EeS8Sb-zNDOJXw"/>
       <children xsi:type="menu:MenuSeparator" xmi:id="_IcPN4OaXEeeaJIdYo5u99g" elementId="de.persosim.driver.connector.ui.menuseparator.configure"/>
     </elements>
   </fragments>
