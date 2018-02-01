@@ -1,10 +1,11 @@
 package de.persosim.driver.connector;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.globaltester.logging.BasicLogger;
+
+import de.persosim.driver.connector.exceptions.IfdCreationException;
 
 public class CommManager {
 	
@@ -15,10 +16,10 @@ public class CommManager {
 			
 			@Override
 			public IfdComm get(String type) {
-				if ("VIRTUAL".equals(type)){
+				if ("VIRTUAL".equals(type) || type == null){
 					try {
 						return new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT);
-					} catch (IOException e) {
+					} catch (IfdCreationException e) {
 						BasicLogger.logException(getClass(), "Could not create virtual driver comm", e);
 					}
 				}
@@ -43,5 +44,18 @@ public class CommManager {
 
 	public static void removeCommProvider(CommProvider provider) {
 		providers.remove(provider);
+	}
+
+	public static IfdComm getWorkingComm(String preferred) {
+		IfdComm candidate = getCommForType(preferred);
+		if (candidate == null) {
+			for (CommProvider provider : providers) {
+				candidate = provider.get(null);
+				if (candidate != null) {
+					return candidate;
+				}
+			}
+		}
+		return null;
 	}
 }

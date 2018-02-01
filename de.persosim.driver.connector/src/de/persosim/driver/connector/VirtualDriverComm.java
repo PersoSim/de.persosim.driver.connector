@@ -14,6 +14,7 @@ import org.globaltester.logging.BasicLogger;
 import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.CommUtils.HandshakeMode;
+import de.persosim.driver.connector.exceptions.IfdCreationException;
 import de.persosim.driver.connector.pcsc.PcscCallData;
 import de.persosim.driver.connector.pcsc.PcscCallResult;
 import de.persosim.driver.connector.pcsc.PcscConstants;
@@ -48,11 +49,19 @@ public class VirtualDriverComm implements IfdComm, Runnable {
 	 * 
 	 * @param socket
 	 *            the socket to use for communication with the native driver
+	 * @throws IfdCreationException 
 	 * @throws IOException
 	 */
-	public VirtualDriverComm(String host, int port) throws IOException {
+	public VirtualDriverComm(String host, int port) throws IfdCreationException {
 		this.host = host;
 		this.port = port;
+
+		try {
+			dataSocket = new Socket(host, port);
+			dataSocket.close();
+		} catch (IOException e) {
+			throw new IfdCreationException("Can not connect to virtual driver", e);
+		}
 	}
 
 	public void log(PcscCallResult data) {

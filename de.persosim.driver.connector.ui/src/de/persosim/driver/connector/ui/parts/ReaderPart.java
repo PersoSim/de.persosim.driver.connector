@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.globaltester.logging.BasicLogger;
+import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.CommManager;
 import de.persosim.driver.connector.DriverConnectorFactory;
@@ -563,7 +564,7 @@ public class ReaderPart implements VirtualReaderUi {
 	}
 
 	private IfdComm getDefaultComm() {
-		return CommManager.getCommForType(VirtualDriverComm.NAME);
+		return CommManager.getWorkingComm(VirtualDriverComm.NAME);
 	}
 
 	/**
@@ -1039,12 +1040,13 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		try {
 			connector.connect(currentComm);
-		} catch (IOException e) {
-			throw new IllegalStateException("Could not connect the reader connector", e);
+			type = currentReaderType;
+			PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
+			PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
+		} catch (IOException | IllegalStateException e) {
+			BasicLogger.logException(getClass(), "Creation of the ifd connector failed using " + currentComm.getName(), e, LogLevel.WARN);
+			MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The IFD connector using " + currentComm.getName() + " could not be created, please choose another ifd type.");
 		}
-		type = currentReaderType;
-		PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
-		PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
 	}
 	
 	private ReaderType getDefaultReaderType() {

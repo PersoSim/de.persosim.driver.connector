@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualDriverComm;
+import de.persosim.driver.connector.exceptions.IfdCreationException;
 import de.persosim.driver.connector.features.DefaultListener;
 import de.persosim.driver.connector.features.MctReaderDirect;
 import de.persosim.driver.connector.features.MctUniversal;
@@ -24,7 +25,7 @@ import de.persosim.driver.connector.service.IfdConnectorImpl;
 public class VirtualDriverConnectorConsole {
 
 	public static void main(String[] args) throws UnknownHostException,
-			IOException {
+			IOException, IfdCreationException {
 		IfdConnector connector = new IfdConnectorImpl();
 		connector.addUi(new ConsoleUi());
 		connector.addListener(new DefaultListener());
