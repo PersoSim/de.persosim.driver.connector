@@ -20,69 +20,70 @@ import de.persosim.simulator.utils.Utils;
 public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 
 	public static final byte FEATURE_TAG = 0x07;
-	
+
 	private List<VirtualReaderUi> interfaces;
-	
+
 	public ModifyPinDirect(UnsignedInteger controlCode) {
 		super(controlCode, FEATURE_TAG);
 	}
 
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
-		if (data.getFunction().equals(IfdInterface.PCSC_FUNCTION_DEVICE_CONTROL)){
-			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())){
+		if (data.getFunction().equals(IfdInterface.PCSC_FUNCTION_DEVICE_CONTROL)) {
+			if (Arrays.equals(data.getParameters().get(0), getControlCode().getAsByteArray())) {
 				List<byte[]> params = data.getParameters();
 				byte[] apduHeaderExpected = HexString.toByteArray("002C0203");
 				byte[] expectedLength = params.get(2);
-				
-				
+
 				byte[] resetRetryCounterApduBytes;
-				
+
 				byte[] newPin1, newPin2;
 				boolean match;
-				
-				for(VirtualReaderUi virtualReaderUi : interfaces) {
+
+				for (VirtualReaderUi virtualReaderUi : interfaces) {
 					match = false;
-					
-					while(!match) {
+
+					while (!match) {
 						virtualReaderUi.display("Please enter new PIN");
 						try {
 							newPin1 = virtualReaderUi.getPin();
 						} catch (IOException e) {
 							newPin1 = null;
 						}
-						
-						if(newPin1 == null) {
-							return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR, new byte[0]);
+
+						if (newPin1 == null) {
+							return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte[] { 0x64, 0x01 });
 						}
-						
+
 						virtualReaderUi.display("Please re-enter new PIN");
 						try {
 							newPin2 = virtualReaderUi.getPin();
 						} catch (IOException e) {
 							newPin2 = null;
 						}
-						
-						if(newPin2 == null) {
+
+						if (newPin2 == null) {
 							return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR, new byte[0]);
 						}
-						
+
 						match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
-						
-						if(match) {
+
+						if (match) {
 							List<byte[]> list = new ArrayList<>(2);
-							
-							resetRetryCounterApduBytes = Utils.concatByteArrays(apduHeaderExpected, HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
+
+							resetRetryCounterApduBytes = Utils.concatByteArrays(apduHeaderExpected,
+									HexString.toByteArray(HexString.hexifyByte(newPin1.length)), newPin1);
 
 							list.add(resetRetryCounterApduBytes);
 							list.add(expectedLength);
-							
+
 							data.setFunction(IfdInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
 							data.setParameters(list);
 
 							System.out.println("modified param 0: " + HexString.encode(data.getParameters().get(0)));
 						} else {
 							virtualReaderUi.display("new PIN does not match");
+							return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte[] { 0x64, 0x02 });
 						}
 					}
 				}

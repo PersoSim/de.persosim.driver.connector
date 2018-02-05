@@ -19,4 +19,6 @@ public interface IfdComm {
 	public void reset();
 	
 	public String getName();
+	
+	public String getUserString();
 }

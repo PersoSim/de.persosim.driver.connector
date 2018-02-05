@@ -53,4 +53,9 @@ public class TestDriverComm implements IfdComm {
 		return this.getName();
 	}
 
+	@Override
+	public String getUserString() {
+		return this.getName();
+	}
+
 }

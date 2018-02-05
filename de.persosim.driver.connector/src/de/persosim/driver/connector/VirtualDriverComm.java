@@ -231,4 +231,9 @@ public class VirtualDriverComm implements IfdComm, Runnable {
 		return NAME;
 	}
 
+	@Override
+	public String getUserString() {
+		return "Virtual PCSClite driver";
+	}
+
 }

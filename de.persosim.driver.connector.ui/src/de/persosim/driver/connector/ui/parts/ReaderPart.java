@@ -25,10 +25,13 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -96,8 +99,7 @@ public class ReaderPart implements VirtualReaderUi {
 	private List<String> pressedKeys = new ArrayList<>();
 
 	private Composite root;
-	private Composite basicReaderControls;
-	private Composite standardReaderControls;
+	private Composite readerUi;
 
 	private ReaderType type = ReaderType.NONE;
 
@@ -109,27 +111,22 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private ReaderType lastReaderType;
 
+
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
 	 * 
 	 * @param parent composite where the reader will be placed
 	 */
 	private void createBasicReader(Composite parent) {
-		disposeReaderControls();
-
-		basicReaderControls = new Composite(parent, SWT.NONE);
-
 		GridData gridData;
-		basicReaderControls.setLayout(new GridLayout(1, false));
+		parent.setLayout(new GridLayout(1, false));
 
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 
-		basicReaderControls.setLayoutData(gridData);
-
-		Text txtOutput = new Text(basicReaderControls, SWT.READ_ONLY
+		Text txtOutput = new Text(parent, SWT.READ_ONLY
 				| SWT.CENTER);
-		txtOutput.setFont(new Font(basicReaderControls.getDisplay(), FONT_NAME,
+		txtOutput.setFont(new Font(parent.getDisplay(), FONT_NAME,
 				24, SWT.BOLD));
 		txtOutput.setText("Basic Reader");
 		txtOutput.setEditable(false);
@@ -145,24 +142,16 @@ public class ReaderPart implements VirtualReaderUi {
 	 * 
 	 * @param parent composite where the reader will be placed
 	 */
-	private void createStandardReader(Composite parent) {
-		disposeReaderControls();
-		standardReaderControls = new Composite(parent, SWT.NONE);
-
+	private void createStandardReader(Composite pinpadReaderUi) {
 		GridData gridData;
-		standardReaderControls.setLayout(new GridLayout(1, false));
-
-		Composite pinpadComposite = new Composite(standardReaderControls,
-				SWT.NONE);
-		pinpadComposite.setLayout(new GridLayout(1, false));
+		pinpadReaderUi.setLayout(new GridLayout(1, false));
 
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
-		pinpadComposite.setLayoutData(gridData);
 
-		txtOutput = new Text(pinpadComposite, SWT.READ_ONLY | SWT.PASSWORD
+		txtOutput = new Text(pinpadReaderUi, SWT.READ_ONLY | SWT.PASSWORD
 				| SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
-		txtOutput.setFont(new Font(pinpadComposite.getDisplay(), FONT_NAME, 24,
+		txtOutput.setFont(new Font(pinpadReaderUi.getDisplay(), FONT_NAME, 24,
 				SWT.BOLD));
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
@@ -172,7 +161,7 @@ public class ReaderPart implements VirtualReaderUi {
 		gridData.heightHint = 80;
 		txtOutput.setLayoutData(gridData);
 
-		Composite keyComposite = new Composite(pinpadComposite, SWT.NONE);
+		Composite keyComposite = new Composite(pinpadReaderUi, SWT.NONE);
 		keyComposite.setLayout(new GridLayout(2, false));
 
 		Composite numericComposite = new Composite(keyComposite, SWT.NONE);
@@ -526,15 +515,12 @@ public class ReaderPart implements VirtualReaderUi {
 		tablePwdManagement.setVisible(true);
 		checkAutoLogin.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
-		parent.layout();
-		parent.redraw();
 	}
 	
 	private void disposeReaderControls() {
-		if (basicReaderControls != null)
-			basicReaderControls.dispose();
-		if (standardReaderControls != null)
-			standardReaderControls.dispose();
+		if (readerUi != null)
+			readerUi.dispose();
+			readerUi = null;
 	}
 	
 	
@@ -590,6 +576,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = SWT.FILL;
 		gridData.widthHint = width;
 		gridData.heightHint = height;
 
@@ -1007,17 +994,42 @@ public class ReaderPart implements VirtualReaderUi {
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not get reader connector object", e);
 		}
+		
+
+		disposeReaderControls();
+		
+		root.setLayout(new FillLayout());
+		
+		readerUi = new Composite(root, SWT.NONE);
+		
+		RowLayout layout = new RowLayout(SWT.VERTICAL);
+		layout.justify = false;
+		layout.wrap = false;
+		readerUi.setLayout(layout);
+		
+		Composite connectionComposite = new Composite(readerUi, SWT.NONE);
+		RowData rowData = new RowData();
+		rowData.height = 30;
+		connectionComposite.setLayoutData(rowData);
+		connectionComposite.setLayout(new FillLayout());
+		
+		Composite readerComposite = new Composite(readerUi, SWT.NONE);
+
+		readerComposite.setLayoutData(new RowData());
+		
+		Label connectionLabel = new Label(connectionComposite, SWT.NONE);
+		
 		switch (currentReaderType) {
 		case BASIC:
 			addBasicListeners(connector);
-			createBasicReader(root);
+			createBasicReader(readerComposite);
 			autologin = false;
 			break;
 		case STANDARD:
 			connector.addUi(this);
 			addBasicListeners(connector);
 			addStandardListeners(connector);
-			createStandardReader(root);
+			createStandardReader(readerComposite);
 			viewer.getTable().setSelection(selectedIndex);
 			if(selectedIndex != -1)
 			{
@@ -1041,8 +1053,11 @@ public class ReaderPart implements VirtualReaderUi {
 		try {
 			connector.connect(currentComm);
 			type = currentReaderType;
+			connectionLabel.setText("Card connection type: " + currentComm.getUserString());
 			PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
 			PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
+			root.layout();
+			root.redraw();
 		} catch (IOException | IllegalStateException e) {
 			BasicLogger.logException(getClass(), "Creation of the ifd connector failed using " + currentComm.getName(), e, LogLevel.WARN);
 			MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The IFD connector using " + currentComm.getName() + " could not be created, please choose another ifd type.");
@@ -1073,7 +1088,6 @@ public class ReaderPart implements VirtualReaderUi {
 	 * attempting a new connection.
 	 */
 	public void resetReader() {
-
 		disposeReaderControls();
 		type = ReaderType.NONE;
 	}
