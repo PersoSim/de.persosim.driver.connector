@@ -187,4 +187,18 @@ public class CommUtils {
 		}
 		return null;
 	}
+
+	/**
+	 * Returns a new byte array containing the given bytes in flipped order.
+	 * @param input
+	 * @return
+	 */
+	public static byte [] changeByteOrder(byte[] input) {
+		byte [] result = new byte [input.length];
+		
+		for (int i = 0; i < input.length; i++) {
+			result [result.length - 1 - i] = input[i];
+		}
+		return result;
+	}
 }

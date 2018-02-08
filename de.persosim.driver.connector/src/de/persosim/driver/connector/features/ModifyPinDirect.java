@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.globaltester.logging.BasicLogger;
+import org.globaltester.logging.tags.LogLevel;
+
 import de.persosim.driver.connector.IfdInterface;
 import de.persosim.driver.connector.UnsignedInteger;
 import de.persosim.driver.connector.VirtualReaderUi;
@@ -63,7 +66,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 						}
 
 						if (newPin2 == null) {
-							return new SimplePcscCallResult(PcscConstants.IFD_COMMUNICATION_ERROR, new byte[0]);
+							return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte[] { 0x64, 0x01 });
 						}
 
 						match = Arrays.equals(newPin1, newPin2) && (newPin1 != null);
@@ -80,7 +83,7 @@ public class ModifyPinDirect extends AbstractPcscFeature implements UiEnabled {
 							data.setFunction(IfdInterface.PCSC_FUNCTION_TRANSMIT_TO_ICC);
 							data.setParameters(list);
 
-							System.out.println("modified param 0: " + HexString.encode(data.getParameters().get(0)));
+							BasicLogger.log(getClass(), "modified param 0 for pin modification: " + HexString.encode(data.getParameters().get(0)), LogLevel.INFO);
 						} else {
 							virtualReaderUi.display("new PIN does not match");
 							return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS, new byte[] { 0x64, 0x02 });

@@ -511,8 +511,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	 */
 	private PcscCallResult buildResponse(UnsignedInteger pcscResponseCode,
 			UnsignedInteger paceResponseCode, byte[] resultData) {
-		byte[] response = Utils.concatByteArrays(paceResponseCode
-				.getAsByteArray(), CommUtils
+		byte[] response = Utils.concatByteArrays(CommUtils.changeByteOrder(paceResponseCode.getAsByteArray()), CommUtils
 				.toUnsignedShortFlippedBytes((short) resultData.length),
 				resultData);
 

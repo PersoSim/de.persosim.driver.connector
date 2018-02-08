@@ -252,4 +252,9 @@ public class CommUtilsTest extends ConnectorTest {
 
 		assertEquals(null, CommUtils.getExpectedLength(callData, 1));
 	}
+	
+	@Test
+	public void testChangeByteOrder() {
+		assertArrayEquals(new byte [] {1,2,3,4}, CommUtils.changeByteOrder(new byte [] {4,3,2,1}));
+	}
 }
