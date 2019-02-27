@@ -36,9 +36,9 @@ public interface DriverConnectorFactory {
 	public void returnConnector(IfdConnector connector);
 
 	/**
-	 * Checks for connector availability.
+	 * Checks for availability of native driver
 	 * 
-	 * @return true, if a fresh connector can be given out
+	 * @return true, if a connection can be made
 	 */
-	public boolean isConnectorAvailable();
+	public boolean isAvailable();
 }

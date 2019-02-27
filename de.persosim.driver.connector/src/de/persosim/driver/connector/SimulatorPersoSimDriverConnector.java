@@ -85,7 +85,16 @@ public class SimulatorPersoSimDriverConnector implements SimulatorDeviceConnecto
 
 	@Override
 	public boolean isAvailable() {
-		return (ndc != null) &&  ndc.isRunning();
+		boolean retVal = false;
+		retVal |= (ndc != null) &&  ndc.isRunning();
+		
+		DriverConnectorFactory factory = de.persosim.driver.connector.Activator.getFactory();
+		if (factory != null) {
+			retVal |= factory.isAvailable();
+		}
+		
+		
+		return retVal;
 	}
 
 	@Override

@@ -1,6 +1,11 @@
 package de.persosim.driver.connector;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
+import org.globaltester.logging.BasicLogger;
+import org.globaltester.logging.tags.LogLevel;
 
 import de.persosim.driver.connector.service.IfdConnectorImpl;
 import de.persosim.driver.connector.service.IfdConnector;
@@ -38,8 +43,16 @@ public class DriverConnectorFactoryImpl implements DriverConnectorFactory {
 	}
 
 	@Override
-	public boolean isConnectorAvailable() {
-		return connector == null;
+	public boolean isAvailable() {
+		try {
+			Socket commandSocket = new Socket();
+			commandSocket.connect(new InetSocketAddress(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT),200);
+			commandSocket.close();
+		} catch (IOException e) {
+			BasicLogger.logException(getClass(), "PersoSim native driver unreachable", e, LogLevel.TRACE);
+			return false;
+		}
+		
+		return true;
 	}
-
 }
