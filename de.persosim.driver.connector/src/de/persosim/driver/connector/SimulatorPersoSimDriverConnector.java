@@ -2,6 +2,7 @@ package de.persosim.driver.connector;
 
 import java.io.IOException;
 
+import org.globaltester.base.PreferenceHelper;
 import org.globaltester.logging.BasicLogger;
 import org.globaltester.logging.tags.LogLevel;
 import org.globaltester.simulator.device.SimulatorDeviceConnector;
@@ -100,8 +101,7 @@ public class SimulatorPersoSimDriverConnector implements SimulatorDeviceConnecto
 	@Override
 	public int getPriority() {
 		// defaults to 300, which is lowest currently known priority (to prioritize hardware simulations devices when available)
-		//TODO allow override with preferences
-		return 300;
+		return Integer.parseInt(PreferenceHelper.getPreferenceValue(Activator.PLUGIN, "SimulatorPersoSimDriverConnectorPriority", "300"));
 	}
 
 }
