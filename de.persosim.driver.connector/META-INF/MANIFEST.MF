@@ -7,7 +7,8 @@ Bundle-Activator: de.persosim.driver.connector.Activator
 Require-Bundle: org.eclipse.core.runtime,
  de.persosim.simulator;bundle-version="0.1.0",
  org.globaltester.simulator,
- org.globaltester.logging
+ org.globaltester.logging,
+ org.globaltester.base
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: de.persosim.driver.connector,
