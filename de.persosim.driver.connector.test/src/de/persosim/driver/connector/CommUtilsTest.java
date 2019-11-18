@@ -3,12 +3,11 @@ package de.persosim.driver.connector;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,9 +22,6 @@ import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
 public class CommUtilsTest extends ConnectorTest {
-
-	@Mocked
-	Socket dataSocket;
 
 	@Before
 	public void setUp() {
@@ -45,12 +41,15 @@ public class CommUtilsTest extends ConnectorTest {
 
 		final FakeOutputStream output = new FakeOutputStream(true);
 
-		new NonStrictExpectations() {
-			{
-				dataSocket.getInputStream();
-				result = input;
-				dataSocket.getOutputStream();
-				result = output;
+		Socket dataSocket = new Socket() {
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return input;
+			}
+			
+			@Override
+			public OutputStream getOutputStream() throws IOException {
+				return output;
 			}
 		};
 
@@ -93,12 +92,15 @@ public class CommUtilsTest extends ConnectorTest {
 
 		final FakeOutputStream output = new FakeOutputStream(true);
 
-		new NonStrictExpectations() {
-			{
-				dataSocket.getInputStream();
-				result = input;
-				dataSocket.getOutputStream();
-				result = output;
+		Socket dataSocket = new Socket() {
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return input;
+			}
+			
+			@Override
+			public OutputStream getOutputStream() throws IOException {
+				return output;
 			}
 		};
 		

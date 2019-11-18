@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import mockit.Expectations;
-import mockit.Mocked;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +23,6 @@ import de.persosim.driver.test.TestDriver;
 public class VirtualDriverCommTest extends ConnectorTest {
 
 	private VirtualDriverComm nativeCommunication;
-	@Mocked
-	private PcscListener mockedListener;
 	private TestDriver driver;
 	private List<PcscListener> listeners;
 
@@ -59,15 +54,13 @@ public class VirtualDriverCommTest extends ConnectorTest {
 	 */
 	@Test
 	public void testThreadValidPcsc() throws IOException, InterruptedException {
-		// prepare the mock
-
-		listeners.add(mockedListener);
-		new Expectations() {
-			{
-				mockedListener.processPcscCall((PcscCallData) any);
-				result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
+		listeners.add(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
 			}
-		};
+		});
 
 		String data = driver.sendData(new UnsignedInteger(0), new UnsignedInteger(0), new byte[0]);
 		assertEquals(PcscConstants.IFD_SUCCESS, UnsignedInteger
@@ -83,16 +76,13 @@ public class VirtualDriverCommTest extends ConnectorTest {
 	 */
 	@Test
 	public void testThreadInvalidPcsc() throws IOException, InterruptedException {
-		// prepare the mock
-
-		listeners.add(mockedListener);
-		new Expectations() {
-			{
-				mockedListener.processPcscCall((PcscCallData) any);
-				times = 0;
-				result = new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
+		listeners.add(new PcscListener() {
+			
+			@Override
+			public PcscCallResult processPcscCall(PcscCallData data) {
+				return new SimplePcscCallResult(PcscConstants.IFD_SUCCESS);
 			}
-		};
+		});
 
 		String data = driver.sendDataDirect(new UnsignedInteger(0), "j09uc540q93rufq09u,³48	q3m05ru");
 		assertEquals(PcscConstants.IFD_NOT_SUPPORTED, UnsignedInteger

@@ -10,9 +10,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import mockit.Expectations;
-import mockit.Mocked;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,9 +17,6 @@ import org.junit.Test;
 public class TestSocketSimTest extends ConnectorTest {
 	TestSocketSim sim;
 
-	@Mocked
-	TestApduHandler handler;
-	
 	@Before
 	public void setUp() throws IOException{
 		sim = new TestSocketSim();
@@ -41,13 +35,15 @@ public class TestSocketSimTest extends ConnectorTest {
 	 */
 	@Test
 	public void testHandleApdu() throws UnknownHostException, IOException {
-		sim.setHandler(handler);
-		new Expectations() {
-			{
-				handler.processCommand(withEqual("55667788"));
-				result = "11223344";
+		sim.setHandler(new TestApduHandler() {
+
+			@Override
+			public String processCommand(String apduLine) {
+				assertEquals("55667788", apduLine);
+				return "11223344";
 			}
-		};
+			
+		});
 		
 		Socket socket = getSimulatorSocket();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
