@@ -27,7 +27,6 @@ import de.persosim.driver.test.ConnectorTest;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
-import mockit.Mocked;
 
 /**
  * This class tests the {@link IfdConnectorImpl}.
@@ -38,8 +37,6 @@ public class IfdConnectorTest extends ConnectorTest{
 
 	private IfdConnector nativeConnector;
 	private final byte [] testAtr = "TESTATR".getBytes();
-	@Mocked
-	private Activator activator;
 	
 	private Simulator simulator;
 	private TestDriverComm testDriverComm;
