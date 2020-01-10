@@ -87,6 +87,7 @@ public class ReaderPart implements VirtualReaderUi {
 	private MenuItem editTableItem;
 
 	private Text txtOutput;
+	private Label lblAccessRights;
 	private Button[] keysNumeric;
 	private Button[] keysControl;
 	private TableViewer viewer;
@@ -155,11 +156,17 @@ public class ReaderPart implements VirtualReaderUi {
 				SWT.BOLD));
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
-
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.heightHint = 80;
 		txtOutput.setLayoutData(gridData);
+		
+		lblAccessRights = new Label(pinpadReaderUi, SWT.NONE);
+		lblAccessRights.setCursor(null);
+		lblAccessRights.setText("accessrights");
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		lblAccessRights.setLayoutData(gridData);
 
 		Composite keyComposite = new Composite(pinpadReaderUi, SWT.NONE);
 		keyComposite.setLayout(new GridLayout(2, false));
@@ -174,12 +181,12 @@ public class ReaderPart implements VirtualReaderUi {
 
 		Button button;
 
-		button = createButton(numericComposite, "", null, 100, 100);
+		button = createButton(numericComposite, "", null);
 		button.setEnabled(DISABLE);
 
 		keysNumeric[0] = getNumericKey(numericComposite, 0);
 
-		button = createButton(numericComposite, "", null, 100, 100);
+		button = createButton(numericComposite, "", null);
 		button.setEnabled(DISABLE);
 		
 
@@ -221,7 +228,7 @@ public class ReaderPart implements VirtualReaderUi {
 		keysControl[2] = getConfirmationKey(leftControlComposite);
 		
 		
-		button = createButton(leftControlComposite, "", null, 150, 100);
+		button = createButton(leftControlComposite, "", null);
 		button.setEnabled(DISABLE);
 		
 		checkAutoLogin = new Button(tableControlComposite, SWT.CHECK);
@@ -497,6 +504,7 @@ public class ReaderPart implements VirtualReaderUi {
 					tablePwdManagement.setEnabled(true);
 					autologin = false;
 					txtOutput.setText("");
+					lblAccessRights.setText("foo");
 					checkAutoLogin.setText("AutoLogin");
 				}
 
@@ -529,6 +537,8 @@ public class ReaderPart implements VirtualReaderUi {
 	public void createComposite(Composite parent) {
 		root = parent;
 		
+		root.getShell().setMinimumSize(600, 600);
+		
 		String lastReaderType = PersoSimPreferenceManager.getPreference(LAST_READER_TYPE);
 		String lastCommType = PersoSimPreferenceManager.getPreference(LAST_COMM_TYPE);
 		
@@ -560,12 +570,10 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param parent composite where the button will be placed
 	 * @param text displayed on the button
 	 * @param selectionListener
-	 * @param width of the button
-	 * @param height of the button
 	 * @return button
 	 */
 	private Button createButton(Composite parent, String text,
-			SelectionListener selectionListener, int width, int height) {
+			SelectionListener selectionListener) {
 		final Button button = new Button(parent, SWT.PUSH);
 		button.setText(text);
 		button.setFont(new Font(parent.getDisplay(), FONT_NAME, 36, SWT.BOLD));
@@ -577,8 +585,6 @@ public class ReaderPart implements VirtualReaderUi {
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.verticalAlignment = SWT.FILL;
-		gridData.widthHint = width;
-		gridData.heightHint = height;
 
 		button.setLayoutData(gridData);
 
@@ -615,8 +621,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 
-		return createButton(parent, String.valueOf(number), selectionListener,
-				100, 100);
+		return createButton(parent, String.valueOf(number), selectionListener);
 	}
 
 	/**
@@ -643,7 +648,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 
-		Button button = createButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener);
 		button.setBackground(new Color(parent.getDisplay(), 255, 0, 0));
 
 		return button;
@@ -751,7 +756,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 
-		Button button = createButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener);
 		button.setBackground(new Color(parent.getDisplay(), 255, 255, 0));
 
 		return button;
@@ -780,7 +785,7 @@ public class ReaderPart implements VirtualReaderUi {
 			}
 		};
 
-		Button button = createButton(parent, text, selectionListener, 150, 100);
+		Button button = createButton(parent, text, selectionListener);
 		button.setBackground(new Color(parent.getDisplay(), 0, 255, 0));
 
 		return button;
