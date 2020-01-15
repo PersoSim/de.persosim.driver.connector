@@ -31,4 +31,16 @@ public interface VirtualReaderUi {
 	 * @return the PCSC device descriptors for this user interface
 	 */
 	public abstract byte[] getDeviceDescriptors();
+
+	/**
+	 * Update the ICC presence indicator (if applicable)
+	 * @param iccPresent
+	 */
+	public abstract void iccPresence(boolean iccPresent);
+
+	/**
+	 * Display the chat to be used for the following authentication
+	 * @param chat
+	 */
+	public abstract void displayChat(byte[] chat);
 }

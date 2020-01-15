@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import de.persosim.driver.connector.CommUtils;
 import de.persosim.driver.connector.VirtualReaderUi;
 import de.persosim.driver.connector.pcsc.PcscConstants;
+import de.persosim.simulator.utils.HexString;
 import de.persosim.simulator.utils.Utils;
 
 /**
@@ -81,6 +82,20 @@ public class ConsoleUi implements VirtualReaderUi {
 		result = Utils.concatByteArrays(result, PcscConstants.DEVICE_TYPE_FUNCTIONAL.getAsByteArray());
 		result = Utils.concatByteArrays(result, CommUtils.getNullTerminatedAsciiString("PersoSim Console Display"));
 		return Utils.concatByteArrays(result, PcscConstants.DEVICE_TYPE_FUNCTIONAL.getAsByteArray());
+	}
+
+	@Override
+	public void iccPresence(boolean iccPresent) {
+		// no icc presence indicator		
+	}
+
+	@Override
+	public void displayChat(byte[] chat) {
+		if (chat != null) {
+			System.out.println("Virtual Reader Display CHAT\n");
+			System.out.println(HexString.encode(chat)+"\n");
+		}
+		
 	}
 
 }

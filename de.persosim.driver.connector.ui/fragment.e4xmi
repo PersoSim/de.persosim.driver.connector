@@ -19,7 +19,7 @@
       <children xsi:type="menu:MenuSeparator" xmi:id="_IcPN4OaXEeeaJIdYo5u99g" elementId="de.persosim.driver.connector.ui.menuseparator.configure"/>
     </elements>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jbTUMEIsEeS095NvfbDi9w" featurename="children" parentElementId="de.persosim.rcp.partSashContainer">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jbTUMEIsEeS095NvfbDi9w" featurename="children" parentElementId="de.persosim.rcp.partstack.main">
     <elements xsi:type="basic:Part" xmi:id="_l56EoEIsEeS095NvfbDi9w" elementId="de.persosim.driver.connector.ui.parts.reader" contributionURI="bundleclass://de.persosim.driver.connector.ui/de.persosim.driver.connector.ui.parts.ReaderPart" label="Card Reader"/>
   </fragments>
 </fragment:ModelFragments>

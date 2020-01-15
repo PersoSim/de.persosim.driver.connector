@@ -25,8 +25,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -54,6 +52,7 @@ import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
 import de.persosim.driver.connector.service.IfdConnector;
 import de.persosim.simulator.preferences.PersoSimPreferenceManager;
+import de.persosim.simulator.utils.HexString;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -112,6 +111,8 @@ public class ReaderPart implements VirtualReaderUi {
 
 	private ReaderType lastReaderType;
 
+	private Label lblCardPresence;
+
 
 	/**
 	 * Defines the virtual basic reader. It has no own input interface.
@@ -119,20 +120,20 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param parent composite where the reader will be placed
 	 */
 	private void createBasicReader(Composite parent) {
-		GridData gridData;
-		parent.setLayout(new GridLayout(1, false));
+		GridLayout parentLayout = new GridLayout(1, false);
+		parentLayout.marginWidth = 0;
+		parent.setLayout(parentLayout );
 
+		GridData gridData;
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
 
-		Text txtOutput = new Text(parent, SWT.READ_ONLY
-				| SWT.CENTER);
-		txtOutput.setFont(new Font(parent.getDisplay(), FONT_NAME,
+		Label lblOutput = new Label(parent, SWT.FILL);
+		lblOutput.setFont(new Font(parent.getDisplay(), FONT_NAME,
 				24, SWT.BOLD));
-		txtOutput.setText("Basic Reader");
-		txtOutput.setEditable(false);
-		txtOutput.setCursor(null);
-
+		lblOutput.setText("Basic Reader");
+		
 		parent.layout();
 		parent.redraw();
 	}
@@ -144,11 +145,7 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @param parent composite where the reader will be placed
 	 */
 	private void createStandardReader(Composite pinpadReaderUi) {
-		GridData gridData;
-		pinpadReaderUi.setLayout(new GridLayout(1, false));
-
-		gridData = new GridData();
-		gridData.horizontalAlignment = SWT.FILL;
+		pinpadReaderUi.setLayout(new GridLayout(6, false));
 
 		txtOutput = new Text(pinpadReaderUi, SWT.READ_ONLY | SWT.PASSWORD
 				| SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
@@ -156,90 +153,143 @@ public class ReaderPart implements VirtualReaderUi {
 				SWT.BOLD));
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
-		gridData = new GridData();
+		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
+		gridData.horizontalSpan=6;
 		gridData.heightHint = 80;
 		txtOutput.setLayoutData(gridData);
 		
 		lblAccessRights = new Label(pinpadReaderUi, SWT.NONE);
 		lblAccessRights.setCursor(null);
-		lblAccessRights.setText("accessrights");
+		lblAccessRights.setText("");
 		gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
+		gridData.horizontalSpan=6;
 		lblAccessRights.setLayoutData(gridData);
-
-		Composite keyComposite = new Composite(pinpadReaderUi, SWT.NONE);
-		keyComposite.setLayout(new GridLayout(2, false));
-
-		Composite numericComposite = new Composite(keyComposite, SWT.NONE);
-		numericComposite.setLayout(new GridLayout(3, false));
-
+		
+		//numeric keys
 		keysNumeric = new Button[10];
-		for (int i = 1; i < 10; i++) {
-			keysNumeric[i] = getNumericKey(numericComposite, i);
-		}
-
-		Button button;
-
-		button = createButton(numericComposite, "", null);
-		button.setEnabled(DISABLE);
-
-		keysNumeric[0] = getNumericKey(numericComposite, 0);
-
-		button = createButton(numericComposite, "", null);
-		button.setEnabled(DISABLE);
+		keysNumeric[1] = getNumericKey(pinpadReaderUi, 1);
+		keysNumeric[2] = getNumericKey(pinpadReaderUi, 2);
+		keysNumeric[3] = getNumericKey(pinpadReaderUi, 3);
 		
-
-		Composite controlComposite = new Composite(keyComposite, SWT.NONE);
-		controlComposite.setLayout(new GridLayout(2, false));
-
-		Composite leftControlComposite = new Composite(controlComposite, SWT.NONE);
-		leftControlComposite.setLayout(new GridLayout(1, false));
-		
-		final Composite rightinsideControlComposite = new Composite(controlComposite,SWT.NONE | SWT.TOP);
-		rightinsideControlComposite.setLayout(new GridLayout(1, true));
-	
-
-		final Composite rightControlComposite = new Composite(rightinsideControlComposite,SWT.NONE);
-		
-		
-		final GridData grid1 = new GridData(SWT.FILL, SWT.FILL, true, true,1,1);
-		grid1.heightHint = 390;
-		grid1.widthHint = 155;
-		rightControlComposite.setLayoutData(grid1);
-		rightControlComposite.setLayout(new FillLayout());
-		
-		
-
-		gridData = new GridData();
-		gridData.verticalAlignment = SWT.FILL;
-		gridData.horizontalAlignment = SWT.BEGINNING;
-		controlComposite.setLayoutData(gridData);
-		
-		final Composite tableControlComposite = new Composite(rightinsideControlComposite,SWT.NONE);
-		tableControlComposite.setLayout(new GridLayout(1, false));
-		
-		
-
-		// left control composite
+		// control keys
 		keysControl = new Button[3];
-		keysControl[0] = getCancelKey(leftControlComposite);
-		keysControl[1] = getCorrectionKey(leftControlComposite);
-		keysControl[2] = getConfirmationKey(leftControlComposite);
+		keysControl[0] = getCancelKey(pinpadReaderUi);
+		
+        placeholderColumn(pinpadReaderUi);
+
+		viewer = createPasswordTableViewer(pinpadReaderUi);
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = SWT.FILL;
+		gridData.verticalSpan=3;		
+		viewer.getControl().setLayoutData(gridData);
+		
+
+		keysNumeric[4] = getNumericKey(pinpadReaderUi, 4);
+		keysNumeric[5] = getNumericKey(pinpadReaderUi, 5);
+		keysNumeric[6] = getNumericKey(pinpadReaderUi, 6);
+		
+		keysControl[1] = getCorrectionKey(pinpadReaderUi);
+		
+        placeholderColumn(pinpadReaderUi);
 		
 		
-		button = createButton(leftControlComposite, "", null);
+		keysNumeric[7] = getNumericKey(pinpadReaderUi, 7);
+		keysNumeric[8] = getNumericKey(pinpadReaderUi, 8);
+		keysNumeric[9] = getNumericKey(pinpadReaderUi, 9);
+		
+		keysControl[2] = getConfirmationKey(pinpadReaderUi);
+		
+        placeholderColumn(pinpadReaderUi);
+		
+		Button button = createButton(pinpadReaderUi, "", null);
 		button.setEnabled(DISABLE);
+
+		keysNumeric[0] = getNumericKey(pinpadReaderUi, 0);
+
+		button = createButton(pinpadReaderUi, "", null);
+		button.setEnabled(DISABLE);
+
+		// keep the cell below the control keys empty
+		new Label(pinpadReaderUi, SWT.NONE);
 		
-		checkAutoLogin = new Button(tableControlComposite, SWT.CHECK);
+        placeholderColumn(pinpadReaderUi);
+		
+		checkAutoLogin = new Button(pinpadReaderUi, SWT.CHECK);
 		checkAutoLogin.setText("AutoLogin "+ "                       ");
-
 		checkAutoLogin.setEnabled(false);
+		gridData = new GridData();
+		gridData.verticalAlignment = SWT.TOP;
+		checkAutoLogin.setLayoutData(gridData);
+		
+		checkAutoLogin.addSelectionListener(new SelectionListener() {
 
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				checkAutoLogin.setText("AutoLogin: " + viewer.getSelection().toString());
+
+				if (checkAutoLogin.getSelection()) {
+
+					tablePwdManagement.setEnabled(false);
+					autologin = true;
+					pressedKeys.clear();
+					char[] entries = viewer.getSelection().toString().replaceAll("\\D+", "").toCharArray();
+					for (int i = 0; i < entries.length; i++) {
+						char entry = entries[i];
+						setButton(String.valueOf(entry));
+
+					}
+
+					setButton("OK");
+
+				}
+
+				else {
+
+					tablePwdManagement.setEnabled(true);
+					autologin = false;
+					txtOutput.setText("");
+					lblAccessRights.setText("");
+					checkAutoLogin.setText("AutoLogin");
+				}
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+
+		});
+
+		
+		
+		
+		
+		
+		
+		
+		
+		tablePwdManagement.setVisible(true);
+		checkAutoLogin.setVisible(true);
+		setEnabledKeySetController(KEYS_ALL, false);
+	}
+
+	private void placeholderColumn(Composite parent) {
+		Label label = new Label(parent, SWT.NONE);
+		GridData gd = new GridData();
+		gd.grabExcessHorizontalSpace = true;
+		gd.horizontalAlignment = SWT.FILL;
+		label.setLayoutData(gd);
+	}
+
+	private TableViewer createPasswordTableViewer(Composite parent) {
+		viewer = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		
 		// define the TableViewer
-		viewer = new TableViewer(rightControlComposite, SWT.H_SCROLL
-				| SWT.V_SCROLL | SWT.BORDER);
-
 		tablePwdManagement = viewer.getTable();
 		tablePwdManagement.setHeaderVisible(true);
 		tablePwdManagement.setLinesVisible(true);
@@ -467,62 +517,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		tablePwdManagement.addSelectionListener(oneClickListener);
 		
-		/**
-		 * This is the listener for the AutoLogin function. When checked, the
-		 * selected password from the list will be used over and over again,
-		 * when a request comes from outside. Also the list with passwords is
-		 * disabled and cant be changed until unchecking the "AutoLogin" button.
-		 * Next to the AutoLogin button u can see the password, which u
-		 * selected, when checked.
-		 */
-
-		SelectionListener checkListener = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				checkAutoLogin.setText("AutoLogin: " + viewer.getSelection().toString());
-
-				if (checkAutoLogin.getSelection()) {
-
-					tablePwdManagement.setEnabled(false);
-					autologin = true;
-					pressedKeys.clear();
-					char[] entries = viewer.getSelection().toString().replaceAll("\\D+", "").toCharArray();
-					for (int i = 0; i < entries.length; i++) {
-						char entry = entries[i];
-						setButton(String.valueOf(entry));
-
-					}
-
-					setButton("OK");
-
-				}
-
-				else {
-
-					tablePwdManagement.setEnabled(true);
-					autologin = false;
-					txtOutput.setText("");
-					lblAccessRights.setText("foo");
-					checkAutoLogin.setText("AutoLogin");
-				}
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-
-		};
-
-		checkAutoLogin.addSelectionListener(checkListener);
-		
-		
-		tablePwdManagement.setVisible(true);
-		checkAutoLogin.setVisible(true);
-		setEnabledKeySetController(KEYS_ALL, false);
+		return viewer;
 	}
 	
 	private void disposeReaderControls() {
@@ -536,8 +531,6 @@ public class ReaderPart implements VirtualReaderUi {
 	@PostConstruct
 	public void createComposite(Composite parent) {
 		root = parent;
-		
-		root.getShell().setMinimumSize(600, 600);
 		
 		String lastReaderType = PersoSimPreferenceManager.getPreference(LAST_READER_TYPE);
 		String lastCommType = PersoSimPreferenceManager.getPreference(LAST_COMM_TYPE);
@@ -996,6 +989,7 @@ public class ReaderPart implements VirtualReaderUi {
 		IfdConnector connector;
 		try {
 			connector = getConnector();
+			connector.addUi(this);
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not get reader connector object", e);
 		}
@@ -1007,22 +1001,27 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		readerUi = new Composite(root, SWT.NONE);
 		
-		RowLayout layout = new RowLayout(SWT.VERTICAL);
-		layout.justify = false;
-		layout.wrap = false;
+		GridLayout layout = new GridLayout(2,false);
 		readerUi.setLayout(layout);
 		
-		Composite connectionComposite = new Composite(readerUi, SWT.NONE);
-		RowData rowData = new RowData();
-		rowData.height = 30;
-		connectionComposite.setLayoutData(rowData);
-		connectionComposite.setLayout(new FillLayout());
+		Label lblConnection = new Label(readerUi, SWT.NONE);
+		GridData gdConnection = new GridData();
+		gdConnection.grabExcessHorizontalSpace = true;
+		lblConnection.setLayoutData(gdConnection);
 		
-		Composite readerComposite = new Composite(readerUi, SWT.NONE);
+		lblCardPresence = new Label(readerUi, SWT.NONE);
+		GridData gdCardPresence = new GridData();
+		gdCardPresence.widthHint = 75;
+		lblCardPresence.setLayoutData(gdCardPresence);
+		lblCardPresence.setText("Card\nunknown");
+		lblCardPresence.setAlignment(SWT.CENTER);
 
-		readerComposite.setLayoutData(new RowData());
 		
-		Label connectionLabel = new Label(connectionComposite, SWT.NONE);
+		Composite readerComposite = new Composite(readerUi, SWT.FILL);
+		GridData gdReader = new GridData();
+		gdReader.horizontalSpan=2;
+		gdReader.horizontalAlignment=SWT.FILL;
+		readerComposite.setLayoutData(gdReader);
 		
 		switch (currentReaderType) {
 		case BASIC:
@@ -1031,7 +1030,6 @@ public class ReaderPart implements VirtualReaderUi {
 			autologin = false;
 			break;
 		case STANDARD:
-			connector.addUi(this);
 			addBasicListeners(connector);
 			addStandardListeners(connector);
 			createStandardReader(readerComposite);
@@ -1055,10 +1053,12 @@ public class ReaderPart implements VirtualReaderUi {
 			currentComm.reset();
 		}
 		
+		readerUi.pack();
+		
 		try {
 			connector.connect(currentComm);
 			type = currentReaderType;
-			connectionLabel.setText("Card connection type: " + currentComm.getUserString());
+			lblConnection.setText("Card connection type\n" + currentComm.getUserString());
 			PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
 			PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
 			root.layout();
@@ -1067,6 +1067,16 @@ public class ReaderPart implements VirtualReaderUi {
 			BasicLogger.logException(getClass(), "Creation of the ifd connector failed using " + currentComm.getName(), e, LogLevel.WARN);
 			MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The IFD connector using " + currentComm.getName() + " could not be created, please choose another ifd type.");
 		}
+
+		root.pack();
+		root.layout();
+		root.redraw();
+
+		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+80);
+
+		//root.getShell().setMinimumSize(root.getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		
+		
 	}
 	
 	private ReaderType getDefaultReaderType() {
@@ -1099,5 +1109,57 @@ public class ReaderPart implements VirtualReaderUi {
 
 	public void restartReader() {
 		switchReaderType(lastReaderType, null);
+	}
+
+	@Override
+	public void iccPresence(boolean iccPresent) {
+		if (lblCardPresence == null) return;
+		
+		lblCardPresence.getDisplay().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				Color green = new Color(lblCardPresence.getDisplay(),   0, 255, 0);
+				Color red   = new Color(lblCardPresence.getDisplay(), 255,   0, 0);
+
+				lblCardPresence.setText(iccPresent ? "card\npresent": "card\nabsent");
+				lblCardPresence.setBackground(iccPresent ? green: red);				
+			}
+		});
+
+	}
+
+	@Override
+	public void displayChat(byte[] chat) {
+		if (lblAccessRights != null) {
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					String terminalType = "";
+					String accessRights = "";
+					if (chat != null && chat.length > 13) {
+						terminalType = "Terminaltype: ";
+						switch (chat[13]) {
+						case 1:
+							terminalType += "IS";
+							break;
+						case 2:
+							terminalType += "AT";
+							break;
+						case 3:
+							terminalType += "ST";
+							break;
+
+						default:
+							terminalType += "unknown";
+							break;
+						}
+						accessRights = "Requested accessrights: " + HexString.encode(chat).substring(32);
+					}
+					lblAccessRights.setText(terminalType+" "+accessRights);
+				}
+			});
+		}
 	}
 }

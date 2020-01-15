@@ -268,6 +268,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 				LENGTH_ESTABLISH_PACE_PIN_LENGTH);
 		offset += pin.length + LENGTH_ESTABLISH_PACE_PIN_LENGTH;
 
+		displayChat(chat);
 		try {
 			if (pin.length == 0) {
 				pin = getPinFromInterfaces(pinId);
@@ -276,6 +277,8 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		} catch (IOException e) {
 			// #833 Use proper logging mechanism
 			return new SimplePcscCallResult(IFD_ERROR_NOT_SUPPORTED);
+		} finally {
+			displayChat(null);
 		}
 
 		if (pin == null) {
@@ -311,6 +314,12 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 					e.getResponseBuffer());
 		}
 
+	}
+
+	private void displayChat(byte[] chat) {
+		for (VirtualReaderUi currentUi : interfaces) {
+			currentUi.displayChat(chat);
+		}	
 	}
 
 	/**
