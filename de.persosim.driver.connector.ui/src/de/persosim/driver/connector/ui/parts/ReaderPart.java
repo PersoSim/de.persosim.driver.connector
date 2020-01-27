@@ -1072,7 +1072,7 @@ public class ReaderPart implements VirtualReaderUi {
 		root.layout();
 		root.redraw();
 
-		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+80);
+		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
 
 		//root.getShell().setMinimumSize(root.getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		
@@ -1119,6 +1119,7 @@ public class ReaderPart implements VirtualReaderUi {
 			
 			@Override
 			public void run() {
+				if (lblCardPresence.isDisposed()) return;
 				Color green = new Color(lblCardPresence.getDisplay(),   0, 255, 0);
 				Color red   = new Color(lblCardPresence.getDisplay(), 255,   0, 0);
 
