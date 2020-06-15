@@ -2,6 +2,7 @@ package de.persosim.driver.connector.ui.parts;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,6 +53,7 @@ import de.persosim.driver.connector.features.PersoSimPcscProcessor;
 import de.persosim.driver.connector.features.VerifyPinDirect;
 import de.persosim.driver.connector.service.IfdConnector;
 import de.persosim.simulator.preferences.PersoSimPreferenceManager;
+import de.persosim.simulator.utils.BitField;
 import de.persosim.simulator.utils.HexString;
 
 /**
@@ -253,6 +255,7 @@ public class ReaderPart implements VirtualReaderUi {
 					autologin = false;
 					txtOutput.setText("");
 					lblAccessRights.setText("");
+					lblAccessRights.setToolTipText(null);
 					checkAutoLogin.setText("AutoLogin");
 				}
 
@@ -1139,6 +1142,7 @@ public class ReaderPart implements VirtualReaderUi {
 				public void run() {
 					String terminalType = "";
 					String accessRights = "";
+					String tooltipText = "no description available";
 					if (chat != null && chat.length > 13) {
 						terminalType = "Terminaltype: ";
 						switch (chat[13]) {
@@ -1147,6 +1151,7 @@ public class ReaderPart implements VirtualReaderUi {
 							break;
 						case 2:
 							terminalType += "AT";
+							tooltipText = getToolTipAt(chat);
 							break;
 						case 3:
 							terminalType += "ST";
@@ -1159,8 +1164,159 @@ public class ReaderPart implements VirtualReaderUi {
 						accessRights = "Requested accessrights: " + HexString.encode(chat).substring(32);
 					}
 					lblAccessRights.setText(terminalType+" "+accessRights);
+					lblAccessRights.setToolTipText(tooltipText);
 				}
 			});
 		}
+	}
+
+	private String getToolTipAt(byte[] chat) {
+		String terminalType = "Authentication Terminal";
+		
+		byte[] auth = Arrays.copyOfRange(chat, 16, chat.length);
+//		BitField authBits = new BitField(auth);
+		BitField authBits = BitField.buildFromBigEndian(auth);
+		
+		String role = "unknown";
+		int roleByte = auth[0] & 0xC0;
+		switch (roleByte) {
+			case 0xC0:
+				role = "CVCA";
+				break;
+				
+			case 0x80:
+				role = "DV (official domestic)";
+				break;
+				
+			case 0x40:
+				role = "DV (non-official / foreign)";
+				break;
+
+			default:
+				role = "AT";
+		}
+		
+		String accessRights = "";
+		if (authBits.getBit(0)) {
+			accessRights += "\n - Age Verification";
+		}
+		if (authBits.getBit(1)) {
+			accessRights += "\n - Community ID Verification";
+		}
+		if (authBits.getBit(2)) {
+			accessRights += "\n - Restricted Identification";
+		}
+		if (authBits.getBit(3)) {
+			accessRights += "\n - Privileged Terminal";
+		}
+		if (authBits.getBit(4)) {
+			accessRights += "\n - CAN allowed";
+		}
+		if (authBits.getBit(5)) {
+			accessRights += "\n - PIN Management";
+		}
+		if (authBits.getBit(6)) {
+			accessRights += "\n - Install Certificate";
+		}
+		if (authBits.getBit(7)) {
+			accessRights += "\n - Install Qualified Certificate";
+		}
+
+		if (authBits.getBit(8)) {
+			accessRights += "\n - Read Access(eID) DG1";
+		}	
+		if (authBits.getBit(9)) {
+			accessRights += "\n - Read Access(eID) DG2";
+		}	
+		if (authBits.getBit(10)) {
+			accessRights += "\n - Read Access(eID) DG3";
+		}	
+		if (authBits.getBit(11)) {
+			accessRights += "\n - Read Access(eID) DG4";
+		}	
+		if (authBits.getBit(12)) {
+			accessRights += "\n - Read Access(eID) DG5";
+		}	
+		if (authBits.getBit(13)) {
+			accessRights += "\n - Read Access(eID) DG6";
+		}	
+		if (authBits.getBit(14)) {
+			accessRights += "\n - Read Access(eID) DG7";
+		}	
+		if (authBits.getBit(15)) {
+			accessRights += "\n - Read Access(eID) DG8";
+		}	
+		if (authBits.getBit(16)) {
+			accessRights += "\n - Read Access(eID) DG9";
+		}	
+		if (authBits.getBit(17)) {
+			accessRights += "\n - Read Access(eID) DG10";
+		}	
+		if (authBits.getBit(18)) {
+			accessRights += "\n - Read Access(eID) DG11";
+		}	
+		if (authBits.getBit(19)) {
+			accessRights += "\n - Read Access(eID) DG12";
+		}	
+		if (authBits.getBit(20)) {
+			accessRights += "\n - Read Access(eID) DG13";
+		}	
+		if (authBits.getBit(21)) {
+			accessRights += "\n - Read Access(eID) DG14";
+		}	
+		if (authBits.getBit(22)) {
+			accessRights += "\n - Read Access(eID) DG15";
+		}	
+		if (authBits.getBit(23)) {
+			accessRights += "\n - Read Access(eID) DG16";
+		}	
+		if (authBits.getBit(24)) {
+			accessRights += "\n - Read Access(eID) DG17";
+		}	
+		if (authBits.getBit(25)) {
+			accessRights += "\n - Read Access(eID) DG18";
+		}	
+		if (authBits.getBit(26)) {
+			accessRights += "\n - Read Access(eID) DG19";
+		}	
+		if (authBits.getBit(27)) {
+			accessRights += "\n - Read Access(eID) DG20";
+		}		
+		if (authBits.getBit(28)) {
+			accessRights += "\n - Read Access(eID) DG21";
+		}	
+		if (authBits.getBit(29)) {
+			accessRights += "\n - Read Access(eID) DG22";
+		}	
+		
+
+		if (authBits.getBit(32)) {
+			accessRights += "\n - Write Access(eID) DG22";
+		}
+		if (authBits.getBit(33)) {
+			accessRights += "\n - Write Access(eID) DG21";
+		}
+		if (authBits.getBit(34)) {
+			accessRights += "\n - Write Access(eID) DG20";
+		}
+		if (authBits.getBit(35)) {
+			accessRights += "\n - Write Access(eID) DG19";
+		}
+		if (authBits.getBit(36)) {
+			accessRights += "\n - Write Access(eID) DG18";
+		}
+		if (authBits.getBit(37)) {
+			accessRights += "\n - Write Access(eID) DG17";
+		}
+
+		
+		if (accessRights.length()<1) {
+			accessRights = "\n - none";
+		}
+
+		String retVal = "Type: "+terminalType;
+		retVal += "\nRole: "+role;
+		retVal += "\nAccess Rights:"+accessRights;
+		return retVal;
 	}
 }
