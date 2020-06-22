@@ -36,6 +36,7 @@ import de.persosim.driver.connector.pcsc.PcscConstants;
 import de.persosim.driver.connector.pcsc.PcscFeature;
 import de.persosim.driver.connector.pcsc.PcscListener;
 import de.persosim.driver.connector.pcsc.SimplePcscCallResult;
+import de.persosim.driver.connector.pcsc.UiEnabled;
 import de.persosim.driver.connector.service.IfdConnector;
 import de.persosim.simulator.platform.Iso7816;
 import de.persosim.simulator.utils.Utils;
@@ -45,11 +46,12 @@ import de.persosim.simulator.utils.Utils;
  * @author mboonk
  *
  */
-public class DefaultListener implements PcscListener, ConnectorEnabled {
+public class DefaultListener implements PcscListener, ConnectorEnabled, UiEnabled {
 
 	private static final byte FEATURE_GET_FEATURE_REQUEST = 0;
 	private byte[] cachedAtr = null;
 	private IfdConnector connector;
+	private List<VirtualReaderUi> userInterfaces;
 	
 	@Override
 	public PcscCallResult processPcscCall(PcscCallData data) {
@@ -292,7 +294,15 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	}
 
 	private PcscCallResult isIccPresent(PcscCallData data) {
-		if ((SimulatorManager.getSim() != null)&& (SimulatorManager.getSim().isRunning())){
+		boolean iccPresent = (SimulatorManager.getSim() != null)&& (SimulatorManager.getSim().isRunning());
+		
+		if (userInterfaces != null) {
+			for (VirtualReaderUi ui : userInterfaces) {
+				ui.iccPresence(iccPresent);
+			}
+		}
+		
+		if (iccPresent) {
 			return new SimplePcscCallResult(IFD_ICC_PRESENT);
 		}
 		return new SimplePcscCallResult(IFD_ICC_NOT_PRESENT);
@@ -326,5 +336,10 @@ public class DefaultListener implements PcscListener, ConnectorEnabled {
 	@Override
 	public void setConnector(IfdConnector connector) {
 		this.connector = connector;
+	}
+
+	@Override
+	public void setUserInterfaces(List<VirtualReaderUi> newUis) {
+		this.userInterfaces = newUis;
 	}
 }
