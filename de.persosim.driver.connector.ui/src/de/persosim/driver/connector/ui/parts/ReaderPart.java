@@ -581,6 +581,7 @@ public class ReaderPart implements VirtualReaderUi {
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.verticalAlignment = SWT.FILL;
+		gridData.heightHint = 72;
 
 		button.setLayoutData(gridData);
 
