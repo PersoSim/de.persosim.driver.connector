@@ -23,13 +23,32 @@ public class PasswordModelProvider {
 
 	private static Preferences prefsUi = InstanceScope.INSTANCE
 			.getNode("de.persosim.driver.connector.ui");
+
+	private static final String AUTO_LOGIN = "AUTO_LOGIN";
 	private static Preferences nodePassword = prefsUi.node("nodePwd");
 
 	private List<String> pins;
 	private boolean sort = true;
+	private String autoLogin = null;
 
 	public boolean getSort() {
 		return sort;
+	}
+
+	public String getAutoLogin() {
+		return autoLogin;
+	}
+
+	public void saveAutoLogin(String pin) {
+		this.autoLogin = pin;
+		prefsUi.put(AUTO_LOGIN, pin);
+		prefsUiFlush();
+	}
+
+	public void removeAutoLogin() {
+		autoLogin = null;
+		prefsUi.remove(AUTO_LOGIN);
+		prefsUiFlush();
 	}
 
 	public void setSort(boolean sort) {
@@ -38,6 +57,7 @@ public class PasswordModelProvider {
 
 	private PasswordModelProvider() {
 		pins = getPinsFromPrefs();
+		autoLogin = prefsUi.get(AUTO_LOGIN, null);
 	}
 
 	public static PasswordModelProvider getInstance() {
@@ -114,12 +134,7 @@ public class PasswordModelProvider {
 
 		}
 
-		try {
-			prefsUi.flush();
-		} catch (BackingStoreException e) {
-			log(getClass(), "could not save the password in the preferences file", LogLevel.ERROR);
-			e.printStackTrace();
-		}
+		prefsUiFlush();
 	}
 
 	public void deletePinsFromPrefs() {
@@ -143,5 +158,14 @@ public class PasswordModelProvider {
 
 		}
 		getPinsFromPrefs();
+	}
+
+	private void prefsUiFlush() {
+		try {
+			prefsUi.flush();
+		} catch (BackingStoreException e) {
+			log(getClass(), "could not save the password in the preferences file", LogLevel.ERROR);
+			e.printStackTrace();
+		}
 	}
 }
