@@ -6,9 +6,9 @@ Bundle-Version: 0.19.0.qualifier
 Bundle-Activator: de.persosim.driver.test.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- de.persosim.driver.connector;bundle-version="0.0.1",
+ de.persosim.driver.connector,
  org.junit,
- de.persosim.simulator;bundle-version="0.5.0",
+ de.persosim.simulator,
  org.globaltester.simulator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
