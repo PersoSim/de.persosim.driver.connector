@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.junit,
  de.persosim.simulator,
  org.globaltester.simulator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: secunet Security Networks AG
 Automatic-Module-Name: de.persosim.driver.connector.test
