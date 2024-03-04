@@ -132,8 +132,9 @@ public class ReaderPart implements VirtualReaderUi {
 		gridData.grabExcessHorizontalSpace = true;
 
 		Label lblOutput = new Label(parent, SWT.FILL);
-		lblOutput.setFont(new Font(parent.getDisplay(), FONT_NAME,
-				24, SWT.BOLD));
+		Font font = new Font(parent.getDisplay(), FONT_NAME, 24, SWT.BOLD);
+		lblOutput.setFont(font);
+		lblOutput.addListener(SWT.Dispose, event -> font.dispose());
 		lblOutput.setText("Basic Reader");
 		
 		parent.layout();
@@ -151,8 +152,9 @@ public class ReaderPart implements VirtualReaderUi {
 
 		txtOutput = new Text(pinpadReaderUi, SWT.READ_ONLY | SWT.PASSWORD
 				| SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.LEFT);
-		txtOutput.setFont(new Font(pinpadReaderUi.getDisplay(), FONT_NAME, 24,
-				SWT.BOLD));
+		Font font = new Font(pinpadReaderUi.getDisplay(), FONT_NAME, 24, SWT.BOLD);
+		txtOutput.setFont(font);
+		txtOutput.addListener(SWT.Dispose, event -> font.dispose());
 		txtOutput.setEditable(false);
 		txtOutput.setCursor(null);
 		GridData gridData = new GridData();
@@ -572,8 +574,9 @@ public class ReaderPart implements VirtualReaderUi {
 			SelectionListener selectionListener) {
 		final Button button = new Button(parent, SWT.PUSH);
 		button.setText(text);
-		button.setFont(new Font(parent.getDisplay(), FONT_NAME, 36, SWT.BOLD));
-
+		Font font = new Font(parent.getDisplay(), FONT_NAME, 36, SWT.BOLD);
+		button.setFont(font);
+		button.addListener(SWT.Dispose, event -> font.dispose());
 		if (selectionListener != null) {
 			button.addSelectionListener(selectionListener);
 		}
