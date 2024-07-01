@@ -2,14 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PersoSim Driver Connector Test
 Bundle-SymbolicName: de.persosim.driver.connector.test
-Bundle-Version: 0.19.0.qualifier
+Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: de.persosim.driver.test.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- de.persosim.driver.connector;bundle-version="0.0.1",
+ de.persosim.driver.connector,
  org.junit,
- de.persosim.simulator;bundle-version="0.5.0",
+ de.persosim.simulator,
  org.globaltester.simulator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: secunet Security Networks AG
+Automatic-Module-Name: de.persosim.driver.connector.test
