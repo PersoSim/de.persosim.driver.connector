@@ -229,7 +229,8 @@ public class DefaultListener implements PcscListener, ConnectorEnabled, UiEnable
 				return new SimplePcscCallResult(PcscConstants.IFD_ERROR_POWER_ACTION);
 			}
 			
-			if (cachedAtr != null && cachedAtr.length <= expectedLength.getAsSignedLong()){
+			long expectedLengthAsLong = expectedLength.getAsSignedLong();
+			if (cachedAtr != null && (cachedAtr.length <= expectedLengthAsLong || expectedLengthAsLong == 0)){
 				return new SimplePcscCallResult(IFD_SUCCESS, cachedAtr);	
 			}
 			return new SimplePcscCallResult(IFD_ERROR_INSUFFICIENT_BUFFER);
