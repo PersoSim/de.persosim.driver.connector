@@ -237,6 +237,8 @@ public class ReaderPart implements VirtualReaderUi {
 
 				if (checkAutoLogin.getSelection()) {
 
+					passwordModelProvider.saveAutoLogin(viewer.getSelection().toString().replaceAll("\\D+", ""));
+
 					tablePwdManagement.setEnabled(false);
 					autologin = true;
 					pressedKeys.clear();
@@ -253,6 +255,7 @@ public class ReaderPart implements VirtualReaderUi {
 
 				else {
 
+					passwordModelProvider.removeAutoLogin();
 					tablePwdManagement.setEnabled(true);
 					autologin = false;
 					txtOutput.setText("");
@@ -275,7 +278,7 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		
 		
-		
+		restoreAutoLoginState();
 		
 		
 		tablePwdManagement.setVisible(true);
@@ -289,6 +292,26 @@ public class ReaderPart implements VirtualReaderUi {
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		label.setLayoutData(gd);
+	}
+
+	private void restoreAutoLoginState() {
+		String pin = passwordModelProvider.getAutoLogin();
+		if(pin != null)
+		{
+			checkAutoLogin.setEnabled(true);
+			checkAutoLogin.setSelection(true);
+			checkAutoLogin.setText("AutoLogin: [" + pin + "]");
+			tablePwdManagement.setEnabled(false);
+			autologin = true;
+			pressedKeys.clear();
+			char[] entries = pin.toCharArray();
+			for (int i = 0; i < entries.length; i++) {
+				char entry = entries[i];
+				setButton(String.valueOf(entry));
+			}
+
+			setButton("OK");
+		}
 	}
 
 	private TableViewer createPasswordTableViewer(Composite parent) {
@@ -317,7 +340,6 @@ public class ReaderPart implements VirtualReaderUi {
 		
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		
 		viewer.setInput(passwordModelProvider.getPins());
 		final Menu popupTable = new Menu(viewer.getTable());
 		
