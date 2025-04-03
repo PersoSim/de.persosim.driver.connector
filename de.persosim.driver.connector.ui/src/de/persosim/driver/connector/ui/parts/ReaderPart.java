@@ -370,9 +370,7 @@ public class ReaderPart implements VirtualReaderUi {
 					viewer.setInput(passwordModelProvider.getPins());
 					int selectionIndex = passwordModelProvider.getPins().lastIndexOf(newPassword);
 					viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
-				}
-
-									
+				}		
 			}
 
 			@Override

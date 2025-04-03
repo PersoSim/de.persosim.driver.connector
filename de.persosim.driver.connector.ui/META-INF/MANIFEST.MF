@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.swt,
  de.persosim.simulator,
  de.persosim.driver.connector,
  org.globaltester.logging,
- org.eclipse.osgi
+ org.eclipse.osgi,
+ de.persosim.remoteifd
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: de.persosim.driver.connector.ui,
  de.persosim.driver.connector.ui.parts
