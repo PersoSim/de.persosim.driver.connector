@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.menu.MItem;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -19,23 +20,25 @@ public class VirtualDriverHandler {
 
 	@Inject
 	private EPartService partService;
-	
+
 	@Execute
-	public void execute() {
-		BasicLogger.log(this.getClass(), "Switch to use virtual driver", LogLevel.INFO);
+	public void execute(final MPart mPart, final MItem mItem) {
+		if (mItem.isSelected()) {
+			BasicLogger.log(this.getClass(), "Switch to use virtual driver", LogLevel.INFO);
 
-		// ID of part as defined in fragment.e4xmi application model
-		MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
+			// ID of part as defined in fragment.e4xmi application model
+			MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
 
-		
-		if (readerPart.getObject() instanceof ReaderPart) {
-			ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
+			
+			if (readerPart.getObject() instanceof ReaderPart) {
+				ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
 
-			try {
-				readerPartObject.switchReaderType(new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));
-			} catch (IfdCreationException e) {
-				BasicLogger.logException(this.getClass(), e, LogLevel.WARN);
-				MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The virtual driver communication could not be established.");
+				try {
+					readerPartObject.switchReaderType(new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));
+				} catch (IfdCreationException e) {
+					BasicLogger.logException(this.getClass(), e, LogLevel.WARN);
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The virtual driver communication could not be established.");
+				}
 			}
 		}
 	}
