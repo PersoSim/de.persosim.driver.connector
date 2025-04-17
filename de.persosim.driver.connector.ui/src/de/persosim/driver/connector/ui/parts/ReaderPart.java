@@ -141,6 +141,31 @@ public class ReaderPart implements VirtualReaderUi {
 		parent.redraw();
 	}
 
+
+	/**
+	 * Defines the none reader. It has no own input interface.
+	 * 
+	 * @param parent composite where the reader will be placed
+	 */
+	private void createNoneReader(Composite parent) {
+		GridLayout parentLayout = new GridLayout(1, false);
+		parentLayout.marginWidth = 0;
+		parent.setLayout(parentLayout );
+
+		GridData gridData;
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+
+		Label lblOutput = new Label(parent, SWT.FILL);
+		Font font = new Font(parent.getDisplay(), FONT_NAME, 24, SWT.BOLD);
+		lblOutput.setFont(font);
+		lblOutput.addListener(SWT.Dispose, event -> font.dispose());
+		
+		parent.layout();
+		parent.redraw();
+	}
+
 	/**
 	 * Defines the layout of the virtual standard reader. Unlike the basic
 	 * reader it contains a keypad.
@@ -270,14 +295,6 @@ public class ReaderPart implements VirtualReaderUi {
 
 		});
 
-		
-		
-		
-		
-		
-		
-		
-		
 		tablePwdManagement.setVisible(true);
 		checkAutoLogin.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
@@ -1043,6 +1060,9 @@ public class ReaderPart implements VirtualReaderUi {
 			{
 				checkAutoLogin.setEnabled(true);
 			}
+			break;
+		case NONE:
+			createNoneReader(readerComposite);
 			break;
 		default:
 			break;
