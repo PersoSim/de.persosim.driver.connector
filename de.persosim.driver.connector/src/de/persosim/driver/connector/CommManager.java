@@ -56,6 +56,6 @@ public class CommManager {
 				}
 			}
 		}
-		return null;
+		return candidate;
 	}
 }
