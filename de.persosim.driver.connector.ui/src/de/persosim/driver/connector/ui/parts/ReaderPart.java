@@ -1034,14 +1034,15 @@ public class ReaderPart implements VirtualReaderUi {
 		GridData gdConnection = new GridData();
 		gdConnection.grabExcessHorizontalSpace = true;
 		lblConnection.setLayoutData(gdConnection);
-		
-		lblCardPresence = new Label(readerUi, SWT.NONE);
-		GridData gdCardPresence = new GridData();
-		gdCardPresence.widthHint = 75;
-		lblCardPresence.setLayoutData(gdCardPresence);
-		lblCardPresence.setText("Card\nunknown");
-		lblCardPresence.setAlignment(SWT.CENTER);
 
+		switch (currentReaderType) {
+		case BASIC:
+		case STANDARD:
+			createCardPresence();
+			break;
+		default:
+			break;
+		}
 		
 		Composite readerComposite = new Composite(readerUi, SWT.FILL);
 		GridData gdReader = new GridData();
@@ -1112,12 +1113,23 @@ public class ReaderPart implements VirtualReaderUi {
 		PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
 		root.layout();
 		root.redraw();
+		
+		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
 
 		root.pack();
 		root.layout();
 		root.redraw();
 
-		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
+	}
+
+
+	private void createCardPresence() {
+		lblCardPresence = new Label(readerUi, SWT.NONE);
+		GridData gdCardPresence = new GridData();
+		gdCardPresence.widthHint = 75;
+		lblCardPresence.setLayoutData(gdCardPresence);
+		lblCardPresence.setText("Card\nunknown");
+		lblCardPresence.setAlignment(SWT.CENTER);
 	}
 	
 	private ReaderType getDefaultReaderType() {
