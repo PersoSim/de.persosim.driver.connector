@@ -27,7 +27,7 @@ public class VirtualDriverHandler {
 	
 	@Execute
 	public void execute(final MPart mPart, final MItem mItem) {
-		BasicLogger.log(this.getClass(), "Switch to use virtual driver", LogLevel.INFO);
+		BasicLogger.log(this.getClass(), "Virtual driver menu entry toggled", LogLevel.INFO);
 		
 		if (mPart.getObject() instanceof ReaderPart) {
 			ReaderPart readerPartObject = (ReaderPart) mPart.getObject();
