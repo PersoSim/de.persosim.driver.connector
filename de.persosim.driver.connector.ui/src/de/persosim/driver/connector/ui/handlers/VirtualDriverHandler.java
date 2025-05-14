@@ -1,11 +1,10 @@
  
 package de.persosim.driver.connector.ui.handlers;
 
-import jakarta.inject.Inject;
-
+import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.menu.MItem;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.globaltester.logging.BasicLogger;
@@ -16,20 +15,22 @@ import de.persosim.driver.connector.exceptions.IfdCreationException;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
 
 public class VirtualDriverHandler {
-
-	@Inject
-	private EPartService partService;
+	
+	@CanExecute
+	public boolean checkState(final MPart mPart, final MItem mItem) {
+		if (mPart.getObject() instanceof ReaderPart) {
+			ReaderPart readerPartObject = (ReaderPart) mPart.getObject();
+			mItem.setSelected(readerPartObject.getCurrentCommType() == VirtualDriverComm.NAME);
+		}
+		return true;
+	}
 	
 	@Execute
-	public void execute() {
-		BasicLogger.log(this.getClass(), "Switch to use virtual driver", LogLevel.INFO);
-
-		// ID of part as defined in fragment.e4xmi application model
-		MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
-
+	public void execute(final MPart mPart, final MItem mItem) {
+		BasicLogger.log(this.getClass(), "Virtual driver menu entry toggled", LogLevel.INFO);
 		
-		if (readerPart.getObject() instanceof ReaderPart) {
-			ReaderPart readerPartObject = (ReaderPart) readerPart.getObject();
+		if (mPart.getObject() instanceof ReaderPart) {
+			ReaderPart readerPartObject = (ReaderPart) mPart.getObject();
 
 			try {
 				readerPartObject.switchReaderType(new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));

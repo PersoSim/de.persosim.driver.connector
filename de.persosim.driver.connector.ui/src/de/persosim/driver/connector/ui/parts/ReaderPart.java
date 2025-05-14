@@ -55,6 +55,7 @@ import de.persosim.driver.connector.service.IfdConnector;
 import de.persosim.simulator.preferences.PersoSimPreferenceManager;
 import de.persosim.simulator.utils.BitField;
 import de.persosim.simulator.utils.HexString;
+import de.persosim.websocket.WebsocketComm;
 
 /**
  * This class defines the appearance and behavior of the PinPad GUI to be used
@@ -70,7 +71,7 @@ public class ReaderPart implements VirtualReaderUi {
 	private static final String LAST_READER_TYPE = "LAST_READER_TYPE";
 
 	public enum ReaderType {
-		STANDARD, BASIC, NONE;
+		STANDARD, BASIC, NONE, EXTERNAL;
 	}
 
 	private static final String FONT_NAME = "Helvetica";
@@ -136,6 +137,51 @@ public class ReaderPart implements VirtualReaderUi {
 		lblOutput.setFont(font);
 		lblOutput.addListener(SWT.Dispose, event -> font.dispose());
 		lblOutput.setText("Basic Reader");
+		
+		parent.layout();
+		parent.redraw();
+	}
+
+
+	/**
+	 * Defines the virtual basic reader. It has no own input interface.
+	 * 
+	 * @param parent composite where the reader will be placed
+	 */
+	private void createExternalReader(Composite parent) {
+		GridLayout parentLayout = new GridLayout(1, false);
+		parentLayout.marginWidth = 0;
+		parent.setLayout(parentLayout );
+
+		GridData gridData;
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		
+		parent.layout();
+		parent.redraw();
+	}
+
+
+	/**
+	 * Defines the none reader. It has no own input interface.
+	 * 
+	 * @param parent composite where the reader will be placed
+	 */
+	private void createNoneReader(Composite parent) {
+		GridLayout parentLayout = new GridLayout(1, false);
+		parentLayout.marginWidth = 0;
+		parent.setLayout(parentLayout );
+
+		GridData gridData;
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+
+		Label lblOutput = new Label(parent, SWT.FILL);
+		Font font = new Font(parent.getDisplay(), FONT_NAME, 24, SWT.BOLD);
+		lblOutput.setFont(font);
+		lblOutput.addListener(SWT.Dispose, event -> font.dispose());
 		
 		parent.layout();
 		parent.redraw();
@@ -270,14 +316,6 @@ public class ReaderPart implements VirtualReaderUi {
 
 		});
 
-		
-		
-		
-		
-		
-		
-		
-		
 		tablePwdManagement.setVisible(true);
 		checkAutoLogin.setVisible(true);
 		setEnabledKeySetController(KEYS_ALL, false);
@@ -342,19 +380,12 @@ public class ReaderPart implements VirtualReaderUi {
 		removeTableItem.setText("Remove Password");
 		removeTableItem.setEnabled(false);
 		
-		
-		
-		
-		
-		
 		/**
 		 * This is the listener for "New Password" in the context menu of the
 		 * list. This method created a input dialog box, where u can enter the
 		 * new password. If the password meets all requirements the password
 		 * will be saved in the list and in preferences.
 		 */
-
-	       
 		SelectionListener addNewPasswordListener = new SelectionListener() {
 
 			@Override
@@ -370,9 +401,7 @@ public class ReaderPart implements VirtualReaderUi {
 					viewer.setInput(passwordModelProvider.getPins());
 					int selectionIndex = passwordModelProvider.getPins().lastIndexOf(newPassword);
 					viewer.setSelection(new StructuredSelection(viewer.getElementAt(selectionIndex)), true);
-				}
-
-									
+				}		
 			}
 
 			@Override
@@ -382,8 +411,6 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		
 		addTableItem.addSelectionListener(addNewPasswordListener);
-		
-		
 		
 		/**
 		 * This is the listener for "Remove Password" in the context menu of the list. The
@@ -428,7 +455,6 @@ public class ReaderPart implements VirtualReaderUi {
 		 * simulates the entry of the password entered and confirms with the
 		 * "OK" button.
 		 */
-		
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 
 			@Override
@@ -454,7 +480,6 @@ public class ReaderPart implements VirtualReaderUi {
 		 * previous password. If the password meets all requirements the
 		 * password will be saved in the list and in preferences.
 		 */
-		
 		SelectionListener editPasswordListener = new SelectionListener() {
 
 			@Override
@@ -485,14 +510,11 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		editTableItem.addSelectionListener(editPasswordListener);
 		
-		
-		
 		/**
 		 * This is the listener for the single click in the list. The listener
 		 * makes it possible to select a password and highlight the choice.
 		 * This listener also triggers the "AutoLogin" function to be enables and visible.
 		 */
-		
 		SelectionListener oneClickListener = new SelectionListener() {
 
 			@Override
@@ -521,7 +543,6 @@ public class ReaderPart implements VirtualReaderUi {
 		};
 		
 		tablePwdManagement.addSelectionListener(oneClickListener);
-		
 		return viewer;
 	}
 	
@@ -530,9 +551,7 @@ public class ReaderPart implements VirtualReaderUi {
 			readerUi.dispose();
 			readerUi = null;
 	}
-	
-	
-	
+
 	@PostConstruct
 	public void createComposite(Composite parent) {
 		root = parent;
@@ -595,7 +614,6 @@ public class ReaderPart implements VirtualReaderUi {
 	    viewer.getControl().setFocus();
 	}
 	
-
 	/**
 	 * This method defines the Numeric Buttons.
 	 * 
@@ -664,7 +682,6 @@ public class ReaderPart implements VirtualReaderUi {
 	 */
 	public String querryUserForNewPassword(String previousValue)
 	{
-		
 		String retVal = null;
 		
 		do {
@@ -964,6 +981,13 @@ public class ReaderPart implements VirtualReaderUi {
 		switchReaderType(null, comm);
 	}
 
+	public String getCurrentCommType() {
+		return currentComm.getName();
+	}
+
+	public ReaderType getCurrentReaderType() {
+		return currentReaderType;
+	}
 	
 	/**
 	 * Switch the parts user interface and behavior to the reader type
@@ -974,13 +998,17 @@ public class ReaderPart implements VirtualReaderUi {
 	 * @throws NoConnectorAvailableException 
 	 * @throws IOException 
 	 */
-	private void switchReaderType(ReaderType readerType, IfdComm comm) {
+	public void switchReaderType(ReaderType readerType, IfdComm comm) {
 		resetReader();
 
 		disposeConnector();
 		
 		if (ReaderType.NONE.equals(readerType)) {
 			return;
+		}
+		
+		if (readerType == null && comm != null && ( comm.getName().equals(WebsocketComm.NAME) || comm.getName().equals("VIRTUAL"))) {
+			readerType = ReaderType.BASIC;
 		}
 		
 		if (readerType != null) {
@@ -993,15 +1021,6 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		lastReaderType = currentReaderType;
 		
-		IfdConnector connector;
-		try {
-			connector = getConnector();
-			connector.addUi(this);
-		} catch (IOException e) {
-			throw new IllegalStateException("Could not get reader connector object", e);
-		}
-		
-
 		disposeReaderControls();
 		
 		root.setLayout(new FillLayout());
@@ -1015,20 +1034,32 @@ public class ReaderPart implements VirtualReaderUi {
 		GridData gdConnection = new GridData();
 		gdConnection.grabExcessHorizontalSpace = true;
 		lblConnection.setLayoutData(gdConnection);
-		
-		lblCardPresence = new Label(readerUi, SWT.NONE);
-		GridData gdCardPresence = new GridData();
-		gdCardPresence.widthHint = 75;
-		lblCardPresence.setLayoutData(gdCardPresence);
-		lblCardPresence.setText("Card\nunknown");
-		lblCardPresence.setAlignment(SWT.CENTER);
 
+		switch (currentReaderType) {
+		case BASIC:
+		case STANDARD:
+			createCardPresence();
+			break;
+		default:
+			break;
+		}
 		
 		Composite readerComposite = new Composite(readerUi, SWT.FILL);
 		GridData gdReader = new GridData();
 		gdReader.horizontalSpan=2;
 		gdReader.horizontalAlignment=SWT.FILL;
 		readerComposite.setLayoutData(gdReader);
+		
+
+		IfdConnector connector = null;
+		if (readerType != ReaderType.EXTERNAL) {
+			try {
+				connector = getConnector();
+				connector.addUi(this);
+			} catch (IOException e) {
+				throw new IllegalStateException("Could not get reader connector object", e);
+			}
+		}		
 		
 		switch (currentReaderType) {
 		case BASIC:
@@ -1046,6 +1077,12 @@ public class ReaderPart implements VirtualReaderUi {
 				checkAutoLogin.setEnabled(true);
 			}
 			break;
+		case NONE:
+			createNoneReader(readerComposite);
+			break;
+		case EXTERNAL:
+			createExternalReader(readerComposite);
+			break;
 		default:
 			break;
 		}
@@ -1062,28 +1099,37 @@ public class ReaderPart implements VirtualReaderUi {
 		
 		readerUi.pack();
 		
-		try {
-			connector.connect(currentComm);
-			type = currentReaderType;
-			lblConnection.setText("Card connection type\n" + currentComm.getUserString());
-			PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
-			PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
-			root.layout();
-			root.redraw();
-		} catch (IOException | IllegalStateException e) {
-			BasicLogger.logException(getClass(), "Creation of the ifd connector failed using " + currentComm.getName(), e, LogLevel.WARN);
-			MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The IFD connector using " + currentComm.getName() + " could not be created, please choose another ifd type.");
+		if (readerType != ReaderType.EXTERNAL) {
+			try {
+				connector.connect(currentComm);
+			} catch (IOException | IllegalStateException e) {
+				BasicLogger.logException(getClass(), "Creation of the ifd connector failed using " + currentComm.getName(), e, LogLevel.WARN);
+				MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The IFD connector using " + currentComm.getName() + " could not be created, please choose another ifd type.");
+			}
 		}
+		type = currentReaderType;
+		lblConnection.setText("Card connection type\n" + currentComm.getUserString());
+		PersoSimPreferenceManager.storePreference(LAST_READER_TYPE, type.name());
+		PersoSimPreferenceManager.storePreference(LAST_COMM_TYPE, currentComm.getName());
+		root.layout();
+		root.redraw();
+		
+		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
 
 		root.pack();
 		root.layout();
 		root.redraw();
 
-		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
+	}
 
-		//root.getShell().setMinimumSize(root.getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-		
-		
+
+	private void createCardPresence() {
+		lblCardPresence = new Label(readerUi, SWT.NONE);
+		GridData gdCardPresence = new GridData();
+		gdCardPresence.widthHint = 75;
+		lblCardPresence.setLayoutData(gdCardPresence);
+		lblCardPresence.setText("Card\nunknown");
+		lblCardPresence.setAlignment(SWT.CENTER);
 	}
 	
 	private ReaderType getDefaultReaderType() {

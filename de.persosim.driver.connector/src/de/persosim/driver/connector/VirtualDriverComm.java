@@ -113,6 +113,7 @@ public class VirtualDriverComm implements IfdComm, Runnable {
 
 	@Override
 	public void stop() {
+		BasicLogger.log("Stopping driver comm", LogLevel.TRACE);
 		if (!isRunning) {
 			return;
 		}
@@ -148,6 +149,7 @@ public class VirtualDriverComm implements IfdComm, Runnable {
 		dataSocket = null;
 		driverComm = null;
 		isRunning = false;
+		BasicLogger.log("Stopping driver comm done", LogLevel.TRACE);
 	}
 
 	@Override
