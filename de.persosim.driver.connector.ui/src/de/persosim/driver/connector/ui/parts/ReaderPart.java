@@ -1114,7 +1114,15 @@ public class ReaderPart implements VirtualReaderUi {
 		root.layout();
 		root.redraw();
 		
-		root.getShell().setMinimumSize(root.getSize().x+10,root.getSize().y+100);
+		int minWidth = root.getSize().x+10;
+		int minHeight = root.getSize().y+100;
+
+		if (minWidth < 500)
+			minWidth = 500;
+		if (minHeight < 600)
+			minHeight = 600;
+		
+		root.getShell().setMinimumSize(minWidth,minHeight);
 
 		root.pack();
 		root.layout();
