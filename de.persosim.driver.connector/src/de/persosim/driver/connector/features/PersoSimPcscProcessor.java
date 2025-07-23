@@ -28,7 +28,7 @@ import de.persosim.simulator.utils.Utils;
 
 /**
  * This class gets PCSC style messages and processes them.
- * 
+ *
  * @author mboonk
  *
  */
@@ -37,7 +37,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	/**
 	 * This enum represents the different states of the PCSC pseudo PACE.
-	 * 
+	 *
 	 * @author mboonk
 	 *
 	 */
@@ -117,7 +117,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	/**
 	 * This creates a PACE-feature using the given control code.
-	 * 
+	 *
 	 * @param controlCode
 	 *            the control code to use
 	 */
@@ -142,7 +142,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	/**
 	 * Override the default behavior of by processing PACE related messages and
 	 * ignoring all others.
-	 * 
+	 *
 	 * @param data
 	 * @return the PACE result data
 	 */
@@ -175,7 +175,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	/**
 	 * Capture PSCS power events and set the pseudo secure messaging state
 	 * accordingly.
-	 * 
+	 *
 	 * @param data
 	 * @return null, to allow further processing
 	 */
@@ -194,7 +194,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	 * An APDU will be modified by setting the logical channel bits to 1 but not
 	 * send. This method can also be used to execute PACE commands using PPDUs
 	 * with an FFC20120 prefix.
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
@@ -249,7 +249,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 		// not supported
 		return null;
 	}
-	
+
 	/**
 	 * Establish a pseudo PACE channel between the connector and the simulator
 	 * @param inputDataFromPpdu
@@ -258,7 +258,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	private PcscCallResult establishPaceChannel(byte[] inputDataFromPpdu) {
 		System.out.println("PCSCPACE");
 		System.out.println(HexString.dump(inputDataFromPpdu));
-		
+
 		int offset = OFFSET_ESTABLISH_PACE_PIN_ID;
 		byte pinId = inputDataFromPpdu[offset];
 		byte[] chat = Utils.getValue(inputDataFromPpdu, ++offset,
@@ -319,12 +319,12 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	private void displayChat(byte[] chat) {
 		for (VirtualReaderUi currentUi : interfaces) {
 			currentUi.displayChat(chat);
-		}	
+		}
 	}
 
 	/**
 	 * Query all interfaces for a password and return it.
-	 * 
+	 *
 	 * @param pin
 	 * @return the password
 	 * @throws IOException
@@ -363,7 +363,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	/**
 	 * Construct the PCSC response for an establish PACE command from the
 	 * previously read EF.CA and the response data of the pseudo PACE apdu.
-	 * 
+	 *
 	 * @param efCardAccess
 	 * @param responseApdu
 	 * @return the response data to be wrapped into a PCSC-PACE answer
@@ -374,22 +374,22 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 		byte[] paceStatusWord = Arrays.copyOfRange(responseApdu,
 				responseApdu.length - 2, responseApdu.length);
-		
+
 		TlvDataObject setAtStatusWord = responseData
 				.getTlvDataObject(TlvConstants.TAG_80);
 
 		if (setAtStatusWord == null){
 			throw new PaceExecutionException(RESULT_COMMUNICATION_ABORT, new byte [0]);
 		}
-		
-		short setAtStatusWordValue = Utils.getShortFromUnsignedByteArray(setAtStatusWord.getValueField()); 
+
+		short setAtStatusWordValue = Utils.getShortFromUnsignedByteArray(setAtStatusWord.getValueField());
 		if (Iso7816Lib.isReportingError(setAtStatusWordValue)){
 			throw new PaceExecutionException(new UnsignedInteger(
 					Utils.concatByteArrays(
 							Utils.toUnsignedByteArray(RESULT_PREFIX_MSE_SET_AT),
 							Utils.toUnsignedByteArray(setAtStatusWordValue))), new byte [0]);
 		}
-		
+
 		TlvDataObject currentCar = responseData
 				.getTlvDataObject(TlvConstants.TAG_87);
 		TlvDataObject previousCar = responseData
@@ -424,7 +424,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 								.getValueField());
 
 		short paceStatusWordValue = Utils.getShortFromUnsignedByteArray(paceStatusWord);
-		
+
 		if (!Iso7816Lib.isReportingNormalProcessing(paceStatusWordValue)) {
 			throw new PaceExecutionException(new UnsignedInteger(
 					Utils.concatByteArrays(
@@ -432,7 +432,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 							Utils.toUnsignedByteArray(paceStatusWordValue))),
 					pcscResponse);
 		}
-				
+
 		return pcscResponse;
 	}
 
@@ -443,21 +443,21 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	 */
 	private byte[] readCardAccess() throws PaceExecutionException, IOException {
 		byte[] select = HexString.toByteArray("00 A4 02 0C 02 01 1C");
-		byte[] readBinary = HexString.toByteArray("00 B0 00 00 00");
+		byte[] readBinary = HexString.toByteArray("00 B0 00 00 00 00 00");
 
 		byte[] response = SimulatorManager.getSim().processCommand(select);
-		
+
 		short statusWord = Utils
 				.getShortFromUnsignedByteArray(Arrays.copyOfRange(response,
 						response.length - 2, response.length - 1));
 
 		if (Iso7816Lib.isReportingError(statusWord)) {
-			// #833 Use proper logging mechanism			
+			// #833 Use proper logging mechanism
 			throw new PaceExecutionException(new UnsignedInteger(Utils.concatByteArrays(
 					Utils.toUnsignedByteArray(RESULT_PREFIX_SELECT_EF_CA),
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);
 		}
-		
+
 		response = SimulatorManager.getSim().processCommand(readBinary);
 
 		statusWord = Utils
@@ -465,7 +465,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 						response.length - 2, response.length - 1));
 
 		if (Iso7816Lib.isReportingError(statusWord)) {
-			// #833 Use proper logging mechanism			
+			// #833 Use proper logging mechanism
 			throw new PaceExecutionException(new UnsignedInteger(Utils.concatByteArrays(
 					Utils.toUnsignedByteArray(RESULT_PREFIX_READ_BINARY_EF_CA),
 					Utils.toUnsignedByteArray(statusWord))), new byte [0]);
@@ -477,7 +477,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 	/**
 	 * Builds the command APDU that is used to trigger the PACE initialization
 	 * in the simulator.
-	 * 
+	 *
 	 * @param pinId
 	 * @param chat
 	 * @param pin
@@ -512,7 +512,7 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 	/**
 	 * Wraps arbitrary data into the PCSC-PACE-features response format.
-	 * 
+	 *
 	 * @param pcscResponseCode
 	 * @param result
 	 * @param resultData
@@ -526,13 +526,13 @@ public class PersoSimPcscProcessor extends AbstractPcscFeature implements
 
 		System.out.println("PCSCPACE Result");
 		System.out.println(HexString.dump(response));
-		
+
 		return new SimplePcscCallResult(pcscResponseCode, response);
 	}
 
 	/**
 	 * Extract the input data from a PCSC PPDU.
-	 * 
+	 *
 	 * @param ppdu
 	 * @return the data field
 	 */
