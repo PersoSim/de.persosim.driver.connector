@@ -1,10 +1,11 @@
- 
+
 package de.persosim.driver.connector.ui.handlers;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.MItem;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.globaltester.logging.BasicLogger;
@@ -13,32 +14,46 @@ import org.globaltester.logging.tags.LogLevel;
 import de.persosim.driver.connector.VirtualDriverComm;
 import de.persosim.driver.connector.exceptions.IfdCreationException;
 import de.persosim.driver.connector.ui.parts.ReaderPart;
+import jakarta.inject.Inject;
 
-public class VirtualDriverHandler {
-	
+public class VirtualDriverHandler
+{
+	private EPartService partService;
+
+	@Inject
+	public VirtualDriverHandler(EPartService partService)
+	{
+		this.partService = partService;
+	}
+
 	@CanExecute
-	public boolean checkState(final MPart mPart, final MItem mItem) {
-		if (mPart.getObject() instanceof ReaderPart) {
-			ReaderPart readerPartObject = (ReaderPart) mPart.getObject();
-			mItem.setSelected(readerPartObject.getCurrentCommType() == VirtualDriverComm.NAME);
+	public boolean checkState(final MItem mItem)
+	{
+		// ID of part as defined in fragment.e4xmi application model
+		MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
+		if (readerPart.getObject() instanceof ReaderPart mPart) {
+			ReaderPart readerPartObject = mPart;
+			mItem.setSelected(VirtualDriverComm.NAME.equals(readerPartObject.getCurrentCommType()));
 		}
 		return true;
 	}
-	
-	@Execute
-	public void execute(final MPart mPart, final MItem mItem) {
-		BasicLogger.log(this.getClass(), "Virtual driver menu entry toggled", LogLevel.INFO);
-		
-		if (mPart.getObject() instanceof ReaderPart) {
-			ReaderPart readerPartObject = (ReaderPart) mPart.getObject();
 
+	@Execute
+	public void execute()
+	{
+		BasicLogger.log(this.getClass(), "Virtual driver menu entry toggled", LogLevel.INFO);
+		// ID of part as defined in fragment.e4xmi application model
+		MPart readerPart = partService.findPart("de.persosim.driver.connector.ui.parts.reader");
+		if (readerPart.getObject() instanceof ReaderPart mPart) {
+			ReaderPart readerPartObject = mPart;
 			try {
 				readerPartObject.switchReaderType(new VirtualDriverComm(VirtualDriverComm.DEFAULT_HOST, VirtualDriverComm.DEFAULT_PORT));
-			} catch (IfdCreationException e) {
+			}
+			catch (IfdCreationException e) {
 				BasicLogger.logException(this.getClass(), e, LogLevel.WARN);
 				MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Connector could not be created", "The virtual driver communication could not be established.");
 			}
 		}
 	}
-		
+
 }
