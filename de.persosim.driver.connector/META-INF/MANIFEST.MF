@@ -4,14 +4,17 @@ Bundle-Name: PersoSim Driver Connector
 Bundle-SymbolicName: de.persosim.driver.connector
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: de.persosim.driver.connector.Activator
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: 
+ org.eclipse.core.runtime,
  de.persosim.simulator,
+ de.persosim.simulator.basics,
  org.globaltester.simulator,
  org.globaltester.logging,
  org.globaltester.base
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
-Export-Package: de.persosim.driver.connector,
+Export-Package: 
+ de.persosim.driver.connector,
  de.persosim.driver.connector.exceptions,
  de.persosim.driver.connector.features,
  de.persosim.driver.connector.pcsc,
